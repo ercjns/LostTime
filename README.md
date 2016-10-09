@@ -33,6 +33,7 @@ Scoring methods include: Time (no score), Ratio to winner (1000pts), World Cup (
 This is a Flask application with a SQLite backend. There is currently no front-end framework; data is passed to the Jinja2 template engine that comes bundled with Flask.
 ## Development and Testing
 You'll need python 2.x and `virtualenvwrapper` installed on a linux machine (or windows subsystem for linux):
+
 1. Fork the project, then clone to a folder on your machine
    - `git clone https://github.com/<username>/LostTime.git <Path/To/Project/Folder>`
 2. set up a python virtual environment with all dependencies
