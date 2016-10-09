@@ -2,6 +2,7 @@
 
 from flask import Flask
 from flask import render_template
+from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -17,6 +18,7 @@ if not app.debug:
     logfilehandler = RotatingFileHandler('logfile.log', maxBytes=10000, backupCount=1)
     app.logger.addHandler(logfilehandler)
 
+db = SQLAlchemy(app)
 
 @app.route('/')
 def home_page():

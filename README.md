@@ -35,13 +35,33 @@ This is a Flask application with a SQLite backend. There is currently no front-e
 You'll need python 2.x and `virtualenvwrapper` installed on a linux machine (or windows subsystem for linux):
 
 1. Fork the project, then clone to a folder on your machine
-   - `git clone https://github.com/<username>/LostTime.git <Path/To/Project/Folder>`
-2. set up a python virtual environment with all dependencies
-   - `mkvirtualenv losttime -a <ProjectFolder> -r requirements.txt`
-3. run the development server
-   - `python rundevserver.py`
+   ```bash
+   $ git clone https://github.com/<username>/LostTime.git <Path/To/Project/Folder>
+   ```
+2. set up a python virtual environment with all dependencies. (The `-a` flag adds a virtual environment to an existing project directory; that's what we want to do.)
+   ```bash
+   $ mkvirtualenv losttime -a <ProjectFolder> -r requirements.txt
+   ```
+3. add your instance config. It might look like this:
+   ```python
+   # instance/instanceconfig.py
+
+   DEBUG = True
+   SQLALCHEMY_DATABASE_URI = 'sqlite:///development.db' #relative path
+   SQLALCHEMY_ECHO = True
+   SECRET_KEY = 'generate-a-secret-key-with-os.urandom(24)-and-paste-here'
+   ```
+4. run the development server
+   ```bash
+   python rundevserver.py
+   ```
 
 ## Database Management
+
+```python
+from losttime import db
+db.create_all()
+```
 
 ## Deployment
 
