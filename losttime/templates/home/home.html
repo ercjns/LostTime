@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime{% endblock %}
+{% block addhead %}{% endblock %}
+
+{% block content %}
+<div class="row">
+<div class="col-sm-12">
+<div id="HeroContent">
+<p>
+<img class="img-responsive center-block" src="{{ url_for('static', filename='LostTimeLogo.svg') }}" alt="Lost Time: utilties for orienteering event organizers">
+</p>
+<p class="text-center" style="margin-top: 5vh">
+<a class="btn btn-success" href="#">Prepare Entries</a>
+<a class="btn btn-success" href="#">Single Event Results</a>
+<!--<a class="btn btn-success" href="#">Season Standings</a>-->
+
+</p>
+</div>
+</div>
+</div>
+{% endblock %}

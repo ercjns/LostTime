@@ -1,6 +1,7 @@
 # losttime/__init__.py
 
 from flask import Flask
+from flask import render_template
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -18,5 +19,5 @@ if not app.debug:
 
 
 @app.route('/')
-def hello_world():
-    return 'Hello, World!'
+def home_page():
+    return render_template('home/home.html')
