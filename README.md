@@ -1,5 +1,5 @@
 # LostTime
-Orienteering utilities on the web. Visit [LostTimeOrienteering.com]() to simplify your workflow and recover some lost time.
+Orienteering utilities on the web. Visit <http://LostTimeOrienteering.com> to simplify your workflow and recover some lost time.
 
 The current goal of LostTime is not to replace event management software, but to make tasks before and after an event easier. Customization on a per-club basis is expected.
 
