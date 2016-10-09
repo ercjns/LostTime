@@ -18,8 +18,10 @@ Scoring methods include: Time (no score), Ratio to winner (1000pts), World Cup (
 # Backlog
 ## Entries
 - make the default output an IOF xml `<EntryList>` file, for greater inter-operability
+
 ## Event Results
 - Calculate and output an additional html page with team results, starting with COC WIOL scoring algorithm.
+
 ## Series Results
 - Allow multiple events to be combined into a series for scoring purposes
 - Configure different series scoring parameters
