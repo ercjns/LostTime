@@ -55,18 +55,19 @@ You'll need python 2.x and `virtualenvwrapper` installed on a linux machine (or 
    ```bash
    python rundevserver.py
    ```
-   or
+   OR
    ```bash
    export FLASK_APP=losttime
    python -m flask run
    ```
-   there are some bugs with how the `flask` command works in virtual environments, but running it from `python -m` works. 
+   There are some bugs with how the `flask` command works in virtual environments, but running it from `python -m` works. 
 
 ## Database Management
-
-```python
-from losttime import db
-db.create_all()
+Using the Flask-Migrations package which leverages the Alembic package for managing database schema changes. Changes in models.py are detected and automatically create a migration script. After making changes, run the following: 
+```bash
+python -m flask db migrate 
+# review the new migration script in migrations/versions, then
+python -m flask db upgrade 
 ```
 
 ## Deployment
