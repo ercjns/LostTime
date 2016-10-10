@@ -55,6 +55,12 @@ You'll need python 2.x and `virtualenvwrapper` installed on a linux machine (or 
    ```bash
    python rundevserver.py
    ```
+   or
+   ```bash
+   export FLASK_APP=losttime
+   python -m flask run
+   ```
+   there are some bugs with how the `flask` command works in virtual environments, but running it from `python -m` works. 
 
 ## Database Management
 

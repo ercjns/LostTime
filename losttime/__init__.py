@@ -3,6 +3,8 @@
 from flask import Flask
 from flask import render_template
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -19,6 +21,7 @@ if not app.debug:
     app.logger.addHandler(logfilehandler)
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 @app.route('/')
 def home_page():
