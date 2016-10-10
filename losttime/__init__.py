@@ -4,6 +4,9 @@ from flask import Flask
 from flask import render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_uploads import UploadSet, configure_uploads
+
+from os.path import join
 
 import logging
 from logging.handlers import RotatingFileHandler
@@ -24,6 +27,10 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 import models #alembic doesn't pick up changes without this import.
+
+eventfilepath = join('losttime', 'static', 'userfiles')
+eventfiles = UploadSet('eventfiles', ('xml',), lambda app:eventfilepath)
+configure_uploads(app, (eventfiles))
 
 from .views.event_result import eventResult as eventResultBP
 app.register_blueprint(eventResultBP, url_prefix='/event-result')
