@@ -3,7 +3,10 @@
 from flask import Blueprint, url_for, redirect, request, render_template
 from datetime import datetime
 from losttime import eventfiles
+from losttime.models import db, Event, EventClass, PersonResult
 from _orienteer_data import OrienteerXmlReader
+from os import remove
+
 
 eventResult = Blueprint("eventResult", __name__, static_url_path='/download', static_folder='../static/userfiles')
 
@@ -34,12 +37,29 @@ def upload_event():
         
         
         reader = OrienteerXmlReader(eventfiles.path(infile))
-
         if not reader.validiofxml:
             return redirect(url_for('eventResult.upload_event', e='Could not parse xml file'))
-
         eventdata = reader.getEventMeta()
+        
+        new_event = Event(eventdata['name'], eventdata['date'], eventdata['venue'])
+        db.session.add(new_event)
+        db.session.commit()
+        eventid = new_event.id
 
-        return 'Got the event!'
+        for ec in eventdata['classes']:
+            new_ec = EventClass(eventid, ec.name, ec.shortname)
+            db.session.add(new_ec)
+            db.session.commit() # must commit to get id
+            classid = new_ec.id
+
+            results = reader.getClassPersonResults(ec.soupCR)
+            for pr in results:
+                new_pr = PersonResult(eventid, classid, pr.sicard, pr.name, pr.bib, pr.clubshortname, pr.coursestatus, pr.resultstatus, pr.time)
+                db.session.add(new_pr)
+        db.session.commit()
+
+        remove(eventfiles.path(infile))
+
+        return 'Populated db for event ' + str(eventid)
         
     

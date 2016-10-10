@@ -26,8 +26,6 @@ if not app.debug:
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-import models #alembic doesn't pick up changes without this import.
-
 eventfilepath = join('losttime', 'static', 'userfiles')
 eventfiles = UploadSet('eventfiles', ('xml',), lambda app:eventfilepath)
 configure_uploads(app, (eventfiles))
