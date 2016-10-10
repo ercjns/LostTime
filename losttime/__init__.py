@@ -25,6 +25,10 @@ migrate = Migrate(app, db)
 
 import models #alembic doesn't pick up changes without this import.
 
+from .views.event_result import eventResult as eventResultBP
+app.register_blueprint(eventResultBP, url_prefix='/event-result')
+
 @app.route('/')
 def home_page():
     return render_template('home/home.html')
+

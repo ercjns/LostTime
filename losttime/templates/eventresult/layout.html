@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Event Result{% endblock %}
+{% block addhead %}{% endblock %}
+
+{% block content %}
+<header class="row">
+	<div class="col-xs-12">
+		<p>
+		<a href="#"><img src="{{ url_for('static', filename='LostTimeWordmark.svg') }}" style="width:70%; max-width:350px;max-height:200px;" alt="Lost Time: utilties for orienteering event organizers"></img></a>
+		</p>
+	</div>
+</header>
+
+<div id="PageContent">
+<div class="row">
+<div class="col-md-7 col-md-offset-1">
+<h2>Post-Process Single Event Results</h2>
+</div>
+</div>
+{% block pagecontent %}
+{% endblock %}
+</div>
+
+
+
+{% endblock %}

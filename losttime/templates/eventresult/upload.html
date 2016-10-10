@@ -1,0 +1,27 @@
+{% extends "eventresult/layout.html" %}
+
+{% block pagecontent %}
+
+<div class="row">
+<div class="col-lg-7 col-md-8 col-lg-offset-1 col-md-offset-1">
+<h3>Step 1: File Upload</h3>
+<form action={{ url_for('eventResult.upload_event') }} method="post" enctype="multipart/form-data">
+<p>Use your event software to save your event results in the <a href="http://orienteering.org/datastandard/IOF.xsd">IOF <b>XML v3</b></a> format and upload that file here.</p>
+{% if error %}
+<div class="form-group has-error">
+{% else %}
+<div class="form-group">
+{% endif %}
+	<label for="inputFile">Select your event file</label>
+	<input type="file" id="inputFile" name="iofxml" accept=".xml" required>
+{% if error %}
+  <span class="help-block">{{ error }}</span>
+{% endif %}
+</div>
+<button type="submit" class="btn btn-default btn-primary">Go!</button>
+</form>
+
+</div>
+</div>
+
+{% endblock %}
