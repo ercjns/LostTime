@@ -10,7 +10,9 @@ SQLAlchemy==1.1.1
 Werkzeug==0.11.11
 alembic==0.8.8
 argparse==1.2.1
+beautifulsoup4==4.5.1
 click==6.6
 itsdangerous==0.24
+lxml==3.6.4
 python-editor==1.0.1
 wsgiref==0.1.2

@@ -38,10 +38,18 @@ You'll need python 2.x and `virtualenvwrapper` installed on a linux machine (or 
    ```bash
    $ git clone https://github.com/<username>/LostTime.git <Path/To/Project/Folder>
    ```
-2. set up a python virtual environment with all dependencies. (The `-a` flag adds a virtual environment to an existing project directory; that's what we want to do.)
+
+2. Set up a python virtual environment with all dependencies. (The `-a` flag adds a virtual environment to an existing project directory; that's what we want to do.)
    ```bash
    $ mkvirtualenv losttime -a <ProjectFolder> -r requirements.txt
    ```
+
+   It's likely that the `lxml` package will fail to install as it has some lower level C dependencies. Check out the lxml [http://lxml.de/installation.html](installation instructions) for help. I needed the following on my Ubuntu 14.04 in Windows Subsystem for Linux:
+   ```bash
+   (losttime)$ sudo apt-get install libxml2-dev libxslt-dev python-dev zlib1g-dev
+   (losttime)$ pip install lxml #success!
+   ```
+
 3. add your instance config. It might look like this:
    ```python
    # instance/instanceconfig.py
@@ -51,15 +59,19 @@ You'll need python 2.x and `virtualenvwrapper` installed on a linux machine (or 
    SQLALCHEMY_ECHO = True
    SECRET_KEY = 'generate-a-secret-key-with-os.urandom(24)-and-paste-here'
    ```
+
 4. run the development server
    ```bash
    python rundevserver.py
    ```
+
    OR
    ```bash
    export FLASK_APP=losttime
+   export FLASK_DEBUG=1
    python -m flask run
    ```
+
    There are some bugs with how the `flask` command works in virtual environments, but running it from `python -m` works. 
 
 ## Database Management
@@ -71,5 +83,3 @@ python -m flask db upgrade
 ```
 
 ## Deployment
-
- 
