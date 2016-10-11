@@ -1,0 +1,103 @@
+{% extends "eventresult/layout.html" %}
+
+{% block pagecontent %}
+<div class="row">
+<div class="col-md-10 col-md-offset-1">
+<h3>Step 2: Event Information</h3>
+<form action={{ url_for('eventResult.event_info', id=event.id) }} method="post">
+<div class="well">
+<div class="row">
+<div class="col-md-7">
+	<div class="form-group">
+		<label for="event-name" class="control-label">Event Name</label>
+		<input type="text" class="form-control" name="event-name" value="{{ event.name }}">
+	</div>
+	<div class="form-group">
+    <!-- add a date picker. Also why is this required? -->
+		<label for="event-date" class="control-label">Event Date</label>
+		<div class="input-group">
+		<div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+		<input type="date" class="form-control" name="event-date" value="{{ event.date }}" pattern="\d{4}-\d{1,2}-\d{1,2}">
+		</div>
+		<p class="help-block">YYYY-MM-DD</p>
+	</div>
+	<div class="form-group">
+		<label for="event-venue" class="control-label">Event Venue</label>
+		<div class="input-group">
+		<div class="input-group-addon"><i class="fa fa-map-marker" aria-hidden="true"></i></div>
+		<input type="text" class="form-control" name="event-venue" value="{{ event.venue }}">
+		</div>
+	</div>
+</div>
+</div>
+
+<h4 style="margin-top:30px">Scoring - Individuals</h4>
+<p><i>Competitors will be listed in the results page based on the selection below. To exclude a class from results, select "Do Not Display."</i></p>
+<!--<p>Add JavaScript here to quickly set presets for WIOL scoring based on hard-coded class names.</p>-->
+<div class="row">
+{% for ec in classes %}
+	<div class="col-sm-4">
+	<div class="form-group">
+	<label for="class-score-method-{{ ec.id }}" class="control-label">{{ ec.name }}</label>
+	<select name="class-score-method-{{ ec.id }}" class="form-control">
+		<option value="time"{{ 'selected' if ec.scoremethod == 'time' }}>Time (no score)</option>
+		<option value="worldcup"{{ 'selected' if ec.scoremethod == 'worldcup' }}>World Cup (100, 95, 92, 90...)</option>
+		<option value="1000pts" {{ 'selected' if ec.scoremethod == '1000pts' }}>1000pts Ratio to Winner</option>
+		<option value="alpha"{{ 'selected' if ec.scoremethod == 'alpha' }}>No Rank (alphabetical list)</option>
+		<option value="hide"{{ 'selected' if ec.scoremethod == 'hide' }}>Do Not Display</option>
+	</select>
+	</div>
+	</div>
+{% endfor %}
+</div>
+
+<h4 style="margin-top:30px">Scoring - Teams</h4>
+<div class="row">
+	<div class="col-md-7">
+	<div class="form-group">
+		<div class="radio">
+			<label>
+				<input type="radio" name="event-team-score-method" value="wiol">
+				WIOL - sum top 3 individuals per team per class
+			</label>
+		</div>
+		<div class="radio">
+			<label>
+				<input type="radio" name="event-team-score-method" value="none">
+				NONE - do not compute team scores for this event
+			</label>
+		</div>
+	</div>
+	</div>
+</div>
+
+<h4 style="margin-top:30px">Output Style</h4>
+<p><i>Select the template to use for creating your page. Want to see your club listed here? I'm happy to help!</i></p>
+<div class="row">
+	<div class="col-md-7">
+	<div class="form-group">
+	<label for="output-style" class="control-label">Output Template</label>
+	<select name="output-style" class="form-control">
+		<option value="general" selected>Generic</option>
+		<option value="coc">Cascade Orienteering Club (new site)</option>
+	</select>
+	</div>
+	</div>
+</div>
+
+
+<div class="row">
+	<div class="col-xs-12">		
+	<div style="margin-top:30px">
+	<a class="btn btn-default" href={{ url_for('eventResult.home') }}><i class="fa fa-chevron-circle-left" aria-hidden="true"></i> Back </a>
+	<button type="submit" class="btn btn-default btn-primary">Continue <i class="fa fa-chevron-circle-right" aria-hidden="true"></i></button>
+	</div>
+	</div>
+</div>
+</div>
+</form>
+
+</div>
+</div>
+
+{% endblock %}

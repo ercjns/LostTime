@@ -49,7 +49,7 @@ def upload_event():
         for ec in eventdata['classes']:
             new_ec = EventClass(eventid, ec.name, ec.shortname)
             db.session.add(new_ec)
-            db.session.commit() # must commit to get id
+            db.session.commit() # must commit to get id (?)
             classid = new_ec.id
 
             results = reader.getClassPersonResults(ec.soupCR)
@@ -59,7 +59,22 @@ def upload_event():
         db.session.commit()
 
         remove(eventfiles.path(infile))
+        return redirect(url_for('eventResult.info', id=eventid))
 
-        return 'Populated db for event ' + str(eventid)
+@eventResult.route('/info/<id>', methods=['GET', 'POST'])
+def event_info(id):
+    """Manage event information
+    
+    Select scoring methods for event classes, edit name, date, venue
+    """
+    if request.method == 'GET':
+        event = Event.query.get(id)
+        classes = EventClass.query.filter_by(eventid=id).all()
+        return render_template('eventresult/info.html', event=event, classes=classes)
+    
+    elif request.method == 'POST':
+        pass
+
+
         
     
