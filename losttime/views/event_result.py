@@ -7,6 +7,7 @@ from losttime.models import db, Event, EventClass, PersonResult
 from _orienteer_data import OrienteerXmlReader
 from _output_templates import EventHtmlWriter
 from os import remove
+from os.path import join
 
 
 eventResult = Blueprint("eventResult", __name__, static_url_path='/download', static_folder='../static/userfiles')
@@ -92,16 +93,26 @@ def event_info(eventid):
         _assignScores(eventid)
         _assignTeamScores(eventid)
 
-        return str(_buildResultPages(eventid, request.form['output-style']))
+        doc = _buildResultPages(eventid, request.form['output-style'])
+        filename = join(eventResult.static_folder, 'EventResult-{0:03d}-indv.html'.format(int(eventid)))
+        with open(filename, 'w') as f:
+            f.write(doc.render())
 
-        # return redirect(url_for('eventResult.event_results', eventid=eventid))
+        return redirect(url_for('eventResult.event_results', eventid=eventid))
 
 @eventResult.route('/results/<eventid>', methods=['GET'])
 def event_results(eventid):
     """Display formatted page for download
 
     """
-    return 'display / download the results page(s) here'
+    try:
+        filename = join(eventResult.static_folder, 'EventResult-{0:03d}-indv.html'.format(int(eventid)))
+        with open(filename) as f:
+            return f.read()
+    except IOError:
+        return "It seems that there are no event results files for event {0}".format(eventid), 404
+    else:
+        return "Something went wrong"
 
 def _assignPositions(eventid):
     """Assign position to PersonResult.position

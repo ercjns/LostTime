@@ -2,4 +2,4 @@ instance/
 *.pyc
 *.log
 *.db
-losttime/static/userfiles/*.xml
+losttime/static/userfiles/
