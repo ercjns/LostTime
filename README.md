@@ -50,14 +50,16 @@ You'll need python 2.x and `virtualenvwrapper` installed on a linux machine (or 
    (losttime)$ pip install lxml #success!
    ```
 
-3. add your instance config. It might look like this:
+3. add an instance folder and instanceconfig.py Mine looks like this:
    ```python
    # instance/instanceconfig.py
+    from os.path import abspath, dirname, join
+    _cwd = dirname(abspath(__file__))
 
-   DEBUG = True
-   SQLALCHEMY_DATABASE_URI = 'sqlite:///development.db' #relative path
-   SQLALCHEMY_ECHO = True
-   SECRET_KEY = 'generate-a-secret-key-with-os.urandom(24)-and-paste-here'
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + join(_cwd, 'dev.db') # puts the db in the instance folder
+    SQLALCHEMY_ECHO = False
+    SECRET_KEY = 'generate-a-secret-key-with-os.urandom(24)-and-paste-here'
    ```
 
 4. run the development server
