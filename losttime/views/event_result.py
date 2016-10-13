@@ -5,6 +5,7 @@ from datetime import datetime
 from losttime import eventfiles
 from losttime.models import db, Event, EventClass, PersonResult
 from _orienteer_data import OrienteerXmlReader
+from _output_templates import EventHtmlWriter
 from os import remove
 
 
@@ -91,9 +92,9 @@ def event_info(eventid):
         _assignScores(eventid)
         _assignTeamScores(eventid)
 
-        _buildResultPages(eventid, request.form['output-style'])
+        return str(_buildResultPages(eventid, request.form['output-style']))
 
-        return redirect(url_for('eventResult.event_results', eventid=eventid))
+        # return redirect(url_for('eventResult.event_results', eventid=eventid))
 
 @eventResult.route('/results/<eventid>', methods=['GET'])
 def event_results(eventid):
@@ -208,4 +209,9 @@ def _buildResultPages(eventid, style):
     """Build and save html page of the Results, for download
 
     """
-    pass
+    event = Event.query.filter_by(id=eventid).one()
+    classes = EventClass.query.filter_by(eventid=eventid).filter(EventClass.scoremethod != 'hide').all()
+    results = PersonResult.query.filter_by(eventid=eventid).all()
+    writer = EventHtmlWriter(event, classes, results)
+    doc = writer.eventResultIndv()
+    return doc

@@ -53,3 +53,10 @@ class PersonResult(db.Model):
         self.resultstatus = resultstatus
         self.time = time
         return
+
+    def timetommmss(self):
+        if (self.time == None) or (self.time == -1):
+            return '--:--'
+        minutes, seconds = divmod(self.time, 60)
+        return '{0:d}:{1:02d}'.format(minutes, seconds)
+        
