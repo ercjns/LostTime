@@ -106,13 +106,13 @@ def event_results(eventid):
 
     """
     try:
-        filename = join(eventResult.static_folder, 'EventResult-{0:03d}-indv.html'.format(int(eventid)))
-        with open(filename) as f:
-            return f.read()
+        filename = 'EventResult-{0:03d}-indv.html'.format(int(eventid))
+        filepath = join(eventResult.static_folder, filename)
+        with open(filepath) as f:
+            htmldoc = f.read()
     except IOError:
         return "It seems that there are no event results files for event {0}".format(eventid), 404
-    else:
-        return "Something went wrong"
+    return render_template('eventresult/result.html', thehtml=htmldoc, thefilename=filename)
 
 def _assignPositions(eventid):
     """Assign position to PersonResult.position
