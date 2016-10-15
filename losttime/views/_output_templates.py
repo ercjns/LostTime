@@ -34,8 +34,11 @@ def _writeEventResultIndv(event, classes, results):
     with page:
         with div(cls='row').add(div(cls='col-xs-12')):
             h1('Results for {0}'.format(event.name))
-            eventdate = datetime.date(*[int(x) for x in event.date.split('-')])
-            p('An orienteering event held at {0} on {1:%d %B %Y}'.format(event.venue, eventdate))
+            try:
+                eventdate = datetime.date(*[int(x) for x in event.date.split('-')])
+                p('An orienteering event held at {0} on {1:%d %B %Y}'.format(event.venue, eventdate))
+            except:
+                pass
             p('Competition Classes:')
         with div(cls='row'):
             for ec in classes:
