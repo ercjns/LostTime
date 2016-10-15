@@ -59,4 +59,34 @@ class PersonResult(db.Model):
             return '--:--'
         minutes, seconds = divmod(self.time, 60)
         return '{0:d}:{1:02d}'.format(minutes, seconds)
-        
+
+class EventTeamClass(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    eventid = db.Column(db.Integer)
+    shortname = db.Column(db.String)
+    name = db.Column(db.String)
+    classids = db.Column(db.String)
+    scoremethod = db.Column(db.String)
+
+    def __init__(self, event, shortname, name, classes, scoremethod=''):
+        self.eventid = int(event)
+        self.shortname = shortname
+        self.name = name
+        self.classids = str(classes).strip('[]').replace(' ', '')
+        self.scoremethod = scoremethod
+        return
+
+class TeamResult(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    eventid = db.Column(db.Integer)
+    teamclassid = db.Column(db.Integer)
+    teamname_short = db.Column(db.String)
+    position = db.Column(db.Integer)
+    score = db.Column(db.Float)
+
+    def __init__(self, event, teamclass, teamname_short, score):
+        self.eventid = event
+        self.teamclassid = teamclass
+        self.teamname_short = teamname_short
+        self.score = score
+        return

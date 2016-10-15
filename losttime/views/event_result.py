@@ -3,7 +3,7 @@
 from flask import Blueprint, url_for, redirect, request, render_template
 from datetime import datetime
 from losttime import eventfiles
-from losttime.models import db, Event, EventClass, PersonResult
+from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult
 from _orienteer_data import OrienteerXmlReader
 from _output_templates import EventHtmlWriter
 from os import remove
@@ -91,7 +91,7 @@ def event_info(eventid):
 
         _assignPositions(eventid)
         _assignScores(eventid)
-        _assignTeamScores(eventid)
+        _assignTeamScores(eventid, request.form['event-team-score-method'])
 
         doc = _buildResultPages(eventid, request.form['output-style'])
         filename = join(eventResult.static_folder, 'EventResult-{0:03d}-indv.html'.format(int(eventid)))
@@ -209,12 +209,61 @@ def _assignScores(eventid):
     db.session.commit()
     return
 
-def _assignTeamScores(eventid):
+def _assignTeamScores(eventid, scoremethod):
     """Calculate and assign values to TeamResult.score
 
     Individual scores must be assigned before calling this function.
+    WIOL:
+        create EventTeamClass, create TeamResult.
     """
-    pass
+    if scoremethod in ['none']:
+        return
+    elif scoremethod == 'wiol':
+        # WIOL_CLASS_CODES = ['W1F', 'W1M', 'W2F', 'W2M', 'W3F', 'W4M', 'W5M', 'W6F', 'W6M']
+        # WIOL_TEAM_CLASS_CODES = ['WT2', 'WT3F', 'WT4M', 'WT5M', 'WT6F', 'WT6M']
+        teamclasses = {}
+        classes = EventClass.query.filter_by(eventid=eventid).all()
+        for ec in classes:
+            if (ec.shortname == 'W2F') or (ec.shortname == 'W2M'):
+                if teamclasses.has_key('WT2'):
+                    teamclasses['WT2'][1].append(ec.id)
+                else:
+                    teamclasses['WT2'] = ('Middle School Teams', [ec.id])
+            elif ec.shortname == 'W3F':
+                teamclasses['WT3F'] = ('JV Girls Teams', [ec.id])
+            elif ec.shortname == 'W4M':
+                teamclasses['WT4M'] = ('JV Boys North Teams', [ec.id])
+            elif ec.shortname == 'W5M':
+                teamclasses['WT5M'] = ('JV Boys South Teams', [ec.id])
+            elif ec.shortname == 'W6F':
+                teamclasses['WT6F'] = ('Varsity Girls Teams', [ec.id])
+            elif ec.shortname == 'W6M':
+                teamclasses['WT6M'] = ('Varsity Girls Teams', [ec.id])
+            else:
+                pass
+        if len(teamclasses.keys()) == 0:
+            return
+        for k, v in teamclasses.iteritems():
+            new_tc = EventTeamClass(eventid, k, v[0], v[1], 'wiol')
+            db.session.add(new_tc)
+        db.session.commit()
+
+        teamclasses = EventTeamClass.query.filter_by(eventid=eventid).all()
+        for tc in teamclasses:
+            results = []
+            for ec in tc.classids.split(','):
+                results += PersonResult.query.filter_by(classid=int(ec)).all()
+            teams = set([r.club_shortname for r in results])
+            for team in teams:
+                scores = [r.score for r in results if (r.club_shortname == team)]
+                scores.sort(reverse=True)
+                teamscore = sum(scores[:3])
+                new_team = TeamResult(eventid, tc.id, team, teamscore)
+                db.session.add(new_team)
+            db.session.commit()
+        return
+
+
 
 def _buildResultPages(eventid, style):
     """Build and save html page of the Results, for download
