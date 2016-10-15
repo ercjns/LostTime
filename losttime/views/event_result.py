@@ -219,8 +219,10 @@ def _assignTeamScores(eventid, scoremethod):
     if scoremethod in ['none']:
         return
     elif scoremethod == 'wiol':
-        # WIOL_CLASS_CODES = ['W1F', 'W1M', 'W2F', 'W2M', 'W3F', 'W4M', 'W5M', 'W6F', 'W6M']
-        # WIOL_TEAM_CLASS_CODES = ['WT2', 'WT3F', 'WT4M', 'WT5M', 'WT6F', 'WT6M']
+        EventTeamClass.query.filter_by(eventid=eventid).delete()
+        TeamResult.query.filter_by(eventid=eventid).delete()
+        db.session.commit()
+
         teamclasses = {}
         classes = EventClass.query.filter_by(eventid=eventid).all()
         for ec in classes:
@@ -238,7 +240,7 @@ def _assignTeamScores(eventid, scoremethod):
             elif ec.shortname == 'W6F':
                 teamclasses['WT6F'] = ('Varsity Girls Teams', [ec.id])
             elif ec.shortname == 'W6M':
-                teamclasses['WT6M'] = ('Varsity Girls Teams', [ec.id])
+                teamclasses['WT6M'] = ('Varsity Boys Teams', [ec.id])
             else:
                 pass
         if len(teamclasses.keys()) == 0:
@@ -255,10 +257,12 @@ def _assignTeamScores(eventid, scoremethod):
                 results += PersonResult.query.filter_by(classid=int(ec)).all()
             teams = set([r.club_shortname for r in results])
             for team in teams:
-                scores = [r.score for r in results if r.club_shortname == team]
-                scores.sort(reverse=True)
-                teamscore = sum(scores[:3])
-                new_team = TeamResult(eventid, tc.id, team, teamscore)
+                members = [r for r in results if r.club_shortname == team]
+                members.sort(key=lambda x: x.score, reverse=True)
+                members = members[:3]
+                memberids = [m.id for m in members]
+                teamscore = sum([m.score for m in members])
+                new_team = TeamResult(eventid, tc.id, team, memberids, teamscore)
                 db.session.add(new_team)
             db.session.commit()
 
@@ -268,15 +272,57 @@ def _assignTeamScores(eventid, scoremethod):
             for i in range(len(teamresults)):
                 teamresults[i].position = prev_result['pos'] + prev_result['count']
                 if teamresults[i].score == prev_result['score']:
-                    # TODO break ties
-                    teamresults[i].position = prev_result['pos']
-                    prev_result = {'pos': prev_result['pos'],
-                                   'count': prev_result['count'] + 1,
-                                   'score': teamresults[i].score}
+                    pos_tie = False
+                    pos_swap = False
+                    A_memberids = teamresults[i-1].resultids.split(',')
+                    B_memberids = teamresults[i].resultids.split(',')
+
+                    while A_memberids and B_memberids:
+                        A_score = PersonResult.query.get(A_memberids.pop(0)).score
+                        B_score = PersonResult.query.get(B_memberids.pop(0)).score
+                        if A_score > B_score:
+                            # A member n beat B member n, team position correct, not tied
+                            break
+                        elif B_score > A_score:
+                            # B member n beat A member n, team positions swap, not tied
+                            pos_swap = True
+                            break
+                        else:
+                            continue
+                    else:
+                        if A_memberids:
+                            # A has more members, team position correct, not tied
+                            break
+                        elif B_memberids:
+                            # B has more members, team positions swap, not tied
+                            pos_swap = True
+                            break
+                        else:
+                            pos_tie = True
+
+                    if pos_tie:
+                        teamresults[i].position = prev_result['pos']
+                        prev_result = {'pos': prev_result['pos'],
+                                       'count': prev_result['count'] + 1,
+                                       'score': teamresults[i].score}
+                        continue
+                    elif pos_swap:
+                        teamresults[i].position = teamresults[i-1].position
+                        teamresults[i-1].position = prev_result['pos'] + prev_result['count']
+                        prev_result = {'pos': teamresults[i-1].position,
+                                       'count': 1,
+                                       'score': teamresults[i-1].score}
+                        continue
+                    else:
+                        prev_result = {'pos': teamresults[i].position,
+                                       'count': 1,
+                                       'score': teamresults[i].score}
+                        continue
                 else:
                     prev_result = {'pos': teamresults[i].position,
                                    'count': 1,
                                    'score': teamresults[i].score}
+
             db.session.add_all(teamresults)
         db.session.commit()
         return

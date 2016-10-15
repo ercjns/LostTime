@@ -83,10 +83,12 @@ class TeamResult(db.Model):
     teamname_short = db.Column(db.String)
     position = db.Column(db.Integer)
     score = db.Column(db.Float)
+    resultids = db.Column(db.String)
 
-    def __init__(self, event, teamclass, teamname_short, score):
+    def __init__(self, event, teamclass, teamname_short, members, score=None):
         self.eventid = event
         self.teamclassid = teamclass
         self.teamname_short = teamname_short
         self.score = score
+        self.resultids = str(members).strip('[]').replace(' ', '')
         return
