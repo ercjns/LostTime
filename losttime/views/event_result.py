@@ -255,14 +255,31 @@ def _assignTeamScores(eventid, scoremethod):
                 results += PersonResult.query.filter_by(classid=int(ec)).all()
             teams = set([r.club_shortname for r in results])
             for team in teams:
-                scores = [r.score for r in results if (r.club_shortname == team)]
+                scores = [r.score for r in results if r.club_shortname == team]
                 scores.sort(reverse=True)
                 teamscore = sum(scores[:3])
                 new_team = TeamResult(eventid, tc.id, team, teamscore)
                 db.session.add(new_team)
             db.session.commit()
-        return
 
+            teamresults = TeamResult.query.filter_by(teamclassid=tc.id).all()
+            teamresults.sort(key=lambda x: -x.score)
+            prev_result = {'pos':0, 'count':1, 'score':0}
+            for i in range(len(teamresults)):
+                teamresults[i].position = prev_result['pos'] + prev_result['count']
+                if teamresults[i].score == prev_result['score']:
+                    # TODO break ties
+                    teamresults[i].position = prev_result['pos']
+                    prev_result = {'pos': prev_result['pos'],
+                                   'count': prev_result['count'] + 1,
+                                   'score': teamresults[i].score}
+                else:
+                    prev_result = {'pos': teamresults[i].position,
+                                   'count': 1,
+                                   'score': teamresults[i].score}
+            db.session.add_all(teamresults)
+        db.session.commit()
+        return
 
 
 def _buildResultPages(eventid, style):
