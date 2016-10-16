@@ -1,27 +1,30 @@
-{% extends "eventresult/layout.html" %}
+{% extends "layout.html" %}
 
-{% block pagecontent %}
+{% block title %}LostTime - Event Result{% endblock %}
 
+{% block content %}
 <div class="row">
-<div class="col-lg-7 col-md-8 col-lg-offset-1 col-md-offset-1">
-<h3>Step 1: File Upload</h3>
+<div class="col-sm-10 col-sm-offset-1">
+<h3 class="page-title">Post Process Event Results Step 1: File Upload</h3>
+<div class="pinkline"></div>
+<h4 class="form-section-title">Event File</h4>
 <form action={{ url_for('eventResult.upload_event') }} method="post" enctype="multipart/form-data">
-<p>Use your event software to save your event results in the <a href="http://orienteering.org/datastandard/IOF.xsd">IOF <b>XML v3</b></a> format and upload that file here.</p>
+<p>Use your event software to save your event results in the IOF <b>XML v3</b> format and upload that file here:</p>
 {% if error %}
 <div class="form-group has-error">
 {% else %}
 <div class="form-group">
 {% endif %}
-	<label for="inputFile">Select your event file</label>
+	<!--<label for="inputFile">Select your event file</label>-->
 	<input type="file" id="inputFile" name="eventfile" accept=".xml" required>
 {% if error %}
   <span class="help-block">{{ error }}</span>
 {% endif %}
 </div>
-<button type="submit" class="btn btn-default btn-primary">Go!</button>
+<a href="{{ url_for('home_page') }}" class="btn btn-default"><i class="fa fa-home"></i> Home</a>
+<button type="submit" class="btn btn-default btn-primary">Go! <i class="fa fa-arrow-circle-right"></i></button>
 </form>
 
 </div>
 </div>
-
 {% endblock %}

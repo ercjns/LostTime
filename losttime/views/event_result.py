@@ -112,7 +112,7 @@ def event_results(eventid):
             htmldoc = f.read()
     except IOError:
         return "It seems that there are no event results files for event {0}".format(eventid), 404
-    return render_template('eventresult/result.html', thehtml=htmldoc, thefilename=filename)
+    return render_template('eventresult/result.html', eventid=eventid, thehtml=htmldoc, thefilename=filename)
 
 def _assignPositions(eventid):
     """Assign position to PersonResult.position
