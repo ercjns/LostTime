@@ -2,29 +2,82 @@
 
 {% block title %}LostTime - Event Result{% endblock %}
 
+{% block addhead %}
+<link href="{{ url_for('static', filename='dropzone.css') }}" rel="stylesheet">
+<script src="{{ url_for('static', filename='dropzone.js') }}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="row">
 <div class="col-sm-10 col-sm-offset-1">
 <h3 class="page-title">Post Process Event Results Step 1: File Upload</h3>
 <div class="pinkline"></div>
 <h4 class="form-section-title">Event File</h4>
-<form action={{ url_for('eventResult.upload_event') }} method="post" enctype="multipart/form-data">
-<p>Use your event software to save your event results in the IOF <b>XML v3</b> format and upload that file here:</p>
+<p>Use your event software to save results in the IOF <strong>XML v3</strong> format.</p> 
 {% if error %}
-<div class="form-group has-error">
-{% else %}
-<div class="form-group">
+<p class="help-block">{{ error }}</p>
 {% endif %}
-	<!--<label for="inputFile">Select your event file</label>-->
-	<input type="file" id="inputFile" name="eventfile" accept=".xml" required>
-{% if error %}
-  <span class="help-block">{{ error }}</span>
-{% endif %}
+
+<div id="theDropzone" class="dropzone">
+	<div class="dz-default dz-message"><span>Drop XML file here (click for file browser)</span></div>
 </div>
+
+<div class="files" id="previews">
+	<div id="template" class="file-row">
+		<div>
+			<p><span class="name" data-dz-name></span> (<span class="size" data-dz-size></span>) <strong class="error text-danger" data-dz-errormessage></strong></p>
+			
+		</div>
+		<div>
+			<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+			<div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
+			</div>
+		</div>
+	</div>
+</div>
+
 <a href="{{ url_for('home_page') }}" class="btn btn-default"><i class="fa fa-home"></i> Home</a>
-<button type="submit" class="btn btn-default btn-primary">Go! <i class="fa fa-arrow-circle-right"></i></button>
-</form>
+<a id="uploadButton" onclick="sendFile()" class="btn btn-default btn-primary disabled">Go! <i class="fa fa-arrow-circle-right"></i></a>
+
 
 </div>
 </div>
+
+
+
+
+{% endblock %}
+
+{% block bottomscripts %}
+<script>
+var previewNode = document.querySelector("#template");
+previewNode.id = ""
+var previewTemplate = previewNode.parentNode.innerHTML;
+previewNode.parentNode.removeChild(previewNode);
+
+
+Dropzone.autoDiscover = false;
+var dzOptions = {
+	url: "{{url_for('eventResult.upload_event')}}",
+	paramName: "eventFile",
+	acceptedFiles: "text/xml",
+	maxFiles: 1,
+	autoProcessQueue: false,
+	previewTemplate: previewTemplate,
+	previewsContainer: "#previews",
+	init: function() {
+		this.on("maxfilesreached", function(file){
+			$("#uploadButton").removeClass("disabled")
+		})
+		this.on("maxfilesexceeded", function(file){
+			$("#uploadButton").addClass("disabled")
+		})
+	}
+}
+var myDropzone = new Dropzone("div#theDropzone", dzOptions);
+
+function sendFile() {
+	myDropzone.processQueue();
+}
+</script>
 {% endblock %}
