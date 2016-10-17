@@ -22,21 +22,21 @@
             <h4 class="form-section-title">Source Code</h4>
             <div class="row">
                 <div class="col-sm-6">
-                    <button id="copy-button" type="button" class="btn btn-success center-block" onclick="copyCode()"><i class="fa fa-clipboard" aria-hidden="true"></i> Copy HTML to my clipboard</button>
+                    <button id="copy-button" type="button" class="btn btn-success center-block" onclick="copyCode('indv')"><i class="fa fa-clipboard" aria-hidden="true"></i> Copy HTML to my clipboard</button>
                 </div>
                 <div class="col-sm-6 text-center">
-                    <a href="{{ url_for('eventResult.static', filename=thefilename) }}" class="btn btn-success" download><i class="fa fa-download" aria-hidden="true"></i> Download the .html file</a>
+                    <a href="{{ url_for('eventResult.static', filename=indvfn) }}" class="btn btn-success" download><i class="fa fa-download" aria-hidden="true"></i> Download the .html file</a>
                 </div>
             </div>
-            <p><pre id="copy-content" class="pre-scrollable" style="max-height:150px">{{ thehtml|escape }}</pre></p>
+            <p><pre id="copy-content-indv" class="pre-scrollable" style="max-height:150px">{{ indvhtml|escape }}</pre></p>
         </div>
         </div>
         <div class="row">
         <div class="col-sm-10 col-sm-offset-1">
             <h4 class="form-section-title">Preview</h4>
-            <p>If you don't see anything in the box, <a href="{{ url_for('eventResult.static', filename=thefilename) }}" target="_blank">click here</a> to view the page in a new tab. Keep in mind styles will not match your final result if you're using classes or fonts from your own site.</p>
+            <p>If you don't see anything in the box, <a href="{{ url_for('eventResult.static', filename=indvfn) }}" target="_blank">click here</a> to view the page in a new tab. Keep in mind styles will not match your final result if you're using classes or fonts from your own site.</p>
         <div id="result-iframewrap">
-        <iframe srcdoc="{{ thehtml }}" height="500px" style="width:100%; border-style:none;"></iframe>
+        <iframe srcdoc="{{ indvhtml }}" height="500px" style="width:100%; border-style:none;"></iframe>
         </div>
         </div>
         </div>
@@ -45,15 +45,24 @@
     <div id="menu-team" class="tab-pane fade">
         <div class="row">
         <div class="col-sm-10 col-sm-offset-1">
-            Team Results Source Code Goes Here!
+            <h4 class="form-section-title">Source Code</h4>
+            <div class="row">
+                <div class="col-sm-6">
+                    <button id="copy-button" type="button" class="btn btn-success center-block" onclick="copyCode('team')"><i class="fa fa-clipboard" aria-hidden="true"></i> Copy HTML to my clipboard</button>
+                </div>
+                <div class="col-sm-6 text-center">
+                    <a href="{{ url_for('eventResult.static', filename=teamfn) }}" class="btn btn-success" download><i class="fa fa-download" aria-hidden="true"></i> Download the .html file</a>
+                </div>
+            </div>
+            <p><pre id="copy-content-team" class="pre-scrollable" style="max-height:150px">{{ teamhtml|escape }}</pre></p>
         </div>
         </div>
         <div class="row">
         <div class="col-sm-10 col-sm-offset-1">
             <h4 class="form-section-title">Preview</h4>
-            <p>If you don't see anything in the box, <a href="{{ url_for('eventResult.static', filename=thefilename) }}" target="_blank">click here</a> to view the page in a new tab. Keep in mind styles will not match your final result if you're using classes or fonts from your own site.</p>
+            <p>If you don't see anything in the box, <a href="{{ url_for('eventResult.static', filename=teamfn) }}" target="_blank">click here</a> to view the page in a new tab. Keep in mind styles will not match your final result if you're using classes or fonts from your own site.</p>
         <div id="result-iframewrap">
-            Team Results Preview Goes Here!
+        <iframe srcdoc="{{ teamhtml }}" height="500px" style="width:100%; border-style:none;"></iframe>
         </div>
         </div>
         </div>
@@ -72,8 +81,10 @@
 {% block bottomscripts %}
 <script>
     // copyCode adapted from https://codepen.io/ryanbuckley13/pen/gpyrwe
-function copyCode() {
-    var content = $('#copy-content');
+function copyCode(name) {
+    var idname = '#copy-content-'.concat(name)
+    var content = $(idname);
+    console.log(content)
     //creates new range object and sets text as boundaries.
     var range = document.createRange();
     range.selectNode(content[0]);

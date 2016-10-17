@@ -107,13 +107,21 @@ def event_results(eventid):
 
     """
     try:
-        filename = 'EventResult-{0:03d}-indv.html'.format(int(eventid))
-        filepath = join(eventResult.static_folder, filename)
+        indvfn = 'EventResult-{0:03d}-indv.html'.format(int(eventid))
+        filepath = join(eventResult.static_folder, indvfn)
         with open(filepath) as f:
-            htmldoc = f.read()
+            indvhtmldoc = f.read()
     except IOError:
         return "It seems that there are no event results files for event {0}".format(eventid), 404
-    return render_template('eventresult/result.html', eventid=eventid, thehtml=htmldoc, thefilename=filename)
+    try:
+        teamfn = 'EventResult-{0:03d}-team.html'.format(int(eventid))
+        filepath = join(eventResult.static_folder, teamfn)
+        with open(filepath) as f:
+            teamhtmldoc = f.read()
+    except:
+        teamfn = None
+        teamhtmldoc = None
+    return render_template('eventresult/result.html', eventid=eventid, indvhtml=indvhtmldoc, indvfn=indvfn, teamhtml=teamhtmldoc, teamfn=teamfn)
 
 def _assignPositions(eventid):
     """Assign position to PersonResult.position
