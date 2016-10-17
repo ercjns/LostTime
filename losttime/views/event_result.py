@@ -93,10 +93,11 @@ def event_info(eventid):
         _assignScores(eventid)
         _assignTeamScores(eventid, request.form['event-team-score-method'])
 
-        doc = _buildResultPages(eventid, request.form['output-style'])
-        filename = join(eventResult.static_folder, 'EventResult-{0:03d}-indv.html'.format(int(eventid)))
-        with open(filename, 'w') as f:
-            f.write(doc.render())
+        docdict = _buildResultPages(eventid, request.form['output-style'])
+        for key,doc in docdict.iteritems():
+            filename = join(eventResult.static_folder, 'EventResult-{0:03d}-{1}.html'.format(int(eventid),key))
+            with open(filename, 'w') as f:
+                f.write(doc.render())
 
         return redirect(url_for('eventResult.event_results', eventid=eventid))
 
@@ -210,11 +211,12 @@ def _assignScores(eventid):
     return
 
 def _assignTeamScores(eventid, scoremethod):
-    """Calculate and assign values to TeamResult.score
+    """Calculate and assign values to TeamResult.score and TeamResult.position
 
     Individual scores must be assigned before calling this function.
     WIOL:
-        create EventTeamClass, create TeamResult.
+        create EventTeamClass, create TeamResult with scores
+        sort TeamResults, assign Positions, break ties.
     """
     if scoremethod in ['none']:
         return
@@ -335,6 +337,15 @@ def _buildResultPages(eventid, style):
     event = Event.query.filter_by(id=eventid).one()
     classes = EventClass.query.filter_by(eventid=eventid).filter(EventClass.scoremethod != 'hide').all()
     results = PersonResult.query.filter_by(eventid=eventid).all()
-    writer = EventHtmlWriter(event, classes, results)
-    doc = writer.eventResultIndv()
-    return doc
+    teamclasses = EventTeamClass.query.filter_by(eventid=eventid).all()
+    teamresults = TeamResult.query.filter_by(eventid=eventid).all()
+    # TODO carry the style variable through
+    writer = EventHtmlWriter(event, classes, results, teamclasses, teamresults)
+    docdict = {}
+    indvdoc = writer.eventResultIndv()
+    if indvdoc is not None:
+        docdict['indv'] = indvdoc
+    teamdoc = writer.eventResultTeam()
+    if teamdoc is not None:
+        docdict['team'] = teamdoc
+    return docdict
