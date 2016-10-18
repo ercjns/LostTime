@@ -5,26 +5,18 @@ import dominate
 from dominate.tags import *
 
 class EventHtmlWriter(object):
-    def __init__(self, event, classes=None, results=None, teamclasses=None, teamresults=None):
+    def __init__(self, event, classes=None, results=None):
         self.event = event
         self.eventclasses = classes
         self.personresults = results
-        self.teamclasses = teamclasses
-        self.teamresults = teamresults
 
     def eventResultIndv(self):
         """
         create an html file with individual results for this event.
         """
-        # TODO switch based on template
+        # in the future, switch based on template here
         return _writeEventResultIndv(self.event, self.eventclasses, self.personresults)
 
-    def eventResultTeam(self):
-        """
-        create an html file with team results for this event
-        """
-        # TODO switch based on template
-        return _writeEventResultTeam(self.event, self.teamclasses, self.teamresults)
 
 
 def _writeEventResultIndv(event, classes, results):
@@ -82,48 +74,6 @@ def _writeEventResultIndv(event, classes, results):
                         if (ec.scoremethod in ['worldcup', '1000pts']):
                             td('{0:d}'.format(int(pr.score))) if pr.score is not None else td()
     return doc
-
-def _writeEventResultTeam(event, classes, results):
-    doc = dominate.document(title='Event Results')
-    with doc.head:
-        link(rel='stylesheet',
-             href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css',
-             integrity='sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7',
-             crossorigin='anonymous')
-        link(rel='stylsheet',
-             href='https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css')
-        meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    with doc:
-        page = div(cls='container-fluid')
-    with page:
-        with div(cls='row').add(div(cls='col-xs-12')):
-            h1('Team Results for {0}'.format(event.name))
-            try:
-                eventdate = datetime.date(*[int(x) for x in event.date.split('-')])
-                p('An orienteering event held at {0} on {1:%d %B %Y}'.format(event.venue, eventdate))
-            except:
-                pass
-            p('Team Competition Classes:')
-        with div(cls='row'):
-            for tc in classes:
-                div((a(tc.name, href='#{0}'.format(tc.shortname))), cls='col-md-3')
-        for tc in classes:
-            with div(cls='row').add(div(cls='col-md-8')):
-                classresults = [r for r in results if r.teamclassid == tc.id]
-                h3(tc.name, id=tc.shortname)
-                t = table(cls='table table-striped table-condensed', id='TeamResultsTable-{0}'.format(tc.shortname))
-                with t.add(tr(id='column-titles')):
-                    classresults = _sortByPosition(classresults)
-                    th('Pos.')
-                    th('Name')
-                    th('Score')
-                for r in classresults:
-                    with t.add(tr()):
-                        td(r.position) if r.position > 0 else td()
-                        td(r.teamname_short)
-                        td('{0:d}'.format(int(r.score))) if r.score is not None else td()
-    return doc
-
 
 
 def _sortByPosition(results):
