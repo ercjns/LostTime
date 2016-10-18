@@ -54,6 +54,15 @@ input:valid, input:focus:valid {
 	height: 506px;
 	border: 3px solid magenta;
 	margin-bottom: 30px;
+}
+
+.dz-remove {
+	color: #337ab7;
+}
+
+.dz-remove:hover {
+	color: #23527c;
+	text-decoration: underline;
 	border-radius: 4px;
 }
 

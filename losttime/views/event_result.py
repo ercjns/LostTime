@@ -1,6 +1,6 @@
 #losttime/views/EventResult.py
 
-from flask import Blueprint, url_for, redirect, request, render_template
+from flask import Blueprint, url_for, redirect, request, render_template, jsonify
 from datetime import datetime
 from losttime import eventfiles
 from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult
@@ -30,17 +30,14 @@ def upload_event():
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         filename = 'event_'+timestamp+'.'
         try:
-            infile = eventfiles.save(request.files['eventfile'], name=filename)
+            infile = eventfiles.save(request.files['eventFile'], name=filename)
         except:
-            # TODO log the failure with the original file name
-            # TODO split out handling of different types of exceptions
-            # TODO find a better way to pass error string than directly in the url
-            return redirect(url_for('eventResult.upload_event', e='Missing or invalid file'))
+            return jsonify(error="Failed to save file, try again later"), 500
 
 
         reader = OrienteerXmlReader(eventfiles.path(infile))
         if not reader.validiofxml:
-            return redirect(url_for('eventResult.upload_event', e='Could not parse xml file'))
+            return jsonify(error='Could not parse XML, please verify it is a XML v3 <ResultList> file.'), 422
         eventdata = reader.getEventMeta()
 
         new_event = Event(eventdata['name'], eventdata['date'], eventdata['venue'])
@@ -61,7 +58,7 @@ def upload_event():
         db.session.commit()
 
         remove(eventfiles.path(infile))
-        return redirect(url_for('eventResult.event_info', eventid=eventid))
+        return jsonify(eventid=eventid), 201
 
 @eventResult.route('/info/<eventid>', methods=['GET', 'POST'])
 def event_info(eventid):
