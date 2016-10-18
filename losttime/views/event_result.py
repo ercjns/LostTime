@@ -32,7 +32,6 @@ def upload_event():
         try:
             infile = eventfiles.save(request.files['eventFile'], name=filename)
         except:
-            # TODO split out handling of different types of exceptions
             return jsonify(error="Failed to save file, try again later"), 500
 
 
