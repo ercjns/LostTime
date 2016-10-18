@@ -4,7 +4,6 @@
 
 {% block addhead %}
 <link href="{{ url_for('static', filename='dropzone.css') }}" rel="stylesheet">
-<script src="{{ url_for('static', filename='dropzone.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -19,7 +18,7 @@
 {% endif %}
 
 <div id="theDropzone" class="dropzone">
-	<div class="dz-default dz-message"><span>Drop XML file here (click for file browser)</span></div>
+	<div class="dz-default dz-message"><span>Drop XML file here (or click for file browser)</span></div>
 </div>
 
 <div class="files" id="previews">
@@ -42,13 +41,10 @@
 
 </div>
 </div>
-
-
-
-
 {% endblock %}
 
 {% block bottomscripts %}
+<script src="{{ url_for('static', filename='dropzone.js') }}"></script>
 <script>
 var previewNode = document.querySelector("#template");
 previewNode.id = ""
@@ -68,10 +64,14 @@ var dzOptions = {
 	init: function() {
 		this.on("maxfilesreached", function(file){
 			$("#uploadButton").removeClass("disabled")
-		})
+		});
 		this.on("maxfilesexceeded", function(file){
 			$("#uploadButton").addClass("disabled")
-		})
+		});
+		this.on("success", function(file, response) {
+			// console.log('Successfully saved event to database with id: '.concat(String(response.eventid)));
+			window.location.href = "{{ url_for('eventResult.event_info', eventid='') }}".concat(String(response.eventid));
+		});
 	}
 }
 var myDropzone = new Dropzone("div#theDropzone", dzOptions);
