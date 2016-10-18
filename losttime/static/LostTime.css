@@ -63,4 +63,13 @@ input:valid, input:focus:valid {
 .dz-remove:hover {
 	color: #23527c;
 	text-decoration: underline;
+	border-radius: 4px;
+}
+
+.nav-pills > li > a {
+	background-color: white;
+	border: 1px solid #adadad;
+}
+.nav-pills > li > a:hover {
+	background-color: #d9e7f4;
 }
