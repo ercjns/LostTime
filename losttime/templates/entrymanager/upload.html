@@ -1,0 +1,151 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Entry Manager{% endblock %}
+
+{% block addhead %}
+<link href="{{ url_for('static', filename='dropzone.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
+<h3 class="page-title">Manage Entries Step 1: File Upload</h3>
+<div class="pinkline"></div>
+<h4 class="form-section-title">Entry Files</h4>
+<p>Save entry / registration information in .csv format. Upload multiple files to combine registration information from multiple sources.</p>
+<p><a onclick="togglecsvtable()" id="spectogglelink">Show the csv spec</a></p>
+<div id="csvspec" style="display:none;">
+	<p>If the exact string below is found <em>within</em> a column header in the csv file, it is a match: column header <code>First Name</code> in the csv file matches <code>first</code>. The csv file may include any set of these columns in any order. Columns in the file that do not match will be ignored. Some behavior is currently ambiguous: if your file contains <code>First Name</code> and <code>Address First Line</code>, you might see unexpected data in <code>first</code> output. Multiple files need not have the same csv format as one another.</p>
+	<table class="table table-striped table-condensed">
+		<tr>
+			<th>CSV Column Header</th>
+			<th>Definition</th>
+		</tr>
+		<tr>
+			<td><code>bib</code></td>
+			<td>Bib number. Must be unique per entry or blank (a mix of blanks and unique values is ok).</td>
+		</tr>
+		<tr>
+			<td><code>first</code></td>
+			<td>First name</td>
+		</tr>
+		<tr>
+			<td><code>last</code></td>
+			<td>Last name</td>
+		</tr> 
+		<tr>
+			<td><code>club</code> or <code>school</code></td>
+			<td>club abbreviation, for example <code>COC</code> for Cascade Orienteering Club</td>
+		</tr>
+		<tr>
+			<td><code>class</code> or <code>course</code></td>
+			<td>Class code abbreviation. <code>course</code> should be avoided.</td>
+		</tr>
+		<tr>
+			<td><code>sex</code> or <code>gen</code></td>
+			<td>Gender identity</td>
+		</tr>
+		<tr>
+			<td><code>punch</code> or <code>card</code></td>
+			<td>e-punch card number</td>
+		</tr>
+		<tr>
+			<td><code>rent</code></td>
+			<td>Mark an X if competitor is renting an e-punch, otherwise leave blank</td>
+		</tr>
+		<tr>
+			<td><code>nc</code></td>
+			<td>Mark an X if competitor is to be marked non-competitive in results, otherwise leave blank</td>
+		</tr>
+	</table>
+</div>
+
+<div id="theDropzone" class="dropzone">
+	<div class="dz-default dz-message"><span>Drop csv file here (or click for file browser)</span></div>
+</div>
+
+<div class="files" id="previews">
+	<div id="template" class="dz-preview">
+		<div>
+			<p><span class="name" data-dz-name></span> (<span class="size" data-dz-size></span>) <strong class="error text-danger" data-dz-errormessage></strong> <span class="dz-remove" data-dz-remove>Remove</span></p>
+			
+		</div>
+		<div class="progress-bar-wrapper">
+			<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+			<div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<a href="{{ url_for('home_page') }}" class="btn btn-default"><i class="fa fa-home"></i> Home</a>
+<a id="uploadButton" onclick="sendFile()" class="btn btn-default btn-primary">Go! <i class="fa fa-arrow-circle-right"></i></a>
+
+
+</div>
+</div>
+{% endblock %}
+
+{% block bottomscripts %}
+<script src="{{ url_for('static', filename='dropzone.js') }}"></script>
+<script>
+var previewNode = document.querySelector("#template");
+previewNode.id = ""
+var previewTemplate = previewNode.parentNode.innerHTML;
+previewNode.parentNode.removeChild(previewNode);
+
+
+Dropzone.autoDiscover = false;
+var dzOptions = {
+	url: "{{url_for('entryManager.upload_entries')}}",
+	paramName: "entryFile",
+	acceptedFiles: "text/csv, .csv",
+	uploadMultiple: true,
+	parallelUploads: 9999,
+	autoProcessQueue: false,
+	previewTemplate: previewTemplate,
+	previewsContainer: "#previews",
+	init: function() {
+		this.on("error", function(file, message) {
+			var node, _i, _len, _ref, _results;
+			if (file.previewElement) {
+				file.previewElement.classList.add("dz-error");
+				if (typeof message !== "String" && message.error) {
+					message = message.error;
+				}
+
+				file.previewElement.querySelector(".progress-bar-wrapper").remove()
+				// $("#uploadButton").addClass("disabled")
+
+				_ref = file.previewElement.querySelectorAll("[data-dz-errormessage]");
+				_results = [];
+				for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+					node = _ref[_i];
+					_results.push(node.textContent = message);
+				}
+				return _results;
+			}
+		});
+		this.on("success", function(file, response) {
+			window.location.href = "{{ url_for('entryManager.download_entries', entryid=stamp) }}";
+		});
+	}
+}
+var myDropzone = new Dropzone("div#theDropzone", dzOptions);
+
+function sendFile() {
+	myDropzone.processQueue();
+}
+
+function togglecsvtable() {
+	if ($("#csvspec").css('display') == 'none') {
+		$("#csvspec").show();
+		$("#spectogglelink").text("Hide the csv spec");
+	}
+	else {
+		$("#csvspec").hide();
+		$("#spectogglelink").text("Show the csv spec");
+	}
+}
+</script>
+{% endblock %}

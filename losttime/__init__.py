@@ -33,6 +33,9 @@ configure_uploads(app, (eventfiles))
 from .views.event_result import eventResult as eventResultBP
 app.register_blueprint(eventResultBP, url_prefix='/event-result')
 
+from .views.entry_manager import entryManager as entryManagerBP
+app.register_blueprint(entryManagerBP, url_prefix='/entry-manager')
+
 @app.route('/')
 def home_page():
     return render_template('home/home.html')
