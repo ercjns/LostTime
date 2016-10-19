@@ -1,4 +1,4 @@
-#losttime/views/EventResult.py
+#losttime/views/event_result.py
 
 from flask import Blueprint, url_for, redirect, request, render_template, jsonify
 from datetime import datetime
@@ -37,6 +37,7 @@ def upload_event():
 
         reader = OrienteerXmlReader(eventfiles.path(infile))
         if not reader.validiofxml:
+            remove(eventfiles.path(infile))
             return jsonify(error='Could not parse XML, please verify it is a XML v3 <ResultList> file.'), 422
         eventdata = reader.getEventMeta()
 
