@@ -7,7 +7,7 @@ from _output_templates import EntryWriter
 import re
 import csv
 from os import remove
-from os.path import join
+from os.path import join, isfile
 
 entryManager = Blueprint("entryManager", __name__, static_url_path='/download', static_folder='../static/userfiles')
 
@@ -37,7 +37,12 @@ def upload_entries():
                 return jsonify(error="Server error: Failed to save file"), 500
 
         writer = EntryWriter(infiles, 'OE', 'standard')
-        doc = writer.writeEntries()
+        try:
+            doc = writer.writeEntries()
+        except:
+            for path in infiles:
+                remove(path)
+            return jsonify(error="Unable to parse entries from this csv file"), 400
         outfilename = join(entryManager.static_folder, 'entry_OE_{0}.csv'.format(request.form['stamp']))
         with open(outfilename, 'w') as out:
             out.write(doc)
@@ -47,8 +52,7 @@ def upload_entries():
 
 @entryManager.route('/entries/<entryid>', methods=['GET'])
 def download_entries(entryid):
-    try:
-        entryfn = 'entry_OE_{0}.csv'.format(entryid)
-    except:
-        return("Hmm... we didn't find that file"), 404
-    return render_template('entrymanager/download.html', entryfn=entryfn)
+    entryfn = 'entry_OE_{0}.csv'.format(entryid)
+    if isfile(join(entryManager.static_folder, 'entry_OE_{0}.csv'.format(entryid))):
+        return render_template('entrymanager/download.html', entryfn=entryfn)
+    return("Hmm... we didn't find that file"), 404
