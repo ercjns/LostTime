@@ -345,8 +345,8 @@ def _buildResultPages(eventid, style):
     results = PersonResult.query.filter_by(eventid=eventid).all()
     teamclasses = EventTeamClass.query.filter_by(eventid=eventid).all()
     teamresults = TeamResult.query.filter_by(eventid=eventid).all()
-    # TODO carry the style variable through
-    writer = EventHtmlWriter(event, classes, results, teamclasses, teamresults)
+
+    writer = EventHtmlWriter(event, style, classes, results, teamclasses, teamresults)
     docdict = {}
     indvdoc = writer.eventResultIndv()
     if indvdoc is not None:
