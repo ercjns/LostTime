@@ -2,8 +2,14 @@
 
 from flask import Blueprint, request, render_template, redirect, url_for, jsonify
 from datetime import datetime
+from losttime import entryfiles
+from _output_templates import EntryWriter
+import re
+import csv
+from os import remove
+from os.path import join
 
-entryManager = Blueprint("entryManager", __name__, static_url_path='/download', static_folder='static/userfiles')
+entryManager = Blueprint("entryManager", __name__, static_url_path='/download', static_folder='../static/userfiles')
 
 @entryManager.route('/')
 def home():
@@ -17,17 +23,32 @@ def upload_entries():
     """
     if request.method == 'GET':
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        return render_template('entrymanager/upload.html', stamp = timestamp)
+        return render_template('entrymanager/upload.html', stamp=timestamp)
 
     elif request.method == 'POST':
-        print('Got these files: ', request.files)
-        # recieve files from dropzone, ok to take them one at a time
-        # process the file on upload, create the output, associate it with the timestamp
-        # save the output file, delete the uploaded file from the server
-        # if a second, third, ... file uploaded, append to the ouput
-        # on the go button, GET the correct resource based on timestamp
-        return jsonify(error="Upload not yet implemented"), 501
+        infiles = []
+        for k in request.files.keys():
+            filenum = re.search(r'\[\d+\]', k).group().strip('[]')
+            filename = 'entry_{0}_{1}.csv'.format(request.form['stamp'], filenum)
+            try:
+                infile = entryfiles.save(request.files[k], name=filename)
+                infiles.append(entryfiles.path(infile))
+            except:
+                return jsonify(error="Server error: Failed to save file"), 500
 
-@entryManager.route('/download/<entryid>', methods=['GET'])
+        writer = EntryWriter(infiles, 'OE', 'standard')
+        doc = writer.writeEntries()
+        outfilename = join(entryManager.static_folder, 'entry_OE_{0}.csv'.format(request.form['stamp']))
+        with open(outfilename, 'w') as out:
+            out.write(doc)
+        for path in infiles:
+            remove(path)
+        return jsonify(stamp=request.form['stamp']), 201
+
+@entryManager.route('/entries/<entryid>', methods=['GET'])
 def download_entries(entryid):
-    return render_template('entrymanager/download.html', stamp=entryid)
+    try:
+        entryfn = 'entry_OE_{0}.csv'.format(entryid)
+    except:
+        return("Hmm... we didn't find that file"), 404
+    return render_template('entrymanager/download.html', entryfn=entryfn)

@@ -28,7 +28,9 @@ migrate = Migrate(app, db)
 
 eventfilepath = join('losttime', 'static', 'userfiles')
 eventfiles = UploadSet('eventfiles', ('xml',), lambda app:eventfilepath)
-configure_uploads(app, (eventfiles))
+entryfilepath = join('losttime', 'static', 'userfiles')
+entryfiles = UploadSet('entryfiles', ('csv',), lambda app:entryfilepath)
+configure_uploads(app, (eventfiles, entryfiles))
 
 from .views.event_result import eventResult as eventResultBP
 app.register_blueprint(eventResultBP, url_prefix='/event-result')

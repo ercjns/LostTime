@@ -126,6 +126,9 @@ var dzOptions = {
 				return _results;
 			}
 		});
+		this.on("sending", function(file, xhr, formData) {
+			formData.append("stamp", {{ stamp }});
+		});
 		this.on("success", function(file, response) {
 			window.location.href = "{{ url_for('entryManager.download_entries', entryid=stamp) }}";
 		});

@@ -1,6 +1,7 @@
 # losttime/views/_output_templates.py
 
 import datetime
+import csv
 import dominate
 from dominate.tags import *
 
@@ -143,3 +144,98 @@ def _sortByPosition(results):
 def _sortByName(results):
     results = sorted(results, key=lambda x: x.name)
     return results
+
+
+class EntryWriter(object):
+    def __init__(self, infiles, format, eventtype='standard', bibstart=1001):
+        self.files = infiles
+        self.format = format
+        self.eventtype = eventtype
+        self.bibnum = _nextbib(bibstart)
+
+    def writeEntries(self):
+        if self.format == 'OE':
+            return self.__writeOEentries()
+
+    def __writeOEentries(self):
+        template = ';{0};;{1};;{2};{3};;{4};;{5};;;;0;;;;;;{6};;;;;{7};;;;;;;;;;;;;;;;;;;;;;;{8};0;X;;;;;;\n'
+        doc = ''
+        prefix = 'OESco0001;' if self.eventtype == 'score' else 'OE0001;'
+        header = prefix + 'Stno;XStno;Chipno;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Credit -;Penalty +;Comment;Club no.;Cl.name;City;Nat;Location;Region;Cl. no.;Short;Long;Entry cl. No;Entry class (short);Entry class (long);Rank;Ranking points;Num1;Num2;Num3;Text1;Text2;Text3;Addr. surname;Addr. first name;Street;Line2;Zip;Addr. city;Phone;Mobile;Fax;EMail;Rented;Start fee;Paid;Team;Course no.;Course;km;m;Course controls\n'
+        doc += header
+        for f in self.files:
+            with open(f, 'r') as currentfile:
+                regreader = csv.reader(currentfile, delimiter=',')
+                datacols = self.__identify_columns(next(regreader))
+
+                known_renting = True if 'rented' in datacols.keys() else False
+                known_bib = True if 'stno' in datacols.keys() else False
+                known_nc = True if 'nc' in datacols.keys() else False
+
+                for line in regreader:
+                    first = line[datacols['first']].strip('\"\'\/\\ ')
+                    last = line[datacols['last']].strip('\"\'\/\\ ')
+                    club = line[datacols['club']].strip('\"\'\/\\ ')
+                    cat = line[datacols['cat']].strip('\"\'\/\\ ')
+                    sex = line[datacols['sex']].strip('\"\'\/\\ ')
+                    punch = line[datacols['punch']].strip('\"\'\/\\ ')
+                    if known_renting:
+                        rented = line[datacols['rented']].strip('\"\'\/\\ ')
+                    else:
+                        rented = 'X' if len(punch) == 0 else ''
+                    if known_bib:
+                        stno = line[datacols['stno']].strip('\"\'\/\\ ')
+                        if len(stno) == 0:
+                            stno = next(self.bibnum)
+                    else:
+                        stno = next(self.bibnum)
+                    if known_nc:
+                        nc = line[datacols['nc']].strip('\"\'\/\\ ')
+                    else:
+                        nc = '0'
+
+                    regline = template.format(stno, punch, last, first, sex, nc, club, cat, rented)
+                    doc += regline
+        return doc
+
+    def __identify_columns(self, headerline):
+        """return dict of indexes for output columns"""
+        datacols = {}
+        for idx, val in enumerate(headerline):
+            val = val.lower()
+            if 'bib' in val:
+                datacols['stno'] = idx
+                continue
+            elif 'first' in val:
+                datacols['first'] = idx
+                continue
+            elif 'last' in val:
+                datacols['last'] = idx
+                continue
+            elif 'club' in val or 'school' in val:
+                datacols['club'] = idx
+                continue
+            elif 'class' in val or 'course' in val:
+                datacols['cat'] = idx
+                continue
+            elif 'sex' in val or ('gen' in val and 'emergency' not in val):
+                datacols['sex'] = idx
+                continue
+            elif 'punch' in val or 'card' in val:
+                datacols['punch'] = idx
+                continue
+            elif 'rent' in val:
+                datacols['rented'] = idx
+                continue
+            elif 'nc' in val and 'emergency' not in val:
+                datacols['nc'] = idx
+                continue
+            else:
+                continue
+        return datacols
+
+def _nextbib(initial=1001):
+    i = initial
+    while True:
+        yield i
+        i += 1
