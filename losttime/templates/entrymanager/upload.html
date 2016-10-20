@@ -78,6 +78,38 @@
 	</div>
 </div>
 
+<form>
+<div class="row">
+	<div class="col-sm-6">
+	<h4 class="form-section-title">Event Type</h4>
+	<div class="form-group">
+		<div class="radio">
+			<label>
+				<input type="radio" name="entry-type" value="standard" checked>
+				Standard point-to-point
+			</label>
+		</div>
+		<div class="radio">
+			<label>
+				<input type="radio" name="entry-type" value="score">
+				Score O
+			</label>
+		</div>
+	</div>
+	</div>
+
+	<!--<div class="col-sm-6">
+	<h4 class="form-section-title">Output Style</h4>	
+		<div class="form-group">
+		<select name="output-style" class="form-control">
+			<option value="OE" selected>Sport Software csv</option>
+			<option value="xml" disabled>IOF XML v3 EntryList</option>
+		</select>
+		</div>
+	</div>-->
+</div>
+</form>
+
 <a href="{{ url_for('home_page') }}" class="btn btn-default"><i class="fa fa-home"></i> Home</a>
 <a id="uploadButton" onclick="sendFile()" class="btn btn-default btn-primary">Go! <i class="fa fa-arrow-circle-right"></i></a>
 
@@ -128,6 +160,7 @@ var dzOptions = {
 		});
 		this.on("sending", function(file, xhr, formData) {
 			formData.append("stamp", {{ stamp }});
+			formData.append("entry-type", $("input[name=entry-type]:checked").val());
 		});
 		this.on("success", function(file, response) {
 			window.location.href = "{{ url_for('entryManager.download_entries', entryid=stamp) }}";
