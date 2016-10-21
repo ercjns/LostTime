@@ -57,6 +57,21 @@ def download_entries(entryid):
     Determines if the requested file exists, renders page or sends 404
     """
     entryfn = 'entry_OE_{0}.csv'.format(entryid)
-    if isfile(join(entryManager.static_folder, 'entry_OE_{0}.csv'.format(entryid))):
-        return render_template('entrymanager/download.html', entryfn=entryfn)
+    if isfile(join(entryManager.static_folder, entryfn)):
+        stats = _entries_stats(join(entryManager.static_folder, entryfn))
+        return render_template('entrymanager/download.html', entryfn=entryfn, stats=stats)
     return("Hmm... we didn't find that file"), 404
+
+def _entries_stats(filename):
+    with open(filename, 'r') as f:
+        numentries = 0
+        categories = []
+
+        reader = csv.reader(f, delimiter=';')
+        header = next(reader)
+        for line in reader:
+            numentries += 1
+            if line[25] not in categories:
+                categories.append(line[25])
+        categories.sort()
+    return {'count':numentries, 'categories':categories}
