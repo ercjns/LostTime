@@ -209,6 +209,8 @@ class EntryWriter(object):
     def writeEntries(self):
         if self.format == 'OE':
             return self.__writeOEentries()
+        else:
+            raise KeyError("Unrecognized output format for entries")
 
     def __writeOEentries(self):
         template = ';{0};;{1};;{2};{3};;{4};;{5};;;;0;;;;;;{6};;;;;{7};;;;;;;;;;;;;;;;;;;;;;;{8};0;X;;;;;;\n'

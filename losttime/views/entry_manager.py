@@ -52,6 +52,10 @@ def upload_entries():
 
 @entryManager.route('/entries/<entryid>', methods=['GET'])
 def download_entries(entryid):
+    """Generate page for users to download entries file
+
+    Determines if the requested file exists, renders page or sends 404
+    """
     entryfn = 'entry_OE_{0}.csv'.format(entryid)
     if isfile(join(entryManager.static_folder, 'entry_OE_{0}.csv'.format(entryid))):
         return render_template('entrymanager/download.html', entryfn=entryfn)

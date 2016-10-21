@@ -221,6 +221,9 @@ def _assignTeamScores(eventid, scoremethod):
 
     Individual scores must be assigned before calling this function.
     WIOL:
+        sum scores for top 3 individuals in each teamclass, hard-coded below
+        no minimum number of required finishers for a valid team.
+        ties broken by individual scores 1 through 3.
         create EventTeamClass, create TeamResult with scores
         sort TeamResults, assign Positions, break ties.
     """
@@ -337,8 +340,10 @@ def _assignTeamScores(eventid, scoremethod):
 
 
 def _buildResultPages(eventid, style):
-    """Build and save html page of the Results, for download
+    """Build and save html page of the event results
 
+    Query the database for all information related to this event id
+    Return dict with indivudal results and team results
     """
     event = Event.query.filter_by(id=eventid).one()
     classes = EventClass.query.filter_by(eventid=eventid).filter(EventClass.scoremethod != 'hide').all()
@@ -348,10 +353,16 @@ def _buildResultPages(eventid, style):
 
     writer = EventHtmlWriter(event, style, classes, results, teamclasses, teamresults)
     docdict = {}
-    indvdoc = writer.eventResultIndv()
+    try:
+        indvdoc = writer.eventResultIndv()
+    except:
+        pass
     if indvdoc is not None:
         docdict['indv'] = indvdoc
-    teamdoc = writer.eventResultTeam()
+    try:
+        teamdoc = writer.eventResultTeam()
+    except:
+        pass
     if teamdoc is not None:
         docdict['team'] = teamdoc
     return docdict
