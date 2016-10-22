@@ -85,3 +85,52 @@ python -m flask db upgrade
 ```
 
 ## Deployment
+
+### Code Updates
+
+git pull, restart the daemon
+
+### Database Schema Changes
+
+git pull, python -m flask db update, restart the daemon
+
+
+### Initial
+First Deployment on a fresh nearlyfreespeech.net server. There was a lot of debugging. Here's what worked in the end.
+1. clone the repository to the protected folder:
+```bash
+$ cd /home/protected
+$ git clone https://github.com/ercjns/LostTime.git .
+```
+2. create the virtual environment, install dependencies.
+```bash
+$ virtualenv -p /usr/local/bin/python2 venv //prevent python3 from installing
+$ source venv/bin/activate
+$ pip install -r requirements.txt //removed wsgiref from the list, it was causing issues
+```
+
+3. create instance file
+```bash
+$ mkdir instance
+$ touch instanceconfig.py
+$ emacs instanceconfig.py
+$ // type in instance config (see above)
+$ // save with C-x C-s, exit with C-x C-c
+```
+
+4. initialize the databse
+```bash
+$ export FLASK_APP=losttime
+$ python -m flask db update
+```
+
+5. test the startup script
+```bash
+$ source venv/bin/activate
+$ gunicorn -p app.pid losttime:app
+```
+Well, actually, the gunicorn command was still reading from the global gunicorn, which caused it to use python 3 and miss my packages.
+So the second line in the startup script is ```usr/local/bin/gunicorn ...```
+
+6. configure the daemon with the startup script in the NFS UI.   
+
