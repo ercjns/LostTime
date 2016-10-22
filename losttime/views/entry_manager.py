@@ -43,7 +43,7 @@ def upload_entries():
             for path in infiles:
                 remove(path)
             return jsonify(error="Unable to parse entries from this csv file"), 400
-        outfilename = join(entryManager.static_folder, 'entry_OE_{0}.csv'.format(request.form['stamp']))
+        outfilename = join(entryManager.static_folder, 'EntryForOE-{0}.csv'.format(request.form['stamp']))
         with open(outfilename, 'w') as out:
             out.write(doc)
         for path in infiles:
@@ -56,7 +56,7 @@ def download_entries(entryid):
 
     Determines if the requested file exists, renders page or sends 404
     """
-    entryfn = 'entry_OE_{0}.csv'.format(entryid)
+    entryfn = 'EntryForOE-{0}.csv'.format(entryid)
     if isfile(join(entryManager.static_folder, entryfn)):
         stats = _entries_stats(join(entryManager.static_folder, entryfn))
         return render_template('entrymanager/download.html', entryfn=entryfn, stats=stats)

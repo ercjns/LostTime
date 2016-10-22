@@ -23,12 +23,11 @@ def upload_event():
     Read an xml <ResultList>, create Event, EventClass, and PersonResult entries
     """
     if request.method == 'GET':
-        err = request.args.get('e', '')
-        return render_template('eventresult/upload.html', error=err)
+        return render_template('eventresult/upload.html')
 
     elif request.method == 'POST':
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        filename = 'event_'+timestamp+'.'
+        filename = 'event_{0}.xml'.format(timestamp)
         try:
             infile = eventfiles.save(request.files['eventFile'], name=filename)
         except:
