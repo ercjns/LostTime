@@ -1,5 +1,8 @@
 instance/
 *.pyc
 *.log
+*.pid
 *.db
+*~
+venv/
 losttime/static/userfiles/
