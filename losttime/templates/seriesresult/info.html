@@ -1,0 +1,126 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Series Result{% endblock %}
+
+{% block content %}
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
+<h3 class="page-title">Series Results Step 2: Series Info</h3>
+<div class="pinkline"></div>
+</div>
+</div>
+
+<h4 class="form-section-title">Series Details</h4>
+<div class="form-group">
+    <label for="series-name" class="control-label">Series Name</label>
+    <input type="text" class="form-control" name="series-name" value="">
+</div>
+<div class="form-group">
+    <label for="series-host" class="control-label">Series Host</label>
+    <input type="text" class="form-control" name="series-host" value="">
+</div>
+
+
+
+
+<h4 class="form-section-title">Series Classes</h4>
+<p>Series standings will be calculated for each class (row), using only results from the indicated events.</p>
+<table class="table table-condensed">
+    <tr>
+        <th>Class</th>
+        <th>event #1</th>
+        <th>event #2</th>
+        <th>event #3</th>
+        <th>event #4</th>
+        <th>event #5</th>
+    </tr>
+    <tr>
+        <td><em>Beginner (1)</em></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td><em>Intermediate (3)</em></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td><em>Short Adv (7)</em></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td><em>Advanced Women (8F)</em></td>
+        <td><input type="checkbox" checked></td>
+        <td><input type="checkbox" checked></td>
+        <td><input type="checkbox" checked></td>
+        <td><input type="checkbox" checked></td>
+        <td><input type="checkbox" checked></td>
+    </tr>
+    <tr>
+        <td><em>Advanced Groups (8G)</em></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td><em>Advanced Men (8M)</em></td>
+        <td><input type="checkbox" checked></td>
+        <td><input type="checkbox" checked></td>
+        <td><input type="checkbox" checked></td>
+        <td><input type="checkbox" checked></td>
+        <td><input type="checkbox" checked></td>
+    </tr>
+</table>
+<h4 class="form-section-title">Scoring Method</h4>
+<p>In each class, the series score is the 
+<select name="series-score-method">
+		<option value="sum">sum</option>
+		<option value="average">average</option>
+</select>
+of the best <input type="number" min=1 max=7> event scores.
+</p>
+<p>An entry must have at least <input type="number" min=1 max=7> valid event scores to have a valid series score.</p>
+<p>Tie series scores are awarded 
+<select name="series-score-method">
+        <option value="average">by comparing all N event scores.</option>
+        <option value="average">by comparing only the M contributing event scores.</option>
+        <option value="sum">as a tie (no tie-breaking).</option>
+</select>
+</p>
+
+
+<h4 class="form-section-title">Output Style</h4>
+<div class="row">
+	<div class="col-md-7">
+	<div class="form-group">
+	<label for="output-style" class="control-label">Output Template</label>
+	<select name="output-style" class="form-control">
+		<option value="general" selected>Generic</option>
+		<option value="coc">Cascade Orienteering Club</option>
+	</select>
+	</div>
+	</div>
+</div>
+
+
+<p>
+    <button class="btn btn-default" onclick="info_page_with_selected_events">Back</button>
+    <button class="btn btn-primary" onclick="compute_series_result">Next</button>
+</p>
+
+
+
+
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Series Result{% endblock %}
+
+{% block content %}
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
+<h3 class="page-title">Series Results Step 1: Select Events</h3>
+<div class="pinkline"></div>
+</div>
+</div>
+
+<h4 class="form-section-title">Existing Series</h4>
+<p>Adding an event to an existing seires? Enter the series code</p>
+<input type="text"><button class="btn btn-default" onclick="fetchExistingSeriesEvents()">Load Series Events</button>
+
+<h4 class="form-section-title">Add Events</h4>
+<table class="table table-stripped">
+    <tr>
+        <th>Event Name</th>
+        <th>Event Date</th>
+        <th>Date Uploaded</th>
+        <th></th>
+    </tr>
+    <tr>
+        <td>2015WIOL01</td>
+        <td>28 October 2015</td>
+        <td>1 November 2015</td>
+        <td><a href="#">add</a></td>
+    </tr>
+    <tr>
+        <td>2015WIOL01</td>
+        <td>28 October 2015</td>
+        <td>1 November 2015</td>
+        <td><a href="#">add</a></td>
+    </tr>
+    <tr>
+        <td>2015WIOL01</td>
+        <td>28 October 2015</td>
+        <td>1 November 2015</td>
+        <td><a href="#">add</a></td>
+    </tr>
+    <tr>
+        <td>2015WIOL01</td>
+        <td>28 October 2015</td>
+        <td>1 November 2015</td>
+        <td><a href="#">add</a></td>
+    </tr>
+</table>
+
+
+<h4 class="form-section-title">Series Events</h4>
+<table class="table table-stripped">
+    <tr>
+        <th>Event #</th>
+        <th>Event Name</th>
+        <th>Event Date</th>
+        <th>Updated Date</th>
+        <th></th>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>2015WIOL01</td>
+        <td>28 October 2015</td>
+        <td>1 November 2015</td>
+        <td><a href="#">remove</a></td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>2015WIOL01</td>
+        <td>28 October 2015</td>
+        <td>1 November 2015</td>
+        <td><a href="#">remove</a></td>
+    </tr>
+</table>
+
+<p><button class="btn btn-primary" onclick="fetchExistingSeriesEvents()">Next</button></p>
+
+{% endblock %}
