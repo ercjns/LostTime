@@ -10,70 +10,87 @@
 </div>
 </div>
 
-<h4 class="form-section-title">Existing Series</h4>
-<p>Adding an event to an existing seires? Enter the series code</p>
-<input type="text"><button class="btn btn-default" onclick="fetchExistingSeriesEvents()">Load Series Events</button>
-
+ 
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
 <h4 class="form-section-title">Add Events</h4>
-<table class="table table-stripped">
-    <tr>
-        <th>Event Name</th>
-        <th>Event Date</th>
-        <th>Date Uploaded</th>
-        <th></th>
+<p>Use the <a href="{{url_for('eventResult.home')}}">individual event results</a> tool to score events, then add events to a series below.</p>
+<p>Adding an event to an existing seires? Enter the series code 
+<input type="text" id="seriescode"> <button class="btn btn-default" onclick="fetchExistingSeriesEvents()">Load Series Events</button></p>
+</div>
+</div>
+
+<div class="row">
+<div class="col-sm-10 col-md-5 col-sm-offset-1">
+<h4 class="form-section-title">Available Events</h4>
+<p>Click on any event to add it to the series.</p>
+<table class="table table-hover" id="eventstable">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Event Date</th>
+            <th>Result Date</th>
+        </tr>
+    </thead>
+    <tbody>
+{% for e in events %}
+    <tr data-id="{{e.id}}" onclick="toggleEvent(this)">
+        <td>{{e.name}}</td>
+        <td>{{e.date}}</td>
+        <td></td>
     </tr>
-    <tr>
-        <td>2015WIOL01</td>
-        <td>28 October 2015</td>
-        <td>1 November 2015</td>
-        <td><a href="#">add</a></td>
-    </tr>
-    <tr>
-        <td>2015WIOL01</td>
-        <td>28 October 2015</td>
-        <td>1 November 2015</td>
-        <td><a href="#">add</a></td>
-    </tr>
-    <tr>
-        <td>2015WIOL01</td>
-        <td>28 October 2015</td>
-        <td>1 November 2015</td>
-        <td><a href="#">add</a></td>
-    </tr>
-    <tr>
-        <td>2015WIOL01</td>
-        <td>28 October 2015</td>
-        <td>1 November 2015</td>
-        <td><a href="#">add</a></td>
-    </tr>
+{% endfor %}
+    </tbody>
 </table>
+</div>
 
-
+<div class="col-sm-10 col-sm-offset-1 col-md-5 col-md-offset-0">
 <h4 class="form-section-title">Series Events</h4>
-<table class="table table-stripped">
+<p>Click an event to remove it from the series. When you're ready, click next.</p>
+<table class="table table-hover" id="seriestable">
+    <thead>
     <tr>
-        <th>Event #</th>
-        <th>Event Name</th>
+        <th>Name</th>
         <th>Event Date</th>
-        <th>Updated Date</th>
-        <th></th>
+        <th>Result Date</th>
     </tr>
-    <tr>
-        <td>1</td>
-        <td>2015WIOL01</td>
-        <td>28 October 2015</td>
-        <td>1 November 2015</td>
-        <td><a href="#">remove</a></td>
-    </tr>
-    <tr>
-        <td>2</td>
-        <td>2015WIOL01</td>
-        <td>28 October 2015</td>
-        <td>1 November 2015</td>
-        <td><a href="#">remove</a></td>
-    </tr>
+    </thead>
+    <tbody>
+    </tbody>
 </table>
+<p class="text-center"><button class="btn btn-primary" onclick="createSeries()">Next</button></p>
+</div>
+</div>
+{% endblock %}
 
-<p><button class="btn btn-primary" onclick="fetchExistingSeriesEvents()">Next</button></p>
+{% block bottomscripts %}
+<script>
+function toggleEvent(tr){
+    if ($(tr).closest('table').attr('id') == "seriestable") {
+        $("#eventstable").append(tr);
+    } else {
+        $("#seriestable").append(tr);
+    }
+}
 
+function createSeries() {
+    series = {
+        code: $("#seriescode").val(),
+        events: []
+    }
+    $("#seriestable").children("tbody").children().each(function() {
+        series.events.push($(this).data("id"));
+    })
+
+    jqxhr = $.post("{{ url_for('seriesResult.select_events') }}", series)
+      .done(function(data) {
+        console.log("done handler");
+        console.log(data);
+      })
+      .fail(function(data) {
+        console.log("fail handler");
+        console.log(data);
+      });
+}
+</script>
 {% endblock %}

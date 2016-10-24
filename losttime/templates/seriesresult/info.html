@@ -10,6 +10,8 @@
 </div>
 </div>
 
+<div class="row">
+<div class="col-sm-6 col-sm-offset-1">
 <h4 class="form-section-title">Series Details</h4>
 <div class="form-group">
     <label for="series-name" class="control-label">Series Name</label>
@@ -19,10 +21,13 @@
     <label for="series-host" class="control-label">Series Host</label>
     <input type="text" class="form-control" name="series-host" value="">
 </div>
+</div>
+</div>
 
 
 
-
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
 <h4 class="form-section-title">Series Classes</h4>
 <p>Series standings will be calculated for each class (row), using only results from the indicated events.</p>
 <table class="table table-condensed">
@@ -83,6 +88,11 @@
         <td><input type="checkbox" checked></td>
     </tr>
 </table>
+</div>
+</div>
+
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
 <h4 class="form-section-title">Scoring Method</h4>
 <p>In each class, the series score is the 
 <select name="series-score-method">
@@ -99,26 +109,26 @@ of the best <input type="number" min=1 max=7> event scores.
         <option value="sum">as a tie (no tie-breaking).</option>
 </select>
 </p>
-
-
-<h4 class="form-section-title">Output Style</h4>
-<div class="row">
-	<div class="col-md-7">
-	<div class="form-group">
-	<label for="output-style" class="control-label">Output Template</label>
-	<select name="output-style" class="form-control">
-		<option value="general" selected>Generic</option>
-		<option value="coc">Cascade Orienteering Club</option>
-	</select>
-	</div>
-	</div>
+</div>
 </div>
 
+<div class="row">
+<div class="col-sm-7 col-sm-offset-1">
+<h4 class="form-section-title">Output Style</h4>
+<div class="form-group">
+<label for="output-style" class="control-label">Output Template</label>
+<select name="output-style" class="form-control">
+    <option value="general" selected>Generic</option>
+    <option value="coc">Cascade Orienteering Club</option>
+</select>
+</div>
 
 <p>
     <button class="btn btn-default" onclick="info_page_with_selected_events">Back</button>
     <button class="btn btn-primary" onclick="compute_series_result">Next</button>
 </p>
+</div>
+</div>
 
 
 

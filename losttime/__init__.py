@@ -38,6 +38,9 @@ app.register_blueprint(eventResultBP, url_prefix='/event-result')
 from .views.entry_manager import entryManager as entryManagerBP
 app.register_blueprint(entryManagerBP, url_prefix='/entry-manager')
 
+from .views.series_result import seriesResult as seriesResultBP
+app.register_blueprint(seriesResultBP, url_prefix='/series-result')
+
 from .views.admin_api import admin as adminBP
 app.register_blueprint(adminBP, url_prefix='/admin')
 
