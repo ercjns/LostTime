@@ -40,7 +40,7 @@ def upload_event():
             return jsonify(error='Could not parse XML, please verify it is a XML v3 <ResultList> file.'), 422
         eventdata = reader.getEventMeta()
 
-        new_event = Event(eventdata['name'], eventdata['date'], eventdata['venue'])
+        new_event = Event(eventdata['name'], eventdata['date'], eventdata['venue'], None)
         db.session.add(new_event)
         db.session.commit()
         eventid = new_event.id
@@ -74,8 +74,9 @@ def event_info(eventid):
     elif request.method == 'POST':
         event = Event.query.get(eventid)
         event.name = request.form['event-name']
-        event.date = request.form['event-date']
+        event.date = datetime.strptime(request.form['event-date'], "%Y-%m-%d")
         event.venue = request.form['event-venue']
+        event.host = request.form['event-host']
         # event.teamscoremethod = request.form['event-team-score-method']
         db.session.add(event)
 
@@ -350,18 +351,14 @@ def _buildResultPages(eventid, style):
     teamclasses = EventTeamClass.query.filter_by(eventid=eventid).all()
     teamresults = TeamResult.query.filter_by(eventid=eventid).all()
 
+
+
     writer = EventHtmlWriter(event, style, classes, results, teamclasses, teamresults)
     docdict = {}
-    try:
-        indvdoc = writer.eventResultIndv()
-    except:
-        pass
-    if indvdoc is not None:
-        docdict['indv'] = indvdoc
-    try:
-        teamdoc = writer.eventResultTeam()
-    except:
-        pass
-    if teamdoc is not None:
-        docdict['team'] = teamdoc
+
+    docdict['indv'] = writer.eventResultIndv()
+
+    if len(teamclasses) > 0:
+        docdict['team'] = writer.eventResultTeam()
+
     return docdict

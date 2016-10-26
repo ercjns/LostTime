@@ -20,7 +20,7 @@
 		<label for="event-date" class="control-label">Event Date</label>
 		<div class="input-group">
 		<div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
-		<input type="date" class="form-control" name="event-date" value="{{ event.date if event.date }}" pattern="\d{4}-\d{1,2}-\d{1,2}">
+		<input type="date" class="form-control" name="event-date" value="{{ event.date.strftime('%Y-%m-%d') if event.date }}" pattern="\d{4}-\d{1,2}-\d{1,2}">
 		</div>
 		<p class="help-block">YYYY-MM-DD</p>
 	</div>
@@ -30,6 +30,10 @@
 		<div class="input-group-addon"><i class="fa fa-map-marker" aria-hidden="true"></i></div>
 		<input type="text" class="form-control" name="event-venue" value="{{ event.venue if event.venue }}">
 		</div>
+	</div>
+	<div class="form-group">
+		<label for="event-host" class="control-label">Event Host</label>
+		<input type="text" class="form-control" name="event-host" value="{{ event.host if event.host }}">
 	</div>
 </div>
 </div>
@@ -80,7 +84,7 @@
 	<div class="form-group">
 	<label for="output-style" class="control-label">Output Template</label>
 	<select name="output-style" class="form-control">
-		<option value="general" selected>Generic</option>
+		<option value="generic" selected>Generic</option>
 		<option value="coc">Cascade Orienteering Club</option>
 	</select>
 	</div>

@@ -1,17 +1,22 @@
 # losttime/models.py
 
 from . import db
+from datetime import datetime
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    date = db.Column(db.String)
+    date = db.Column(db.DateTime)
     venue = db.Column(db.String)
-    
-    def __init__(self, name, date, venue):
+    host = db.Column(db.String)
+    created = db.Column(db.DateTime)
+
+    def __init__(self, name, date, venue, host):
         self.name = name
         self.date = date
         self.venue = venue
+        self.host = host
+        self.created = datetime.now()
         return
 
 class EventClass(db.Model):
@@ -20,7 +25,7 @@ class EventClass(db.Model):
     name = db.Column(db.String)
     shortname = db.Column(db.String)
     scoremethod = db.Column(db.String)
-    
+
     def __init__(self, event, name, shortname, scoremethod='time'):
         self.eventid = int(event)
         self.name = name
