@@ -7,11 +7,12 @@
 <div class="col-sm-10 col-sm-offset-1">
     <h3 class="page-title">Post Process Event Results Step 3: Download HTML</h3>
     <div class="pinkline"></div>
-
+{% if teamfn %}
     <ul class="nav nav-pills nav-justified">
         <li class="active"><a data-toggle="pill" href="#menu-indv">Individual Results</a></li>
         <li><a data-toggle="pill" href="#menu-team">Team Results</a></li>
     </ul>
+{% endif %}
 </div>
 </div>
 
@@ -41,7 +42,7 @@
         </div>
         </div>
     </div>
-
+    {% if teamfn %}
     <div id="menu-team" class="tab-pane fade">
         <div class="row">
         <div class="col-sm-10 col-sm-offset-1">
@@ -67,6 +68,7 @@
         </div>
         </div>
     </div>
+    {% endif %}
 </div>
 
 
