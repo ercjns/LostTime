@@ -113,3 +113,29 @@ class ClubCode(db.Model):
         self.code = code
         self.name = name
         return
+
+class Series(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    host = db.Column(db.String)
+    updated = db.Column(db.DateTime)
+    eventids = db.Column(db.String)
+    scoremethod = db.Column(db.String)
+    scoreeventscount = db.Column(db.Integer)
+    scoreeventsneeded = db.Column(db.Integer)
+
+class SeriesClass(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    seriesid = db.Column(db.Integer)
+    name = db.Column(db.String)
+    shortname = db.Column(db.String)
+    eventids = db.Column(db.String)
+
+class SeriesResult(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    seriesid = db.Column(db.Integer)
+    seriesclassid = db.Column(db.Integer)
+    name = db.Column(db.String)
+    position = db.Column(db.Integer)
+    score = db.Column(db.Integer)
+    results = db.Column(db.String)
