@@ -271,7 +271,7 @@ def _assignTeamScores(eventid, scoremethod):
                 members = [r for r in results if r.club_shortname == team]
                 members.sort(key=lambda x: x.score, reverse=True)
                 members = members[:3]
-                memberids = [m.id for m in members]
+                memberids = [m.id for m in members if m.score > 0]
                 teamscore = sum([m.score for m in members])
                 new_team = TeamResult(eventid, tc.id, team, memberids, teamscore)
                 db.session.add(new_team)
@@ -287,6 +287,10 @@ def _assignTeamScores(eventid, scoremethod):
                     pos_swap = False
                     A_memberids = teamresults[i-1].resultids.split(',')
                     B_memberids = teamresults[i].resultids.split(',')
+                    if A_memberids == [u'']:
+                        A_memberids = []
+                    if B_memberids == [u'']:
+                        B_memberids = []
 
                     while A_memberids and B_memberids:
                         A_score = PersonResult.query.get(A_memberids.pop(0)).score

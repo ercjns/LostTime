@@ -192,10 +192,28 @@ class EventHtmlWriter(object):
                         th('Name')
                         th('Score')
                     for r in classresults:
-                        with t.add(tr()):
+                        try:
+                            memberids = [int(x) for x in r.resultids.split(',')]
+                        except:
+                            memberids = []
+                        members = [x for x in self.personresults if x.id in memberids]
+                        members = _sortByPosition(members)
+                        with t.add(tr(cls="team-result")):
                             td(r.position) if r.position > 0 else td()
                             td(r.teamname_short)
                             td('{0:d}'.format(int(r.score))) if r.score is not None else td()
+                        for m in members:
+                            with t.add(tr(cls="team-member")):
+                                td()
+                                td()
+                                td('{0:d}'.format(int(m.score))) if m.score is not None else td()
+                                td(m.name)
+                                if m.coursestatus in ['ok']:
+                                    td(m.timetommmss())
+                                elif m.resultstatus in ['ok']:
+                                    td('{1} {0}'.format(m.timetommmss(), m.coursestatus))
+                                else:
+                                    td('{1} {2} {0}'.format(m.timetommmss(), m.coursestatus, m.resultstatus))
         return doc # __writeEventResultTeam_coc
 
 
