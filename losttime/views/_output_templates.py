@@ -200,20 +200,21 @@ class EventHtmlWriter(object):
                         members = _sortByPosition(members)
                         with t.add(tr(cls="team-result")):
                             td(r.position) if r.position > 0 else td()
-                            td(r.teamname_short)
-                            td('{0:d}'.format(int(r.score))) if r.score is not None else td()
+                            td(strong(r.teamname_short))
+                            td(strong('{0:d}'.format(int(r.score)))) if r.score is not None else td()
+                            td('Starts: {0} Finishes: {1}'.format(r.numstarts, r.numfinishes))
                         for m in members:
                             with t.add(tr(cls="team-member")):
                                 td()
                                 td()
-                                td('{0:d}'.format(int(m.score))) if m.score is not None else td()
-                                td(m.name)
+                                td(em('{0:d}'.format(int(m.score)))) if m.score is not None else td()
+                                td(em(m.name))
                                 if m.coursestatus in ['ok']:
-                                    td(m.timetommmss())
+                                    td(em(m.timetommmss()))
                                 elif m.resultstatus in ['ok']:
-                                    td('{1} {0}'.format(m.timetommmss(), m.coursestatus))
+                                    td(em('{1} {0}'.format(m.timetommmss(), m.coursestatus)))
                                 else:
-                                    td('{1} {2} {0}'.format(m.timetommmss(), m.coursestatus, m.resultstatus))
+                                    td(em('{1} {2} {0}'.format(m.timetommmss(), m.coursestatus, m.resultstatus)))
         return doc # __writeEventResultTeam_coc
 
 

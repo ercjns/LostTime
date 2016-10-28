@@ -269,11 +269,13 @@ def _assignTeamScores(eventid, scoremethod):
             teams = set([r.club_shortname for r in results])
             for team in teams:
                 members = [r for r in results if r.club_shortname == team]
+                numstarts = len(members)
+                numfinishes = len([x for x in members if x.coursestatus == 'ok'])
                 members.sort(key=lambda x: x.score, reverse=True)
                 members = members[:3]
                 memberids = [m.id for m in members if m.score > 0]
                 teamscore = sum([m.score for m in members])
-                new_team = TeamResult(eventid, tc.id, team, memberids, teamscore)
+                new_team = TeamResult(eventid, tc.id, team, memberids, teamscore, numstarts, numfinishes)
                 db.session.add(new_team)
             db.session.commit()
 
