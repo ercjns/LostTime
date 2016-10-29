@@ -3,7 +3,7 @@
 from flask import Blueprint, url_for, redirect, request, render_template, jsonify
 from datetime import datetime
 from losttime import eventfiles
-from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult
+from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, ClubCode
 from _orienteer_data import OrienteerXmlReader
 from _output_templates import EventHtmlWriter
 from os import remove
@@ -356,10 +356,13 @@ def _buildResultPages(eventid, style):
     results = PersonResult.query.filter_by(eventid=eventid).all()
     teamclasses = EventTeamClass.query.filter_by(eventid=eventid).all()
     teamresults = TeamResult.query.filter_by(eventid=eventid).all()
+    clubcodes = {}
+    for club in ClubCode.query.all():
+        clubcodes.setdefault(club.code, []).append(club)
 
 
 
-    writer = EventHtmlWriter(event, style, classes, results, teamclasses, teamresults)
+    writer = EventHtmlWriter(event, style, classes, results, teamclasses, teamresults, clubcodes)
     docdict = {}
 
     docdict['indv'] = writer.eventResultIndv()

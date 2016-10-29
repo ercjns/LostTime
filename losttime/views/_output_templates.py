@@ -6,13 +6,14 @@ import dominate
 from dominate.tags import *
 
 class EventHtmlWriter(object):
-    def __init__(self, event, format='generic', classes=None, results=None, teamclasses=None, teamresults=None):
+    def __init__(self, event, format='generic', classes=None, results=None, teamclasses=None, teamresults=None, clubcodes=None):
         self.event = event
         self.format = format
         self.eventclasses = classes
         self.personresults = results
         self.teamclasses = teamclasses
         self.teamresults = teamresults
+        self.clubcodes = clubcodes
 
     def eventResultIndv(self):
         """
@@ -191,30 +192,35 @@ class EventHtmlWriter(object):
                         th('Pos.')
                         th('Name')
                         th('Score')
+                        th('Details')
                     for r in classresults:
+                        with t.add(tr(cls="team-result")):
+                            td(r.position) if r.position > 0 else td()
+                            td(r.teamname_short)
+                            td('{0:d}'.format(int(r.score))) if r.score is not None else td()
+                            try:
+                                td('{0}'.format(self.clubcodes[r.teamname_short][0].name))
+                            except:
+                                td()
+                            td('Finishers: {0} of {1}'.format(r.numfinishes, r.numstarts))
                         try:
                             memberids = [int(x) for x in r.resultids.split(',')]
                         except:
                             memberids = []
                         members = [x for x in self.personresults if x.id in memberids]
                         members = _sortByPosition(members)
-                        with t.add(tr(cls="team-result")):
-                            td(r.position) if r.position > 0 else td()
-                            td(strong(r.teamname_short))
-                            td(strong('{0:d}'.format(int(r.score)))) if r.score is not None else td()
-                            td('Starts: {0} Finishes: {1}'.format(r.numstarts, r.numfinishes))
                         for m in members:
                             with t.add(tr(cls="team-member")):
                                 td()
                                 td()
-                                td(em('{0:d}'.format(int(m.score)))) if m.score is not None else td()
-                                td(em(m.name))
+                                td('{0:d}'.format(int(m.score))) if m.score is not None else td()
+                                td(m.name)
                                 if m.coursestatus in ['ok']:
-                                    td(em(m.timetommmss()))
+                                    td(m.timetommmss())
                                 elif m.resultstatus in ['ok']:
-                                    td(em('{1} {0}'.format(m.timetommmss(), m.coursestatus)))
+                                    td('{1} {0}'.format(m.timetommmss(), m.coursestatus))
                                 else:
-                                    td(em('{1} {2} {0}'.format(m.timetommmss(), m.coursestatus, m.resultstatus)))
+                                    td('{1} {2} {0}'.format(m.timetommmss(), m.coursestatus, m.resultstatus))
         return doc # __writeEventResultTeam_coc
 
 
