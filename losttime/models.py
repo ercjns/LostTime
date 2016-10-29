@@ -101,3 +101,15 @@ class TeamResult(db.Model):
         self.numstarts = starts
         self.numfinishes = finishes
         return
+
+class ClubCode(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    namespace = db.Column(db.String)
+    code = db.Column(db.String)
+    name = db.Column(db.String)
+
+    def __init__(self, namespace, code, name):
+        self.namespace = namespace
+        self.code = code
+        self.name = name
+        return
