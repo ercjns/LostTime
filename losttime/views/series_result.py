@@ -1,7 +1,7 @@
 #losttime/views/series_result.py
 
 from flask import Blueprint, url_for, redirect, request, render_template, jsonify
-from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult
+from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, Series
 
 
 seriesResult = Blueprint("seriesResult", __name__, static_url_path='/download', static_folder='../static/userfiles')
@@ -26,8 +26,13 @@ def select_events():
         # redirect to the info page for this series  
 
         print(request.form.get('code'))
-        print(request.form.getlist('events[]'))
-        return jsonify(code='GOGOGO'), 501
+        print([int(x) for x in request.form.getlist('events[]')])
+
+        series = Series([int(x) for x in request.form.getlist('events[]')])
+        db.session.add(series)
+        db.session.commit()
+
+        return jsonify(seriesid=series.id), 202
 
 @seriesResult.route('/info/<seriesid>', methods=['GET', 'POST'])
 def series_info(seriesid):

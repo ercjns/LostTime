@@ -124,6 +124,10 @@ class Series(db.Model):
     scoreeventscount = db.Column(db.Integer)
     scoreeventsneeded = db.Column(db.Integer)
 
+    def __init__(self, events):
+        self.eventids = str(events).strip('[]').replace(' ', '')
+        return
+
 class SeriesClass(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     seriesid = db.Column(db.Integer)

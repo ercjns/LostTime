@@ -36,8 +36,16 @@
 {% for e in events %}
     <tr data-id="{{e.id}}" onclick="toggleEvent(this)">
         <td>{{e.name}}</td>
+        {% if e.date %}
+        <td>{{e.date|datetimeformat("%Y-%m-%d")}}</td>
+        {% else %}
         <td>{{e.date}}</td>
-        <td></td>
+        {% endif %}
+        {% if e.created %}
+        <td>{{e.created|datetimeformat("%Y-%m-%d %H:%M")}}</td>
+        {% else %}
+        <td>{{e.created}}</td>
+        {% endif %}
     </tr>
 {% endfor %}
     </tbody>
@@ -86,6 +94,7 @@ function createSeries() {
       .done(function(data) {
         console.log("done handler");
         console.log(data);
+        window.location.href = "{{ url_for('seriesResult.series_info', seriesid='') }}".concat(String(data.seriesid));
       })
       .fail(function(data) {
         console.log("fail handler");
