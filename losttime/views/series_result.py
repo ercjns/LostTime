@@ -1,7 +1,7 @@
 #losttime/views/series_result.py
 
 from flask import Blueprint, url_for, redirect, request, render_template, jsonify
-from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, Series
+from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, Series, SeriesClass
 
 
 seriesResult = Blueprint("seriesResult", __name__, static_url_path='/download', static_folder='../static/userfiles')
@@ -45,8 +45,29 @@ def series_info(seriesid):
         return render_template('seriesresult/info.html', series=series, events=events, seriesclasses=seriesclasses)
 
     elif request.method == 'POST':
-        for k, v in request.get_json(force=True).iteritems():
-            print(k, v)
+        formdata = request.get_json(force=True)
+        series = Series.query.get(seriesid)
+        series.name = str(formdata['name'])
+        series.host = str(formdata['host'])
+        series.scoremethod = str(formdata['scoremethod'])
+        series.scoreeventscount = int(formdata['scoreeventscount'])
+        series.scoreeventsneeded = int(formdata['scoreeventsneeded'])
+        db.session.add(series)
+        db.session.commit()
+
+        # delete seriesClass and seriesResult objects with this seriesid
+        SeriesClass.query.filter_by(seriesid=series.id).delete()
+        # SeriesResult.query.filter_by(seriesid=series.id).delete()
+
+        for c in formdata['classes']:
+            if len(c['eventclasses']) == 0:
+                continue
+            name, abbr = c['name'].split(')')[0].split('(')
+            print(series.id, name.strip(), abbr, series.eventids, c['eventclasses'])
+            sc = SeriesClass(series.id, name.strip(), abbr, series.eventids, c['eventclasses'])
+            db.session.add(sc)
+        db.session.commit()
+
         #create and calculate the series scores
         #create the pages
         #redirect to the view/download page
