@@ -91,7 +91,7 @@ of the best <input name="series-num-scored-events" type="number" min=1 max={{eve
 
 <p>
     <button class="btn btn-default" onclick="info_page_with_selected_events">Back</button>
-    <button class="btn btn-primary" onclick="submitSeriesInfo()">Next</button>
+    <button id="nextbutton" class="btn btn-primary" onclick="submitSeriesInfo()">Next</button>
 </p>
 </div>
 </div>
@@ -119,6 +119,7 @@ function submitSeriesInfo() {
         scoremethod: $("select[name='series-score-method']").val(),
         scoreeventscount: $("input[name='series-num-scored-events']").val(),
         scoreeventsneeded: $("input[name='series-num-needed-events']").val(),
+        scoretiebreak: $("select[name='series-tiebreak-method']").val(),
         output: $("select[name='output-style']").val()
     };
     $("#series-class-select").children("tbody").children().each(function(){
@@ -134,6 +135,7 @@ function submitSeriesInfo() {
         series.classes.push(seriesclass);
     })
     console.log(series);
+    $('#nextbutton').after('<span id="spinner"><i class="fa fa-cog fa-spin fa-2x fa-fw" style="vertical-align:middle;"></i><span class="sr-only">Loading...</span></span>');
 
     posturl = "{{ url_for('seriesResult.series_info', seriesid='') }}".concat(String(series.id))
 
@@ -146,6 +148,8 @@ function submitSeriesInfo() {
       .fail(function(data) {
         console.log("fail handler");
         console.log(data);
+        $('#spinner').remove();
+        $('#nextbutton').after('<p class="text-danger">'.concat(data.responseJSON.message, ' Error ', String(data.status), '</p>'));
       });
 }
 </script>

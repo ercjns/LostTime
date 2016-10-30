@@ -123,6 +123,7 @@ class Series(db.Model):
     scoremethod = db.Column(db.String)
     scoreeventscount = db.Column(db.Integer)
     scoreeventsneeded = db.Column(db.Integer)
+    scoretiebreak = db.Column(db.String)
 
     def __init__(self, events):
         self.eventids = str(events).strip('[]').replace(' ', '')
