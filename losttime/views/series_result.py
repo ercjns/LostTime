@@ -42,13 +42,14 @@ def series_info(seriesid):
             seriesclasstable.setdefault(ec.shortname, starterdict)[ec.eventid] = ec
         seriesclasses = sorted(seriesclasstable.items(), key=lambda x: x[0])
 
-        return render_template('seriesresult/info.html', events=events, seriesclasses=seriesclasses)
+        return render_template('seriesresult/info.html', series=series, events=events, seriesclasses=seriesclasses)
 
     elif request.method == 'POST':
-        #read the form
-        #save the parameters
+        for k, v in request.get_json(force=True).iteritems():
+            print(k, v)
         #create and calculate the series scores
         #create the pages
         #redirect to the view/download page
-        pass
+        return jsonify(message="not yet"), 501
+
 
