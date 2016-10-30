@@ -19,14 +19,6 @@ def select_events():
     elif request.method == 'POST':
         # if CODE in series Results table, grab that series result
         # request.form.get('code')
-        # if CODE blank, or not in series results table
-        #    create a new series result, get it.
-        # set the events to the events on the page... 
-        # myseries.events = request.form.getlist('events[]')
-        # redirect to the info page for this series  
-
-        print(request.form.get('code'))
-        print([int(x) for x in request.form.getlist('events[]')])
 
         series = Series([int(x) for x in request.form.getlist('events[]')])
         db.session.add(series)
@@ -37,9 +29,20 @@ def select_events():
 @seriesResult.route('/info/<seriesid>', methods=['GET', 'POST'])
 def series_info(seriesid):
     if request.method == 'GET':
-        #grab the seriesid
-        #grab the associated events / eventclasses eventteamclasses
-        return render_template('seriesresult/info.html')
+        series = Series.query.get(seriesid)
+        eventids = [int(x) for x in series.eventids.split(',')] # TODO handle empty case?
+        events = Event.query.filter(Event.id.in_(eventids)).all()
+        events.sort(key=lambda x: eventids.index(x.id))
+        eventclasses = EventClass.query.filter(EventClass.eventid.in_(eventids)).all()
+
+        seriesclasstable = {}
+        for ec in eventclasses:
+            starterdict = {event.id:False for event in events}
+            starterdict.update({'name':ec.name})
+            seriesclasstable.setdefault(ec.shortname, starterdict)[ec.eventid] = ec
+        seriesclasses = sorted(seriesclasstable.items(), key=lambda x: x[0])
+
+        return render_template('seriesresult/info.html', events=events, seriesclasses=seriesclasses)
 
     elif request.method == 'POST':
         #read the form

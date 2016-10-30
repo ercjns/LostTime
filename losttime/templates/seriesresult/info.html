@@ -33,60 +33,22 @@
 <table class="table table-condensed">
     <tr>
         <th>Class</th>
-        <th>event #1</th>
-        <th>event #2</th>
-        <th>event #3</th>
-        <th>event #4</th>
-        <th>event #5</th>
+        {% for e in events %}
+        <th>{{e.name}}</th>
+        {% endfor %}
     </tr>
+    {% for sc, scevents in seriesclasses %}
     <tr>
-        <td><em>Beginner (1)</em></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
+        <td><em>{{scevents['name']}} ({{sc}})</em></td>
+        {% for e in events %}
+            {% if scevents[e.id] != False %}
+            <td data-event-class={{scevents[e.id].id}}><input type="checkbox"></td>
+            {% else %}
+            <td>n/a</td>
+            {% endif %}
+        {% endfor %}
     </tr>
-    <tr>
-        <td><em>Intermediate (3)</em></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td><em>Short Adv (7)</em></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td><em>Advanced Women (8F)</em></td>
-        <td><input type="checkbox" checked></td>
-        <td><input type="checkbox" checked></td>
-        <td><input type="checkbox" checked></td>
-        <td><input type="checkbox" checked></td>
-        <td><input type="checkbox" checked></td>
-    </tr>
-    <tr>
-        <td><em>Advanced Groups (8G)</em></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td><em>Advanced Men (8M)</em></td>
-        <td><input type="checkbox" checked></td>
-        <td><input type="checkbox" checked></td>
-        <td><input type="checkbox" checked></td>
-        <td><input type="checkbox" checked></td>
-        <td><input type="checkbox" checked></td>
-    </tr>
+    {% endfor %}
 </table>
 </div>
 </div>
@@ -99,13 +61,13 @@
 		<option value="sum">sum</option>
 		<option value="average">average</option>
 </select>
-of the best <input type="number" min=1 max=7> event scores.
+of the best <input type="number" min=1 max={{events|length}}> event scores.
 </p>
-<p>An entry must have at least <input type="number" min=1 max=7> valid event scores to have a valid series score.</p>
+<p>An entry must have at least <input type="number" min=1 max={{events|length}}> valid event scores to have a valid series score.</p>
 <p>Tie series scores are awarded 
 <select name="series-score-method">
-        <option value="average">by comparing all N event scores.</option>
-        <option value="average">by comparing only the M contributing event scores.</option>
+        <option value="average">by comparing all {{events|length}} event scores.</option>
+        <option value="average">by comparing only the contributing event scores.</option>
         <option value="sum">as a tie (no tie-breaking).</option>
 </select>
 </p>
