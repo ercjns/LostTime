@@ -257,9 +257,9 @@ class SeriesHtmlWriter(object):
                                 scores.append(int(r['results'][eid].score))
                             except:
                                 scores.append('--')
-                        with t.add(tr(cls="team-member")):
+                        with t.add(tr()):
                             td(r['position'])
-                            td(r['name'])
+                            td("{0} ({1})".format(r['name'], r['club']))
                             for s in scores:
                                 td(s)
                             td(r['score'])
