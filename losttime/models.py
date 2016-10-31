@@ -146,12 +146,3 @@ class SeriesClass(db.Model):
         self.eventclassids = str(classids).strip('[]').replace(' ', '')
         self.classtype = classtype
         return
-
-class SeriesResult(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    seriesid = db.Column(db.Integer)
-    seriesclassid = db.Column(db.Integer)
-    name = db.Column(db.String)
-    position = db.Column(db.Integer)
-    score = db.Column(db.Integer)
-    results = db.Column(db.String)
