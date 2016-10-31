@@ -125,9 +125,11 @@ class EventHtmlWriter(object):
                             if pr.coursestatus in ['ok']:
                                 td(pr.timetommmss())
                             elif pr.resultstatus in ['ok']:
-                                td('{1} {0}'.format(pr.timetommmss(), pr.coursestatus))
+                                td('{0} {1}'.format(pr.coursestatus, pr.timetommmss()))
+                            elif pr.resultstatus in ['dns']:
+                                td('{0}'.format(pr.resultstatus))
                             else:
-                                td('{1} {2} {0}'.format(pr.timetommmss(), pr.coursestatus, pr.resultstatus))
+                                td('{0} {1}*'.format(pr.resultstatus, pr.timetommmss()))
                             if (ec.scoremethod in ['worldcup', '1000pts']):
                                 td('{0:d}'.format(int(pr.score))) if pr.score is not None else td()
         return doc # __writeEventResultIndv_coc

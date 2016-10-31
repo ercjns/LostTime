@@ -76,6 +76,7 @@ var dzOptions = {
 				}
 
 				file.previewElement.querySelector(".progress-bar-wrapper").remove()
+				$('#spinner').remove();
 				$("#uploadButton").addClass("disabled")
 
 				_ref = file.previewElement.querySelectorAll("[data-dz-errormessage]");
@@ -100,6 +101,7 @@ var dzOptions = {
 var myDropzone = new Dropzone("div#theDropzone", dzOptions);
 
 function sendFile() {
+	$('#uploadButton').after('<span id="spinner"><i class="fa fa-cog fa-spin fa-2x fa-fw" style="vertical-align:middle;"></i><span class="sr-only">Loading...</span></span>');
 	myDropzone.processQueue();
 }
 </script>

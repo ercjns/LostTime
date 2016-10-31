@@ -74,7 +74,10 @@ def event_info(eventid):
     elif request.method == 'POST':
         event = Event.query.get(eventid)
         event.name = request.form['event-name']
-        event.date = datetime.strptime(request.form['event-date'], "%Y-%m-%d")
+        try:
+            event.date = datetime.strptime(request.form['event-date'], "%Y-%m-%d")
+        except:
+            event.data = None
         event.venue = request.form['event-venue']
         event.host = request.form['event-host']
         # event.teamscoremethod = request.form['event-team-score-method']
