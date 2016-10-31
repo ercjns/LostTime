@@ -109,6 +109,8 @@ def _calculateSeries(seriesid):
                 raise "Didn't find any results"
         scresultdict = {}
         for r in results:
+            if r.resultstatus == 'nc':
+                continue
             defaultdict = {'name':r.name, 'club':r.club_shortname, 'results':{x:False for x in eventids}}
             # Key: NAME-CLUBCODE causes issues if club is inconsistent
             # Key: NAME causes issues if people have the same name.
@@ -117,18 +119,19 @@ def _calculateSeries(seriesid):
 
         for sr in scresultdict.values():
             sr['score'], sr['scores'] = _calculateSeriesScore(series, sr['results'].values())
-        scresults = _assignSeriesClassPositions(series, scresultdict.values())
+
+        scresults = _assignSeriesClassPositions(series, [x for x in scresultdict.values() if x['score']])
         seriesresults[sc.shortname] = scresults
     return seriesresults
 
 def _calculateSeriesScore(series, results):
-    # TODO: also need to remove result status = NC here.
     results = [x for x in results if isinstance(x, PersonResult) or isinstance(x, TeamResult)]
     # TODO: need to detect if good scores are high or low (!)
     results.sort(key=lambda x: -x.score)
     scores = [x.score for x in results[:series.scoreeventscount]]
+    # TODO: filter on result status, not just result existance 
     if len(scores) < series.scoreeventsneeded:
-        return False
+        return False, False
     if series.scoremethod == 'sum':
         score = sum(scores)
     elif series.scoremethod == 'average':
@@ -165,12 +168,9 @@ def _assignSeriesClassPositions(series, seriesclassresults):
                     swap = True
                     break
             else:
-                if A_scores:
-                    break
-                elif B_scores:
+                if B_scores and not A_scores:
                     swap = True
-                    break
-                else:
+                elif not A_scores and not B_scores:
                     tie = True
 
             if tie:
@@ -182,9 +182,11 @@ def _assignSeriesClassPositions(series, seriesclassresults):
                 prev['pos'] = seriesclassresults[i-1]['position']
                 prev['count'] = 1
             else:
+                # tiebreak results in holding current positions
                 prev['pos'] = seriesclassresults[i]['position']
                 prev['count'] = 1
         else:
+            # not tied, update the prev dict.
             prev['pos'] = seriesclassresults[i]['position']
             prev['count'] = 1
             prev['score'] = seriesclassresults[i]['score']
