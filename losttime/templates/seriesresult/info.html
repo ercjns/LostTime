@@ -41,11 +41,23 @@
     </thead>
     <tbody>
     {% for sc, scevents in seriesclasses %}
-    <tr>
+    <tr data-lt-series-type="indv">
         <td><em>{{scevents['name']}} ({{sc}})</em> <a onclick=toggleClassSelection(this)>select all</a></td>
         {% for e in events %}
             {% if scevents[e.id] != False %}
             <td class="text-center eventclass-option" data-event-class={{scevents[e.id].id}}><input type="checkbox"></td>
+            {% else %}
+            <td class="text-center">n/a</td>
+            {% endif %}
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    {% for stc, stcevents in seriesteamclasses %}
+    <tr data-lt-series-type="team">
+        <td><em>{{stcevents['name']}} ({{stc}})</em> <a onclick=toggleClassSelection(this)>select all</a></td>
+        {% for e in events %}
+            {% if stcevents[e.id] != False %}
+            <td class="text-center eventclass-option" data-event-class={{stcevents[e.id].id}}><input type="checkbox"></td>
             {% else %}
             <td class="text-center">n/a</td>
             {% endif %}
@@ -125,6 +137,7 @@ function submitSeriesInfo() {
     $("#series-class-select").children("tbody").children().each(function(){
         seriesclass = {
             name: $(this).children("td:first").text(),
+            type: $(this).data("lt-series-type"),
             eventclasses: []
         }
         $(this).children("td.eventclass-option").each(function(){

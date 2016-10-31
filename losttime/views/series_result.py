@@ -36,6 +36,7 @@ def series_info(seriesid):
         events = Event.query.filter(Event.id.in_(eventids)).all()
         events.sort(key=lambda x: eventids.index(x.id))
         eventclasses = EventClass.query.filter(EventClass.eventid.in_(eventids)).all()
+        eventteamclasses = EventTeamClass.query.filter(EventTeamClass.eventid.in_(eventids)).all()
 
         seriesclasstable = {}
         for ec in eventclasses:
@@ -44,7 +45,18 @@ def series_info(seriesid):
             seriesclasstable.setdefault(ec.shortname, starterdict)[ec.eventid] = ec
         seriesclasses = sorted(seriesclasstable.items(), key=lambda x: x[0])
 
-        return render_template('seriesresult/info.html', series=series, events=events, seriesclasses=seriesclasses)
+        seriesteamclasstable = {}
+        for etc in eventteamclasses:
+            starterdict = {event.id:False for event in events}
+            starterdict.update({'name':etc.name})
+            seriesteamclasstable.setdefault(etc.shortname, starterdict)[etc.eventid] = etc
+        seriesteamclasses = sorted(seriesteamclasstable.items(), key=lambda x: x[0])
+
+        return render_template('seriesresult/info.html',
+                               series=series,
+                               events=events,
+                               seriesclasses=seriesclasses,
+                               seriesteamclasses=seriesteamclasses)
 
     elif request.method == 'POST':
         formdata = request.get_json(force=True)
@@ -66,7 +78,7 @@ def series_info(seriesid):
             if len(c['eventclasses']) == 0:
                 continue
             name, abbr = c['name'].split(')')[0].split('(')
-            sc = SeriesClass(series.id, name.strip(), abbr, series.eventids, c['eventclasses'])
+            sc = SeriesClass(series.id, name.strip(), abbr, series.eventids, c['eventclasses'], c['type'])
             db.session.add(sc)
         db.session.commit()
 
@@ -102,20 +114,24 @@ def _calculateSeries(seriesid):
     seriesresults = {}
     for sc in seriesclasses:
         ecids = [int(x) for x in sc.eventclassids.split(',')]
-        results = PersonResult.query.filter(PersonResult.classid.in_(ecids)).all()
-        if len(results) == 0:
-            results = TeamResult.query.filter(TeamResult.teamclassid.in_(ecids)).all()
-            if len(results) == 0:
-                raise "Didn't find any results"
         scresultdict = {}
-        for r in results:
-            if r.resultstatus == 'nc':
-                continue
-            defaultdict = {'name':r.name, 'club':r.club_shortname, 'results':{x:False for x in eventids}}
-            # Key: NAME-CLUBCODE causes issues if club is inconsistent
-            # Key: NAME causes issues if people have the same name.
-            seriesresultkey = '{0}-{1}'.format(r.name.upper(), r.club_shortname)
-            scresultdict.setdefault(seriesresultkey, defaultdict)['results'][r.eventid] = r
+        if sc.classtype == 'indv':
+            results = PersonResult.query.filter(PersonResult.classid.in_(ecids)).all()
+            for r in results:
+                if r.resultstatus == 'nc':
+                    continue
+                defaultdict = {'name':r.name, 'club':r.club_shortname, 'results':{x:False for x in eventids}}
+                # Key: NAME-CLUBCODE causes issues if club is inconsistent
+                # Key: NAME causes issues if people have the same name.
+                seriesresultkey = '{0}-{1}'.format(r.name.upper(), r.club_shortname)
+                scresultdict.setdefault(seriesresultkey, defaultdict)['results'][r.eventid] = r
+        elif sc.classtype == 'team':
+            results = TeamResult.query.filter(TeamResult.teamclassid.in_(ecids)).all()
+            for r in results:
+                defaultdict = {'name':r.teamname_short, 'results':{x:False for x in eventids}}
+                scresultdict.setdefault(r.teamname_short, defaultdict)['results'][r.eventid] = r
+        else:
+            raise "Didn't find any results"
 
         for sr in scresultdict.values():
             sr['score'], sr['scores'] = _calculateSeriesScore(series, sr['results'].values())
@@ -125,7 +141,7 @@ def _calculateSeries(seriesid):
     return seriesresults
 
 def _calculateSeriesScore(series, results):
-    results = [x for x in results if isinstance(x, PersonResult) or isinstance(x, TeamResult)]
+    results = [x for x in results if (isinstance(x, PersonResult) or isinstance(x, TeamResult)) and (x.score)]
     # TODO: need to detect if good scores are high or low (!)
     results.sort(key=lambda x: -x.score)
     scores = [x.score for x in results[:series.scoreeventscount]]

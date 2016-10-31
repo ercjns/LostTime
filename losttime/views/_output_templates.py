@@ -248,7 +248,7 @@ class SeriesHtmlWriter(object):
                     t = table(cls="table table-striped")
                     with t.add(tr(id='column-titles')):
                         th('Place')
-                        th('Name')
+                        th('Name') if sc.classtype == 'indv' else th('Team')
                         for i in range(1, len(self.series.eventids.split(','))+1):
                             th('#{0}'.format(i))
                         th('Season')
@@ -261,7 +261,10 @@ class SeriesHtmlWriter(object):
                                 scores.append('--')
                         with t.add(tr()):
                             td(r['position'])
-                            td("{0} ({1})".format(r['name'], r['club']))
+                            if sc.classtype == 'indv':
+                                td("{0} ({1})".format(r['name'], r['club']))
+                            elif sc.classtype == 'team':
+                                td("{0}".format(r['name']))
                             for s in scores:
                                 td(s)
                             td(r['score'])

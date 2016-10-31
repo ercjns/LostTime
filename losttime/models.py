@@ -136,13 +136,15 @@ class SeriesClass(db.Model):
     shortname = db.Column(db.String)
     eventids = db.Column(db.String)
     eventclassids = db.Column(db.String)
+    classtype = db.Column(db.String)
 
-    def __init__(self, seriesid, name, shortname, eventids, classids):
+    def __init__(self, seriesid, name, shortname, eventids, classids, classtype):
         self.seriesid = seriesid
         self.name = name
         self.shortname = shortname
         self.eventids = eventids
         self.eventclassids = str(classids).strip('[]').replace(' ', '')
+        self.classtype = classtype
         return
 
 class SeriesResult(db.Model):
