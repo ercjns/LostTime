@@ -132,32 +132,36 @@ def _assignPositions(eventid):
     """
     classes = EventClass.query.filter_by(eventid=eventid).all()
     for ec in classes:
-        ec_results = PersonResult.query.filter_by(eventid=eventid).filter_by(classid=ec.id).all()
-        if len(ec_results) == 0:
-            # TODO log event class with no results.
-            continue
+        with db.session.no_autoflush:
+            ec_results = PersonResult.query.filter_by(eventid=eventid).filter_by(classid=ec.id).all()
+            if len(ec_results) == 0:
+                # TODO log event class with no results.
+                continue
 
-        if ec.scoremethod in ['time', 'worldcup', '1000pts']:
-            ec_results.sort(key=lambda x: x.time)
-            prev_result = (0, 1, -1) # (position, results in current position, time)
-            for i in range(len(ec_results)):
-                if ec_results[i].coursestatus != 'ok' or ec_results[i].resultstatus != 'ok':
-                    ec_results[i].position = -1
-                    continue
-                ec_results[i].position = prev_result[0] + prev_result[1]
-                if ec_results[i].time == prev_result[2]:
-                    ec_results[i].position = prev_result[0]
-                    prev_result = (ec_results[i].position, prev_result[1]+1, ec_results[i].time)
-                else:
-                    prev_result = (ec_results[i].position, 1, ec_results[i].time)
-            db.session.add_all(ec_results)
+            if ec.scoremethod in ['time', 'worldcup', '1000pts']:
+                ec_results.sort(key=lambda x: x.time)
+                prev_result = (0, 1, -1) # (position, results in current position, time)
+                for i in range(len(ec_results)):
+                    if ec_results[i].coursestatus != 'ok' or ec_results[i].resultstatus != 'ok':
+                        ec_results[i].position = -1
+                        continue
+                    ec_results[i].position = prev_result[0] + prev_result[1]
+                    if ec_results[i].time == prev_result[2]:
+                        ec_results[i].position = prev_result[0]
+                        prev_result = (ec_results[i].position, prev_result[1]+1, ec_results[i].time)
+                    else:
+                        prev_result = (ec_results[i].position, 1, ec_results[i].time)
+                db.session.add_all(ec_results)
+                db.session.commit()
+                db.session.flush()
 
-        elif ec.scoremethod in ['alpha', 'hide']:
-            continue
-        else:
-            # TODO log unknown score method
-            continue
-    db.session.commit()
+            elif ec.scoremethod in ['alpha', 'hide']:
+                continue
+            else:
+                # TODO log unknown score method
+                continue
+            
+    # db.session.commit()
     return
 
 def _assignScores(eventid):
