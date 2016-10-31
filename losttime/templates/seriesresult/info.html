@@ -143,7 +143,7 @@ function submitSeriesInfo() {
       .done(function(data) {
         console.log("done handler");
         console.log(data);
-        //window.location.href = "{{ url_for('seriesResult.series_info', seriesid='') }}".concat(String({{series.id}}));//
+        window.location.href = "{{ url_for('seriesResult.series_result', seriesid='') }}".concat(String({{series.id}}));
       })
       .fail(function(data) {
         console.log("fail handler");

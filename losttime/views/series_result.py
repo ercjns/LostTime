@@ -2,6 +2,8 @@
 
 from flask import Blueprint, url_for, redirect, request, render_template, jsonify
 from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, Series, SeriesClass
+from _output_templates import SeriesHtmlWriter
+from os.path import join
 
 
 seriesResult = Blueprint("seriesResult", __name__, static_url_path='/download', static_folder='../static/userfiles')
@@ -64,7 +66,6 @@ def series_info(seriesid):
             if len(c['eventclasses']) == 0:
                 continue
             name, abbr = c['name'].split(')')[0].split('(')
-            print(series.id, name.strip(), abbr, series.eventids, c['eventclasses'])
             sc = SeriesClass(series.id, name.strip(), abbr, series.eventids, c['eventclasses'])
             db.session.add(sc)
         db.session.commit()
@@ -72,13 +73,26 @@ def series_info(seriesid):
         #create and calculate the series scores
         seriesresults = _calculateSeries(series.id)
 
-        # for sc, src in seriesresults.iteritems():
-        #     for k, sr in src.iteritems():
-        #         print(sc, sr['name'], sr['position'], sr['score'], sr['scores'])
-        
-        # create the pages
-        # return success to front-end, trigger redirect to view/download page
-        return jsonify(message="not yet"), 501
+        seriesclasses = SeriesClass.query.filter_by(seriesid=series.id).all()
+        # scdict = {sc.shortname: sc for sc in seriesclasses}
+        writer = SeriesHtmlWriter(series, formdata['output'], seriesclasses, seriesresults)
+        doc = writer.writeSeriesResult()
+        filename = join(seriesResult.static_folder, 'SeriesResult-{0:03d}'.format(int(seriesid)))
+        with open(filename, 'w') as f:
+            f.write(doc.render())
+
+        return jsonify(seriesid=seriesid), 201
+
+@seriesResult.route('/results/<seriesid>', methods=['GET'])
+def series_result(seriesid):
+    try:
+        fn = 'SeriesResult-{0:03d}'.format(int(seriesid))
+        filepath = join(seriesResult.static_folder, fn)
+        with open(filepath) as f:
+            htmldoc = f.read()
+    except IOError:
+        return "couldn't find that file...", 404
+    return render_template('seriesresult/result.html', seriesid=seriesid, thehtml=htmldoc)
 
 
 def _calculateSeries(seriesid):
@@ -103,8 +117,8 @@ def _calculateSeries(seriesid):
 
         for sr in scresultdict.values():
             sr['score'], sr['scores'] = _calculateSeriesScore(series, sr['results'].values())
-        _assignSeriesPositions(series, scresultdict)
-        seriesresults[sc.shortname] = scresultdict
+        scresults = _assignSeriesClassPositions(series, scresultdict.values())
+        seriesresults[sc.shortname] = scresults
     return seriesresults
 
 def _calculateSeriesScore(series, results):
@@ -131,20 +145,17 @@ def _calculateSeriesScore(series, results):
     return score, tiebreakscores
 
 
-def _assignSeriesPositions(series, seriesresultdict):
+def _assignSeriesClassPositions(series, seriesclassresults):
     # TODO: are good scores high or low (!)
-    seriesresults = seriesresultdict.items()
-    seriesresults.sort(key=lambda x: -x[1]['score'])
+    seriesclassresults.sort(key=lambda x: -x['score'])
     prev = {'pos':0, 'count':1, 'score':0}
-    # ordered, assign positions to seriesresultdict[k]['position'] = pos
-    for i in range(len(seriesresults)):
-        k = seriesresults[i][0]
-        seriesresultdict[k]['position'] = prev['pos'] + prev['count']
-        if seriesresultdict[k]['score'] == prev['score']:
+    for i in range(len(seriesclassresults)):
+        seriesclassresults[i]['position'] = prev['pos'] + prev['count']
+        if seriesclassresults[i]['score'] == prev['score']:
             tie = False
             swap = False
-            A_scores = seriesresultdict[seriesresults[i-1][0]]['scores']
-            B_scores = seriesresultdict[k]['scores']
+            A_scores = seriesclassresults[i-1]['scores'][:]
+            B_scores = seriesclassresults[i]['scores'][:]
 
             while A_scores and B_scores:
                 A, B = A_scores.pop(0), B_scores.pop(0)
@@ -163,18 +174,18 @@ def _assignSeriesPositions(series, seriesresultdict):
                     tie = True
 
             if tie:
-                seriesresultdict[k]['position'] = prev['pos']
+                seriesclassresults[i]['position'] = prev['pos']
                 prev['count'] += 1
             elif swap:
-                seriesresultdict[k]['position'] = seriesresultdict[seriesresults[i-1][0]]['position']
-                seriesresultdict[seriesresults[i-1][0]]['position'] = prev['pos'] + prev['count']
-                prev['pos'] = seriesresultdict[seriesresults[i-1][0]]['position']
+                seriesclassresults[i]['position'] = seriesclassresults[i-1]['position']
+                seriesclassresults[i-1]['position'] = prev['pos'] + prev['count']
+                prev['pos'] = seriesclassresults[i-1]['position']
                 prev['count'] = 1
             else:
-                prev['pos'] = seriesresultdict[k]['position']
+                prev['pos'] = seriesclassresults[i]['position']
                 prev['count'] = 1
         else:
-            prev['pos'] = seriesresultdict[k]['position']
+            prev['pos'] = seriesclassresults[i]['position']
             prev['count'] = 1
-            prev['score'] = seriesresultdict[k]['score']
-    return
+            prev['score'] = seriesclassresults[i]['score']
+    return seriesclassresults

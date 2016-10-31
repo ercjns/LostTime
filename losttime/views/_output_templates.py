@@ -224,6 +224,49 @@ class EventHtmlWriter(object):
         return doc # __writeEventResultTeam_coc
 
 
+class SeriesHtmlWriter(object):
+    def __init__(self, series, format='generic', seriesclasses=None, results=None, clubcodes=None):
+        self.series = series
+        self.format = format
+        self.seriesclasses = seriesclasses
+        self.results = results
+        self.clubcodes = clubcodes
+
+    def writeSeriesResult(self):
+        doc = div(cls="LostTimeContent")
+        with doc:
+            with div(cls="lg-mrg-bottom"):
+                h2("Season Standings")
+                self.seriesclasses.sort(key=lambda x: x.shortname)
+                for sc in self.seriesclasses:
+                    h4(a(sc.name, href='#{0}'.format(sc.shortname)))
+            for sc in self.seriesclasses:
+                with div(cls="classResults lg-mrg-bottom", id=sc.shortname):
+                    h3(sc.name)
+                    t = table(cls="table table-striped")
+                    with t.add(tr(id='column-titles')):
+                        th('Place')
+                        th('Name')
+                        for i in range(1, len(self.series.eventids.split(','))+1):
+                            th('#{0}'.format(i))
+                        th('Season')
+                    for r in self.results[sc.shortname]:
+                        scores = []
+                        for eid in [int(x) for x in self.series.eventids.split(',')]:
+                            try:
+                                scores.append(int(r['results'][eid].score))
+                            except:
+                                scores.append('--')
+                        with t.add(tr(cls="team-member")):
+                            td(r['position'])
+                            td(r['name'])
+                            for s in scores:
+                                td(s)
+                            td(r['score'])
+        return doc
+
+
+
 class EntryWriter(object):
     def __init__(self, infiles, format, eventtype='standard', bibstart=1001):
         self.files = infiles

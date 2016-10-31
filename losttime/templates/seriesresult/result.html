@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Series Result{% endblock %}
+
+{% block content %}
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
+<h3 class="page-title">Series Results Step 3: Download HTML</h3>
+<div class="pinkline"></div>
+</div>
+</div>
+
+<div class="tab-content">
+    <div id="menu-indv" class="tab-pane fade in active">
+        <div class="row">
+        <div class="col-sm-10 col-sm-offset-1">
+            <h4 class="form-section-title">Source Code</h4>
+            <div class="row">
+                <div class="col-sm-6">
+                    <button id="copy-button" type="button" class="btn btn-success center-block" onclick="copyCode('indv')"><i class="fa fa-clipboard" aria-hidden="true"></i> Copy HTML to my clipboard</button>
+                </div>
+                <div class="col-sm-6 text-center">
+                    <a href="{{ url_for('seriesResult.static', filename=fn) }}" class="btn btn-success" download><i class="fa fa-download" aria-hidden="true"></i> Download the .html file</a>
+                </div>
+            </div>
+            <p><pre id="copy-content-indv" class="pre-scrollable" style="max-height:150px">{{ thehtml|escape }}</pre></p>
+        </div>
+        </div>
+        <div class="row">
+        <div class="col-sm-10 col-sm-offset-1">
+            <h4 class="form-section-title">Preview</h4>
+            <p>If you don't see anything in the box, <a href="{{ url_for('seriesResult.static', filename=fn) }}" target="_blank">click here</a> to view the page in a new tab. Keep in mind styles will not match your final result if you're using classes or fonts from your own site.</p>
+        <div id="result-iframewrap">
+        <iframe srcdoc="{{ thehtml }}" height="500px" style="width:100%; border-style:none;"></iframe>
+        </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">		
+    <a class="btn btn-default" href="{{ url_for('seriesResult.series_info', seriesid=seriesid) }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i> Back to Edit Info </a>
+    <a class="btn btn-default" href="{{ url_for('home_page') }}">LostTime Home <i class="fa fa-home" aria-hidden="true"></i></a>
+    </div>
+</div>
+{% endblock %}
+
+{% block bottomscripts %}
+<script>
+    // copyCode adapted from https://codepen.io/ryanbuckley13/pen/gpyrwe
+function copyCode(name) {
+    var idname = '#copy-content-'.concat(name)
+    var content = $(idname);
+    console.log(content)
+    //creates new range object and sets text as boundaries.
+    var range = document.createRange();
+    range.selectNode(content[0]);
+    window.getSelection().addRange(range);
+    try {
+      // Now that we've selected the text, execute the copy command  
+      var successful = document.execCommand('copy');
+      /*var msg = successful ? 'successful' : 'unsuccessful';
+      console.log('Copy command was ' + msg);*/
+    } catch (err) {
+      // console.log('Oops, unable to copy');
+    }
+    try {
+        //clear out range for next event.
+        window.getSelection().removeAllRanges();
+    } catch (err) {
+    }
+}
+</script>
+{% endblock %}
