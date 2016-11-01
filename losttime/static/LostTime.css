@@ -73,3 +73,22 @@ input:valid, input:focus:valid {
 .nav-pills > li > a:hover {
 	background-color: #d9e7f4;
 }
+
+#eventstable.table-hover>tbody>tr:hover {
+	background-color: #dff0d8;
+	box-shadow: 2px 2px 2px grey, -2px -2px 2px grey, -2px 2px 2px grey, 2px -2px 2px grey;
+	font-weight: bold;
+	cursor: pointer;
+}
+#seriestable.table-hover>tbody>tr:hover {
+	background-color: #f2dede;
+	box-shadow: 2px 2px 2px grey, -2px -2px 2px grey, -2px 2px 2px grey, 2px -2px 2px grey;
+	font-style: italic;
+	text-decoration: line-through;
+	color: grey;
+	cursor: pointer;
+}
+
+td.toggle-event {
+	cursor: pointer;
+}

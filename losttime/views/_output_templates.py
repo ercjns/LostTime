@@ -125,9 +125,11 @@ class EventHtmlWriter(object):
                             if pr.coursestatus in ['ok']:
                                 td(pr.timetommmss())
                             elif pr.resultstatus in ['ok']:
-                                td('{1} {0}'.format(pr.timetommmss(), pr.coursestatus))
+                                td('{0} {1}'.format(pr.coursestatus, pr.timetommmss()))
+                            elif pr.resultstatus in ['dns']:
+                                td('{0}'.format(pr.resultstatus))
                             else:
-                                td('{1} {2} {0}'.format(pr.timetommmss(), pr.coursestatus, pr.resultstatus))
+                                td('{0} {1}*'.format(pr.resultstatus, pr.timetommmss()))
                             if (ec.scoremethod in ['worldcup', '1000pts']):
                                 td('{0:d}'.format(int(pr.score))) if pr.score is not None else td()
         return doc # __writeEventResultIndv_coc
@@ -222,6 +224,52 @@ class EventHtmlWriter(object):
                                 else:
                                     td('{1} {2} {0}'.format(m.timetommmss(), m.coursestatus, m.resultstatus))
         return doc # __writeEventResultTeam_coc
+
+
+class SeriesHtmlWriter(object):
+    def __init__(self, series, format='generic', seriesclasses=None, results=None, clubcodes=None):
+        self.series = series
+        self.format = format
+        self.seriesclasses = seriesclasses
+        self.results = results
+        self.clubcodes = clubcodes
+
+    def writeSeriesResult(self):
+        doc = div(cls="LostTimeContent")
+        with doc:
+            with div(cls="lg-mrg-bottom"):
+                h2("Season Standings")
+                self.seriesclasses.sort(key=lambda x: x.shortname)
+                for sc in self.seriesclasses:
+                    h4(a(sc.name, href='#{0}'.format(sc.shortname)))
+            for sc in self.seriesclasses:
+                with div(cls="classResults lg-mrg-bottom", id=sc.shortname):
+                    h3(sc.name)
+                    t = table(cls="table table-striped")
+                    with t.add(tr(id='column-titles')):
+                        th('Place')
+                        th('Name') if sc.classtype == 'indv' else th('Team')
+                        for i in range(1, len(self.series.eventids.split(','))+1):
+                            th('#{0}'.format(i))
+                        th('Season')
+                    for r in self.results[sc.shortname]:
+                        scores = []
+                        for eid in [int(x) for x in self.series.eventids.split(',')]:
+                            try:
+                                scores.append(int(r['results'][eid].score))
+                            except:
+                                scores.append('--')
+                        with t.add(tr()):
+                            td(r['position'])
+                            if sc.classtype == 'indv':
+                                td("{0} ({1})".format(r['name'], r['club']))
+                            elif sc.classtype == 'team':
+                                td("{0}".format(r['name']))
+                            for s in scores:
+                                td(s)
+                            td(r['score'])
+        return doc
+
 
 
 class EntryWriter(object):

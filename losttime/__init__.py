@@ -32,11 +32,18 @@ entryfilepath = join('losttime', 'static', 'userfiles')
 entryfiles = UploadSet('entryfiles', ('csv',), lambda app:entryfilepath)
 configure_uploads(app, (eventfiles, entryfiles))
 
+@app.template_filter()
+def datetimeformat(value, format='%Y-%m-%dT%H:%M:%S'):
+    return value.strftime(format)
+
 from .views.event_result import eventResult as eventResultBP
 app.register_blueprint(eventResultBP, url_prefix='/event-result')
 
 from .views.entry_manager import entryManager as entryManagerBP
 app.register_blueprint(entryManagerBP, url_prefix='/entry-manager')
+
+from .views.series_result import seriesResult as seriesResultBP
+app.register_blueprint(seriesResultBP, url_prefix='/series-result')
 
 from .views.admin_api import admin as adminBP
 app.register_blueprint(adminBP, url_prefix='/admin')

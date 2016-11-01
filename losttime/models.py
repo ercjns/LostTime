@@ -113,3 +113,36 @@ class ClubCode(db.Model):
         self.code = code
         self.name = name
         return
+
+class Series(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    host = db.Column(db.String)
+    updated = db.Column(db.DateTime)
+    eventids = db.Column(db.String)
+    scoremethod = db.Column(db.String)
+    scoreeventscount = db.Column(db.Integer)
+    scoreeventsneeded = db.Column(db.Integer)
+    scoretiebreak = db.Column(db.String)
+
+    def __init__(self, events):
+        self.eventids = str(events).strip('[]').replace(' ', '')
+        return
+
+class SeriesClass(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    seriesid = db.Column(db.Integer)
+    name = db.Column(db.String)
+    shortname = db.Column(db.String)
+    eventids = db.Column(db.String)
+    eventclassids = db.Column(db.String)
+    classtype = db.Column(db.String)
+
+    def __init__(self, seriesid, name, shortname, eventids, classids, classtype):
+        self.seriesid = seriesid
+        self.name = name
+        self.shortname = shortname
+        self.eventids = eventids
+        self.eventclassids = str(classids).strip('[]').replace(' ', '')
+        self.classtype = classtype
+        return

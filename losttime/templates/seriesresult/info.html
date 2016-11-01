@@ -1,0 +1,169 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Series Result{% endblock %}
+
+{% block content %}
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
+<h3 class="page-title">Series Results Step 2: Series Info</h3>
+<div class="pinkline"></div>
+</div>
+</div>
+
+<div class="row">
+<div class="col-sm-6 col-sm-offset-1">
+<h4 class="form-section-title">Series Details</h4>
+<div class="form-group">
+    <label for="series-name" class="control-label">Series Name</label>
+    <input type="text" class="form-control" name="series-name" value="{{series.name}}">
+</div>
+<div class="form-group">
+    <label for="series-host" class="control-label">Series Host</label>
+    <input type="text" class="form-control" name="series-host" value="{{series.host}}">
+</div>
+</div>
+</div>
+
+
+
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
+<h4 class="form-section-title">Series Classes</h4>
+<p>Series standings will be calculated for each class (row), using only results from the indicated events.</p>
+<table id="series-class-select" class="table table-condensed">
+    <thead>
+    <tr>
+        <th>Class</th>
+        {% for e in events %}
+        <th class="text-center">{{e.name}}</th>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for sc, scevents in seriesclasses %}
+    <tr data-lt-series-type="indv">
+        <td><em>{{scevents['name']}} ({{sc}})</em> <a onclick=toggleClassSelection(this)>select all</a></td>
+        {% for e in events %}
+            {% if scevents[e.id] != False %}
+            <td class="text-center eventclass-option" data-event-class={{scevents[e.id].id}}><input type="checkbox"></td>
+            {% else %}
+            <td class="text-center">n/a</td>
+            {% endif %}
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    {% for stc, stcevents in seriesteamclasses %}
+    <tr data-lt-series-type="team">
+        <td><em>{{stcevents['name']}} ({{stc}})</em> <a onclick=toggleClassSelection(this)>select all</a></td>
+        {% for e in events %}
+            {% if stcevents[e.id] != False %}
+            <td class="text-center eventclass-option" data-event-class={{stcevents[e.id].id}}><input type="checkbox"></td>
+            {% else %}
+            <td class="text-center">n/a</td>
+            {% endif %}
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+</div>
+
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
+<h4 class="form-section-title">Scoring Method</h4>
+<p>Calculate series score as the 
+<select name="series-score-method">
+		<option value="sum">sum</option>
+		<option value="average">average</option>
+</select>
+of the best <input name="series-num-scored-events" type="number" min=1 max={{events|length}} value={{events|length}}> event scores.
+</p>
+<p>An entry must have at least <input name="series-num-needed-events" type="number" min=1 max={{events|length}} value=1> valid event score(s) for a valid series score.</p>
+<p>Tie series scores are awarded 
+<select name="series-tiebreak-method">
+        <option value="all">by comparing all {{events|length}} event scores.</option>
+        <option value="scoring">by comparing only the contributing event scores.</option>
+        <option value="tie">as a tie (no tie-breaking).</option>
+</select>
+</p>
+</div>
+</div>
+
+<div class="row">
+<div class="col-sm-7 col-sm-offset-1">
+<h4 class="form-section-title">Output Style</h4>
+<div class="form-group">
+<label for="output-style" class="control-label">Output Template</label>
+<select name="output-style" class="form-control">
+    <option value="generic" selected>Generic</option>
+    <option value="coc">Cascade Orienteering Club</option>
+</select>
+</div>
+
+<p>
+    <button class="btn btn-default" onclick="info_page_with_selected_events">Back</button>
+    <button id="nextbutton" class="btn btn-primary" onclick="submitSeriesInfo()">Next</button>
+</p>
+</div>
+</div>
+{% endblock %}
+
+{% block bottomscripts %}
+<script>
+function toggleClassSelection(classname) {
+    if ($(classname).text() == 'select all'){
+        eventclasses = $(classname).parent().siblings();
+        eventclasses.children(':checkbox').prop('checked', true);
+        $(classname).text('select none');
+    } else {
+        eventclasses = $(classname).parent().siblings();
+        eventclasses.children(':checkbox').prop('checked', false);
+        $(classname).text('select all');
+    }
+}
+function submitSeriesInfo() {
+    series = {
+        id: {{ series.id }},
+        name: $("input[name='series-name']").val(),
+        host: $("input[name='series-host']").val(),
+        classes: [],
+        scoremethod: $("select[name='series-score-method']").val(),
+        scoreeventscount: $("input[name='series-num-scored-events']").val(),
+        scoreeventsneeded: $("input[name='series-num-needed-events']").val(),
+        scoretiebreak: $("select[name='series-tiebreak-method']").val(),
+        output: $("select[name='output-style']").val()
+    };
+    $("#series-class-select").children("tbody").children().each(function(){
+        seriesclass = {
+            name: $(this).children("td:first").text(),
+            type: $(this).data("lt-series-type"),
+            eventclasses: []
+        }
+        $(this).children("td.eventclass-option").each(function(){
+            if ($(this).children(':checkbox').prop('checked')) {
+                seriesclass.eventclasses.push($(this).data("event-class"));
+            }
+        })
+        series.classes.push(seriesclass);
+    })
+    console.log(series);
+    $('#nextbutton').after('<span id="spinner"><i class="fa fa-cog fa-spin fa-2x fa-fw" style="vertical-align:middle;"></i><span class="sr-only">Loading...</span></span>');
+
+    posturl = "{{ url_for('seriesResult.series_info', seriesid='') }}".concat(String(series.id))
+
+    jqxhr = $.post(posturl, JSON.stringify(series))
+      .done(function(data) {
+        console.log("done handler");
+        console.log(data);
+        window.location.href = "{{ url_for('seriesResult.series_result', seriesid='') }}".concat(String({{series.id}}));
+      })
+      .fail(function(data) {
+        console.log("fail handler");
+        console.log(data);
+        $('#spinner').remove();
+        $('#nextbutton').after('<p class="text-danger">'.concat(data.responseJSON.message, ' Error ', String(data.status), '</p>'));
+      });
+}
+</script>
+{% endblock%}
