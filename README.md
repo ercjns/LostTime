@@ -12,20 +12,21 @@ For the input .csv files, if the header line contains any of the following strin
 
 ## Event Results
 **Input**: single IOF v3 .xml `<ResultList>` file  
-**Output**: single .html page, results by class, sorted, and scored  
+**Output**: an html page, results by class, sorted, and scored. Can also include a second html page with team results 
 Scoring methods include: Time (no score), Ratio to winner (1000pts), World Cup (100, 95, 92, 90, ...), or Alphabetical sorting (no placement).
+Team scoring methods are added as requested. Currently there is one: WIOL (Washington Interscholastic Orienteering League) teams are the top three finishers from a school in a given class, except middle school where the girls and boys races are combined in a single Middle School Team class.
+
+## Series Results
+**Input**: existing event results uploaded to Lost Time Orienteering
+**Output**: html page, series results by class, calculated and sorted.
+Series can be configured to count the best N scores out of M races. Individuals must run in the same class, and are matched on name+club.
 
 # Backlog
 ## Entries
 - make the default output an IOF xml `<EntryList>` file, for greater inter-operability
-
-## Event Results
-- Calculate and output an additional html page with team results, starting with COC WIOL scoring algorithm.
-
-## Series Results
-- Allow multiple events to be combined into a series for scoring purposes
-- Configure different series scoring parameters
-- Calculate and output html page of series results
+## Series
+- ability to preload series events / add events to existing series
+- ability to add blank events to fill out remainder of a series
 
 
 # Technical Notes
@@ -86,13 +87,7 @@ python -m flask db upgrade
 
 ## Deployment
 
-### Code Updates
-
-git pull, restart the daemon
-
-### Database Schema Changes
-
-git pull, python -m flask db update, restart the daemon
+It's easy! Open an ssh client and `git pull` and then restart the daemon via `TERM` in the NFS GUI. If there are also db schema changes, also run `python -m flask db upgrade` to pick up the new schema. 
 
 
 ### Initial
