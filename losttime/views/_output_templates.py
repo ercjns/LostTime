@@ -307,6 +307,8 @@ class EntryWriter(object):
                     cat = line[datacols['cat']].strip('\"\'\/\\ ')
                     sex = line[datacols['sex']].strip('\"\'\/\\ ')
                     punch = line[datacols['punch']].strip('\"\'\/\\ ')
+                    if (first == '') and (last == '') and (club == '') and (cat == ''):
+                        continue
                     if known_renting:
                         rented = line[datacols['rented']].strip('\"\'\/\\ ')
                     else:

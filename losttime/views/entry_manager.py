@@ -8,6 +8,7 @@ import re
 import csv
 from os import remove
 from os.path import join, isfile
+from collections import Counter
 
 entryManager = Blueprint("entryManager", __name__, static_url_path='/download', static_folder='../static/userfiles')
 
@@ -71,7 +72,11 @@ def _entries_stats(filename):
         header = next(reader)
         for line in reader:
             numentries += 1
-            if line[25] not in categories:
-                categories.append(line[25])
-        categories.sort()
-    return {'count':numentries, 'categories':categories}
+            # if line[25] not in categories:
+            categories.append(line[25])
+
+        cats = dict(Counter(categories)).items()
+        cats.sort(key=lambda x:x[0])
+        if cats[0][0] == '':
+            cats[0] = ('NO_CLASS', cats[0][1])
+    return {'count':numentries, 'categories':cats}
