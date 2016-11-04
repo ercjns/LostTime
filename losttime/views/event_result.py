@@ -188,7 +188,10 @@ def _assignScores(eventid):
                     # TODO log position not assigned
                     continue
                 elif (r.position == -1) or (r.position >= 94):
-                    r.score = 0
+                    if r.resultstatus == 'nc':
+                        r.score = None
+                    else:                   
+                        r.score = 0
                 elif r.position == 1:
                     r.score = 100
                 elif r.position == 2:
@@ -275,8 +278,11 @@ def _assignTeamScores(eventid, scoremethod):
                 results += PersonResult.query.filter_by(classid=int(ec)).all()
             teams = set([r.club_shortname for r in results])
             for team in teams:
-                members = [r for r in results if r.club_shortname == team]
+                members = [r for r in results if (r.club_shortname == team) and (r.resultstatus not in ['nc', 'dns'])]
                 numstarts = len(members)
+                if numstarts == 0:
+                    print("not a team: {}".format(team))
+                    continue
                 numfinishes = len([x for x in members if x.coursestatus == 'ok'])
                 members.sort(key=lambda x: x.score, reverse=True)
                 members = members[:3]

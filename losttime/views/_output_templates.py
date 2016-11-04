@@ -198,6 +198,22 @@ class EventHtmlWriter(object):
                                     else:
                                         td('{1} {2} {0}'.format(m.timetommmss(), m.coursestatus, m.resultstatus))
                     p(a("Menu", href="#lt-top"), cls="lg-mrg-bottom text-center")
+            h3("Result Status Codes")
+            with dl(cls="dl-horizontal"):
+                dt("msp: missing punch")
+                dd("a control was skipped or taken out of order")
+                dt("dnf: did not finish")
+                dd("a control or set of controls at the end of the course were skipped")
+                dt("nc: not competing")
+                dd("the competitor is not eligible for standings, such as when running a second course")
+                dt("dq: disqualified")
+                dd("breaking competition rules, such as conferring with another competitor or entering an out of bounds area")
+                dt("ovt: overtime")
+                dd("returning after the course closure time")
+                dt("dns: did not start")
+                dd("the competitor did not start")
+                dt("<time>*")
+                dd("the star indicates course completion status was not reported and may be valid, msp, or dnf")
         return doc # __writeEventResultIndv_coc
 
 
