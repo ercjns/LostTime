@@ -17,7 +17,7 @@ class EventHtmlWriter(object):
 
     def eventResultIndv(self):
         """
-        create an html file with individual results for this event.
+        create an html file with individual, or individual+team results for this event.
         """
         if self.format == 'generic':
             return self.__writeEventResultIndv()
@@ -30,10 +30,12 @@ class EventHtmlWriter(object):
         """
         create an html file with team results for this event
         """
+        if len(self.teamclasses) == 0:
+            return False
         if self.format == 'generic':
             return self.__writeEventResultTeam()
-        if self.format == 'coc':
-            return self.__writeEventResultTeam_coc()
+        elif self.format == 'coc':
+            return False #team results included on indv result page
         else:
             raise KeyError("Unrecognized output format {0}".format(self.format))
 
@@ -96,12 +98,35 @@ class EventHtmlWriter(object):
         return doc # __writeEventResultIndv
 
     def __writeEventResultIndv_coc(self):
-        doc = div(cls="LostTimeContent")
+        doc = div(cls="LostTimeContent", id="lt-top")
         with doc:
-            with div(cls="lg-mrg-bottom"):
-                self.eventclasses.sort(key=lambda x: x.shortname)
-                for ec in self.eventclasses:
-                    h3(a(ec.name, href='#{0}'.format(ec.shortname)))
+
+            self.eventclasses.sort(key=lambda x: x.shortname)
+            WIOL = [x for x in self.eventclasses if x.shortname.startswith('W')]
+            if len(WIOL) > 0:
+                # Split Out Public and WIOL individual classes in menu
+                with div(cls="lg-mrg-bottom"):
+                    h2("Winter Series (Public)")
+                    for ec in self.eventclasses:
+                        if ec not in WIOL:
+                            h4(a(ec.name, href='#{0}'.format(ec.shortname)))
+                with div(cls="lg-mrg-bottom"):
+                    h2("WIOL School League - Individuals")
+                    for ec in WIOL:
+                        h4(a(ec.name, href='#{0}'.format(ec.shortname)))
+            else:
+                with div(cls="lg-mrg-bottom"):
+                    h2("Event Classes")
+                    for ec in self.eventclasses:
+                        h4(a(ec.name, href='#{0}'.format(ec.shortname)))
+
+            if len(self.teamclasses) > 0:
+                with div(cls="lg-mrg-bottom"):
+                    h2("WIOL School League - Teams")
+                    for tc in self.teamclasses:
+                        self.teamclasses.sort(key=lambda x: x.shortname)
+                        h4(a(tc.name, href='#{0}'.format(tc.shortname)))
+
             for ec in self.eventclasses:
                 with div(cls="classResults lg-mrg-bottom"):
                     classresults = [r for r in self.personresults if r.classid == ec.id]
@@ -132,6 +157,47 @@ class EventHtmlWriter(object):
                                 td('{0} {1}*'.format(pr.resultstatus, pr.timetommmss()))
                             if (ec.scoremethod in ['worldcup', '1000pts']):
                                 td('{0:d}'.format(int(pr.score))) if pr.score is not None else td()
+                p(a("Menu", href="#lt-top"), cls="lg-mrg-bottom text-center")
+            if len(self.teamclasses) > 0:
+                for tc in self.teamclasses:
+                    with div(cls="classResults lg-mrg-bottom"):
+                        classresults = [r for r in self.teamresults if r.teamclassid == tc.id]
+                        h3(tc.name, id=tc.shortname)
+                        t = table(cls='table table-striped', id='TeamResultsTable-{0}'.format(tc.shortname)).add(tbody())
+                        with t.add(tr(id='column-titles')):
+                            classresults = _sortByPosition(classresults)
+                            th('Place')
+                            th('Points')
+                            th('School / Name')
+                            th('Finish')
+                        for r in classresults:
+                            with t.add(tr(cls="team-result-full")):
+                                td(r.position) if r.position > 0 else td()
+                                td('{0:d}'.format(int(r.score))) if r.score is not None else td()
+                                try:
+                                    td('{0} ({1})'.format(self.clubcodes[r.teamname_short][0].name, r.teamname_short))
+                                except:
+                                    td()
+                                finpct = r.numfinishes if r.numfinishes == 0 else int((float(r.numfinishes)/r.numstarts)*100)
+                                td('{0}% ({1} of {2})'.format(finpct, r.numfinishes, r.numstarts))
+                            try:
+                                memberids = [int(x) for x in r.resultids.split(',')]
+                            except:
+                                memberids = []
+                            members = [x for x in self.personresults if x.id in memberids]
+                            members = _sortByPosition(members)
+                            for m in members:
+                                with t.add(tr(cls="team-result-member")):
+                                    td()
+                                    td('{0:d}'.format(int(m.score))) if m.score is not None else td()
+                                    td('{0} ({1})'.format(m.name, m.club_shortname))
+                                    if m.coursestatus in ['ok']:
+                                        td(m.timetommmss())
+                                    elif m.resultstatus in ['ok']:
+                                        td('{1} {0}'.format(m.timetommmss(), m.coursestatus))
+                                    else:
+                                        td('{1} {2} {0}'.format(m.timetommmss(), m.coursestatus, m.resultstatus))
+                    p(a("Menu", href="#lt-top"), cls="lg-mrg-bottom text-center")
         return doc # __writeEventResultIndv_coc
 
 
@@ -177,54 +243,6 @@ class EventHtmlWriter(object):
                             td('{0:d}'.format(int(r.score))) if r.score is not None else td()
         return doc # __writeEventResultTeam
 
-    def __writeEventResultTeam_coc(self):
-        doc = div(cls="LostTimeContent")
-        with doc:
-            with div(cls="lg-mrg-bottom"):
-                for tc in self.teamclasses:
-                    self.teamclasses.sort(key=lambda x: x.shortname)
-                    h3(a(tc.name, href='#{0}'.format(tc.shortname)))
-            for tc in self.teamclasses:
-                with div(cls="classResults lg-mrg-bottom"):
-                    classresults = [r for r in self.teamresults if r.teamclassid == tc.id]
-                    h3(tc.name, id=tc.shortname)
-                    t = table(cls='table table-striped', id='TeamResultsTable-{0}'.format(tc.shortname)).add(tbody())
-                    with t.add(tr(id='column-titles')):
-                        classresults = _sortByPosition(classresults)
-                        th('Pos.')
-                        th('Name')
-                        th('Score')
-                        th('Details')
-                    for r in classresults:
-                        with t.add(tr(cls="team-result")):
-                            td(r.position) if r.position > 0 else td()
-                            td(r.teamname_short)
-                            td('{0:d}'.format(int(r.score))) if r.score is not None else td()
-                            try:
-                                td('{0}'.format(self.clubcodes[r.teamname_short][0].name))
-                            except:
-                                td()
-                            td('Finishers: {0} of {1}'.format(r.numfinishes, r.numstarts))
-                        try:
-                            memberids = [int(x) for x in r.resultids.split(',')]
-                        except:
-                            memberids = []
-                        members = [x for x in self.personresults if x.id in memberids]
-                        members = _sortByPosition(members)
-                        for m in members:
-                            with t.add(tr(cls="team-member")):
-                                td()
-                                td()
-                                td('{0:d}'.format(int(m.score))) if m.score is not None else td()
-                                td(m.name)
-                                if m.coursestatus in ['ok']:
-                                    td(m.timetommmss())
-                                elif m.resultstatus in ['ok']:
-                                    td('{1} {0}'.format(m.timetommmss(), m.coursestatus))
-                                else:
-                                    td('{1} {2} {0}'.format(m.timetommmss(), m.coursestatus, m.resultstatus))
-        return doc # __writeEventResultTeam_coc
-
 
 class SeriesHtmlWriter(object):
     def __init__(self, series, format='generic', seriesclasses=None, results=None, clubcodes=None):
@@ -234,7 +252,22 @@ class SeriesHtmlWriter(object):
         self.results = results
         self.clubcodes = clubcodes
 
-    def writeSeriesResult(self):
+    def seriesResult(self):
+        """
+        create an html file with series results for this event.
+        """
+        if self.format == 'generic':
+            return self.__writeSeriesResult()
+        elif self.format == 'coc':
+            return self.__writeSeriesResult_coc()
+        else:
+            raise KeyError("Unrecognized output format {0}".format(self.format))
+
+    def __writeSeriesResult(self):
+        # TODO: generic series output
+        return self.__writeSeriesResult_coc
+
+    def __writeSeriesResult_coc(self):
         doc = div(cls="LostTimeContent")
         with doc:
             with div(cls="lg-mrg-bottom"):

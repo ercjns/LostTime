@@ -367,14 +367,10 @@ def _buildResultPages(eventid, style):
     for club in ClubCode.query.all():
         clubcodes.setdefault(club.code, []).append(club)
 
-
-
     writer = EventHtmlWriter(event, style, classes, results, teamclasses, teamresults, clubcodes)
     docdict = {}
-
     docdict['indv'] = writer.eventResultIndv()
-
-    if len(teamclasses) > 0:
-        docdict['team'] = writer.eventResultTeam()
-
+    teamdoc = writer.eventResultTeam()
+    if teamdoc: # false if no team results page
+        docdict['team'] = teamdoc
     return docdict

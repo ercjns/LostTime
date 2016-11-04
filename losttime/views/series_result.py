@@ -88,7 +88,7 @@ def series_info(seriesid):
         seriesclasses = SeriesClass.query.filter_by(seriesid=series.id).all()
         # scdict = {sc.shortname: sc for sc in seriesclasses}
         writer = SeriesHtmlWriter(series, formdata['output'], seriesclasses, seriesresults)
-        doc = writer.writeSeriesResult()
+        doc = writer.seriesResult()
         filename = join(seriesResult.static_folder, 'SeriesResult-{0:03d}'.format(int(seriesid)))
         with open(filename, 'w') as f:
             f.write(doc.render())
