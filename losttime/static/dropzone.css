@@ -175,8 +175,9 @@
 
 .dropzone {
   min-height: 150px;
-  border: 2px dotted black;
-  background: rgba(255, 215, 175, .3);
+  border: 2px dashed magenta;
+  /*background: rgba(255, 215, 175, .3);*/
+  background: rgba(200,200,200,.3);
   border-radius: 10px;
   padding: 20px 20px; 
   margin-bottom: 30px;}
@@ -189,7 +190,8 @@
   .dropzone.dz-started .dz-message {
     display: none; }
   .dropzone.dz-drag-hover {
-    border-style: solid; }
+    border-style: solid;
+    background: rgba(200,200,200,.8); }
     .dropzone.dz-drag-hover .dz-message {
       opacity: 0.5; }
   .dropzone .dz-message {

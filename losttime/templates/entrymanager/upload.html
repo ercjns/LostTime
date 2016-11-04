@@ -60,8 +60,12 @@
 	</table>
 </div>
 
-<div id="theDropzone" class="dropzone">
-	<div class="dz-default dz-message"><span>Drop csv file here (or click for file browser)</span></div>
+<div id="theDropzone">
+	<p id="loading-dz">
+		<span id="spinner"><i class="fa fa-refresh fa-spin fa-2x fa-fw" style="vertical-align:middle;"></i><span class="sr-only">Loading...</span></span>
+		Loding dropzone... if this persists more than a few seconds please reload the page
+	</p> 
+	<div class="dz-default dz-message"><span>Drop csv file(s) here, or click for file browser</span></div>
 </div>
 
 <div class="files" id="previews">
@@ -121,13 +125,13 @@
 {% block bottomscripts %}
 <script src="{{ url_for('static', filename='dropzone.js') }}"></script>
 <script>
+Dropzone.autoDiscover = false;
 var previewNode = document.querySelector("#template");
-previewNode.id = ""
+previewNode.id = "";
 var previewTemplate = previewNode.parentNode.innerHTML;
 previewNode.parentNode.removeChild(previewNode);
 
 
-Dropzone.autoDiscover = false;
 var dzOptions = {
 	url: "{{url_for('entryManager.upload_entries')}}",
 	paramName: "entryFile",
@@ -147,6 +151,7 @@ var dzOptions = {
 				}
 
 				file.previewElement.querySelector(".progress-bar-wrapper").remove()
+				$('#spinner').remove();
 				// $("#uploadButton").addClass("disabled")
 
 				_ref = file.previewElement.querySelectorAll("[data-dz-errormessage]");
@@ -168,9 +173,16 @@ var dzOptions = {
 	}
 }
 var myDropzone = new Dropzone("div#theDropzone", dzOptions);
+document.getElementById("theDropzone").classList.add("dropzone");
+var element = document.getElementById("loading-dz");
+element.parentNode.removeChild(element);
+
 
 function sendFile() {
-	myDropzone.processQueue();
+	if (myDropzone.getQueuedFiles().length > 0){
+		$('#uploadButton').after('<span id="spinner"><i class="fa fa-cog fa-spin fa-2x fa-fw" style="vertical-align:middle;"></i><span class="sr-only">Loading...</span></span>');
+		myDropzone.processQueue();
+	}
 }
 
 function togglecsvtable() {
