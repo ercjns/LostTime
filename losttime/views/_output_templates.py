@@ -1,7 +1,7 @@
 # losttime/views/_output_templates.py
 
 import datetime
-import csv
+import csv, fileinput, sys
 import dominate
 from dominate.tags import *
 
@@ -341,6 +341,12 @@ class EntryWriter(object):
         header = prefix + 'Stno;XStno;Chipno;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Credit -;Penalty +;Comment;Club no.;Cl.name;City;Nat;Location;Region;Cl. no.;Short;Long;Entry cl. No;Entry class (short);Entry class (long);Rank;Ranking points;Num1;Num2;Num3;Text1;Text2;Text3;Addr. surname;Addr. first name;Street;Line2;Zip;Addr. city;Phone;Mobile;Fax;EMail;Rented;Start fee;Paid;Team;Course no.;Course;km;m;Course controls\n'
         doc += header
         for f in self.files:
+
+            for line in fileinput.input(files=(f), inplace=True):
+                # for line in rawfile:
+                line = line.replace('\0', '')
+                sys.stdout.write(line)
+
             with open(f, 'r') as currentfile:
                 regreader = csv.reader(currentfile, delimiter=',')
                 datacols = self.__identify_columns(next(regreader))
