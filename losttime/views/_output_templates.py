@@ -177,7 +177,7 @@ class EventHtmlWriter(object):
                                 try:
                                     td('{0} ({1})'.format(self.clubcodes[r.teamname_short][0].name, r.teamname_short))
                                 except:
-                                    td()
+                                    td(r.teamname_short)
                                 finpct = r.numfinishes if r.numfinishes == 0 else int((float(r.numfinishes)/r.numstarts)*100)
                                 td('{0}% ({1} of {2})'.format(finpct, r.numfinishes, r.numstarts))
                             try:
