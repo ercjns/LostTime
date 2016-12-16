@@ -281,7 +281,7 @@ class SeriesHtmlWriter(object):
 
     def __writeSeriesResult(self):
         # TODO: generic series output
-        return self.__writeSeriesResult_coc
+        return self.__writeSeriesResult_coc()
 
     def __writeSeriesResult_coc(self):
         doc = div(cls="LostTimeContent")
@@ -313,10 +313,10 @@ class SeriesHtmlWriter(object):
                             if sc.classtype == 'indv':
                                 td("{0} ({1})".format(r['name'], r['club']))
                             elif sc.classtype == 'team':
-                                td("{0}".format(r['name']))
+                                td("{0} ({1})".format(self.clubcodes[r['name']][0].name, r['name']))
                             for s in scores:
                                 td(s)
-                            td(r['score'])
+                            td(int(r['score']))
         return doc
 
 

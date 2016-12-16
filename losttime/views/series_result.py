@@ -1,7 +1,7 @@
 #losttime/views/series_result.py
 
 from flask import Blueprint, url_for, redirect, request, render_template, jsonify
-from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, Series, SeriesClass
+from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, Series, SeriesClass, ClubCode
 from _output_templates import SeriesHtmlWriter
 from os.path import join
 
@@ -87,7 +87,12 @@ def series_info(seriesid):
 
         seriesclasses = SeriesClass.query.filter_by(seriesid=series.id).all()
         # scdict = {sc.shortname: sc for sc in seriesclasses}
-        writer = SeriesHtmlWriter(series, formdata['output'], seriesclasses, seriesresults)
+
+        clubcodes = {}
+        for club in ClubCode.query.all():
+            clubcodes.setdefault(club.code, []).append(club)
+
+        writer = SeriesHtmlWriter(series, formdata['output'], seriesclasses, seriesresults, clubcodes)
         doc = writer.seriesResult()
         filename = join(seriesResult.static_folder, 'SeriesResult-{0:03d}'.format(int(seriesid)))
         with open(filename, 'w') as f:
