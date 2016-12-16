@@ -141,12 +141,12 @@ def _calculateSeries(seriesid):
         for sr in scresultdict.values():
             sr['score'], sr['scores'] = _calculateSeriesScore(series, sr['results'].values())
 
-        scresults = _assignSeriesClassPositions(series, [x for x in scresultdict.values() if x['score']])
+        scresults = _assignSeriesClassPositions(series, [x for x in scresultdict.values() if x['score'] is not None])
         seriesresults[sc.shortname] = scresults
     return seriesresults
 
 def _calculateSeriesScore(series, results):
-    results = [x for x in results if (isinstance(x, PersonResult) or isinstance(x, TeamResult)) and (x.score)]
+    results = [x for x in results if (isinstance(x, PersonResult) or isinstance(x, TeamResult)) and (x.score is not None)]
     # TODO: need to detect if good scores are high or low (!)
     results.sort(key=lambda x: -x.score)
     scores = [x.score for x in results[:series.scoreeventscount]]
@@ -165,7 +165,6 @@ def _calculateSeriesScore(series, results):
         tiebreakscores = scores
     else:
         tiebreakscores = []
-    # TODO: also return the list of scores to be used for tiebreaking ("all", "scoring", "tie")
     return score, tiebreakscores
 
 
