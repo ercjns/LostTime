@@ -142,6 +142,7 @@ def _calculateSeries(seriesid):
             sr['score'], sr['scores'] = _calculateSeriesScore(series, sr['results'].values())
 
         scresults = _assignSeriesClassPositions(series, [x for x in scresultdict.values() if x['score'] is not None])
+        scresults.sort(key=lambda x: x['position'])
         seriesresults[sc.shortname] = scresults
     return seriesresults
 
@@ -188,7 +189,9 @@ def _assignSeriesClassPositions(series, seriesclassresults):
                     swap = True
                     break
             else:
-                if B_scores and not A_scores:
+                if B == 0 and A == 0:
+                    tie = True
+                elif B_scores and not A_scores:
                     swap = True
                 elif not A_scores and not B_scores:
                     tie = True
