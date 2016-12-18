@@ -77,8 +77,8 @@ def series_info(seriesid):
         for c in formdata['classes']:
             if len(c['eventclasses']) == 0:
                 continue
-            name, abbr = c['name'].split(')')[0].split('(')
-            sc = SeriesClass(series.id, name.strip(), abbr, series.eventids, c['eventclasses'], c['type'])
+            name, abbr = c['name'].rsplit('(', 1)
+            sc = SeriesClass(series.id, name.strip(), abbr.strip('() '), series.eventids, c['eventclasses'], c['type'])
             db.session.add(sc)
         db.session.commit()
 
