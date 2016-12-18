@@ -278,6 +278,9 @@ def _assignTeamScores(eventid, scoremethod):
                 results += PersonResult.query.filter_by(classid=int(ec)).all()
             teams = set([r.club_shortname for r in results])
             for team in teams:
+                if team in ['None', 'NONE', 'none']:
+                    print("not a team: {}".format(team))
+                    continue
                 members = [r for r in results if (r.club_shortname == team) and (r.resultstatus not in ['nc', 'dns'])]
                 numstarts = len(members)
                 if numstarts == 0:
