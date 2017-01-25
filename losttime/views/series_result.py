@@ -94,7 +94,7 @@ def series_info(seriesid):
 
         writer = SeriesHtmlWriter(series, formdata['output'], seriesclasses, seriesresults, clubcodes)
         doc = writer.seriesResult()
-        filename = join(seriesResult.static_folder, 'SeriesResult-{0:03d}'.format(int(seriesid)))
+        filename = join(seriesResult.static_folder, 'SeriesResult-{0:03d}.html'.format(int(seriesid)))
         with open(filename, 'w') as f:
             f.write(doc.render())
 
@@ -103,13 +103,13 @@ def series_info(seriesid):
 @seriesResult.route('/results/<seriesid>', methods=['GET'])
 def series_result(seriesid):
     try:
-        fn = 'SeriesResult-{0:03d}'.format(int(seriesid))
+        fn = 'SeriesResult-{0:03d}.html'.format(int(seriesid))
         filepath = join(seriesResult.static_folder, fn)
         with open(filepath) as f:
             htmldoc = f.read()
     except IOError:
         return "couldn't find that file...", 404
-    return render_template('seriesresult/result.html', seriesid=seriesid, thehtml=htmldoc)
+    return render_template('seriesresult/result.html', seriesid=seriesid, thehtml=htmldoc, fn=fn)
 
 
 def _calculateSeries(seriesid):
