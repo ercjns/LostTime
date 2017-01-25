@@ -78,7 +78,7 @@ def series_info(seriesid):
             if len(c['eventclasses']) == 0:
                 continue
             name, abbr = c['name'].rsplit('(', 1)
-            sc = SeriesClass(series.id, name.strip(), abbr.strip('() '), series.eventids, c['eventclasses'], c['type'])
+            sc = SeriesClass(series.id, name.strip(), abbr.split(')')[0], series.eventids, c['eventclasses'], c['type'])
             db.session.add(sc)
         db.session.commit()
 
