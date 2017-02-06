@@ -16,7 +16,7 @@ def home():
 def select_events():
     if request.method == 'GET':
         current_events = [3, 36, 26, 34, 35, 30]
-        events = Event.query.filter(Event.id.in_(current_events)).all()
+        events = Event.query.filter((Event.id.in_(current_events)) | (Event.id > 36)).all()
         return render_template('seriesresult/events.html', events=events)
 
     elif request.method == 'POST':
