@@ -169,49 +169,50 @@ def _calculateSeriesScore(series, results):
         tiebreakscores = []
     return score, tiebreakscores
 
-
 def _assignSeriesClassPositions(series, seriesclassresults):
-    # TODO: are good scores high or low (!)
-    seriesclassresults.sort(key=lambda x: -x['score'])
-    prev = {'pos':0, 'count':1, 'score':0}
-    for i in range(len(seriesclassresults)):
-        seriesclassresults[i]['position'] = prev['pos'] + prev['count']
-        if seriesclassresults[i]['score'] == prev['score']:
-            tie = False
-            swap = False
-            A_scores = seriesclassresults[i-1]['scores'][:]
-            B_scores = seriesclassresults[i]['scores'][:]
-
-            while A_scores and B_scores:
-                A, B = A_scores.pop(0), B_scores.pop(0)
-                if A > B:
-                    break
-                elif B > A:
-                    swap = True
-                    break
-            else:
-                if B == 0 and A == 0:
-                    tie = True
-                elif B_scores and not A_scores:
-                    swap = True
-                elif not A_scores and not B_scores:
-                    tie = True
-
-            if tie:
-                seriesclassresults[i]['position'] = prev['pos']
-                prev['count'] += 1
-            elif swap:
-                seriesclassresults[i]['position'] = seriesclassresults[i-1]['position']
-                seriesclassresults[i-1]['position'] = prev['pos'] + prev['count']
-                prev['pos'] = seriesclassresults[i-1]['position']
-                prev['count'] = 1
-            else:
-                # tiebreak results in holding current positions
-                prev['pos'] = seriesclassresults[i]['position']
-                prev['count'] = 1
+    seriesclassresults.sort(cmp=sortSeriesResults)
+    seriesclassresults.reverse()
+    nextpos = 1
+    tied = 0
+    seriesclassresults[0]['position'] = nextpos
+    for i in range(1, len(seriesclassresults)):
+        if sortSeriesResults(seriesclassresults[i-1], seriesclassresults[i]) != 0:
+            # not tied, increment position by 1 plus previous ties
+            nextpos += 1
+            nextpos += tied
+            tied = 0
         else:
-            # not tied, update the prev dict.
-            prev['pos'] = seriesclassresults[i]['position']
-            prev['count'] = 1
-            prev['score'] = seriesclassresults[i]['score']
+            # tied, next gets same pos, increment tied counter
+            tied += 1
+        seriesclassresults[i]['position'] = nextpos
     return seriesclassresults
+
+
+def sortSeriesResults(a, b):
+    if a['score'] is None or b['score'] is None:
+        raise KeyError('missing score value')
+    elif a['score'] > b['score']:
+        return 1
+    elif b['score'] > a['score']:
+        return -1
+    elif a['score'] == b['score']:
+        return sortTiedSeriesResults(a, b)
+
+def sortTiedSeriesResults(a, b):
+    a_scores = a['scores'][:]
+    b_scores = b['scores'][:]
+    while a_scores and b_scores:
+        a, b = a_scores.pop(0), b_scores.pop(0)
+        if a > b:
+            return 1
+        elif b > a:
+            return -1
+        elif a == 0 and b == 0:
+            return 0
+
+    if a_scores and not b_scores:
+        return 1
+    elif b_scores and not a_scores:
+        return -1
+    else:
+        return 0
