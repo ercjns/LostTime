@@ -286,6 +286,7 @@ class SeriesHtmlWriter(object):
     def __writeSeriesResult_coc(self):
         doc = div(cls="LostTimeContent")
         with doc:
+            style(".season1{ color: Red;} .season2{ color: Crimson;} .season3{ color: OrangeRed;}")
             with div(cls="lg-mrg-bottom"):
                 h2("Season Standings")
                 self.seriesclasses.sort(key=lambda x: x.shortname)
@@ -298,6 +299,8 @@ class SeriesHtmlWriter(object):
                     with t.add(tr(id='column-titles')):
                         th('Place')
                         th('Name') if sc.classtype == 'indv' else th('Team')
+                        if sc.classtype == 'indv':
+                            th('School') if sc.shortname.startswith('W') else th('Club')
                         for i in range(1, len(self.series.eventids.split(','))+1):
                             th('#{0}'.format(i))
                         th('Season')
@@ -305,17 +308,27 @@ class SeriesHtmlWriter(object):
                         scores = []
                         for eid in [int(x) for x in self.series.eventids.split(',')]:
                             try:
-                                scores.append(int(r['results'][eid].score))
+                                scores.append((int(r['results'][eid].score), int(r['results'][eid].position)))
                             except:
-                                scores.append('--')
+                                scores.append(('--', False))
                         with t.add(tr()):
                             td(r['position'])
                             if sc.classtype == 'indv':
-                                td("{0} ({1})".format(r['name'], r['club']))
+                                # td("{0} ({1})".format(r['name'], r['club']))
+                                td("{0}".format(r['name']))
+                                td("{0}".format(r['club']))
                             elif sc.classtype == 'team':
                                 td("{0} ({1})".format(self.clubcodes[r['name']][0].name, r['name']))
                             for s in scores:
-                                td(s)
+                                # td(s)
+                                if s[1] == 1:
+                                    td(s[0], cls="season1")
+                                elif s[1] == 2:
+                                    td(s[0], cls="season2")
+                                elif s[1] == 3:
+                                    td(s[0], cls="season3")
+                                else:
+                                    td(s[0])
                             td(int(r['score']))
         return doc
 
