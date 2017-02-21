@@ -286,7 +286,7 @@ class SeriesHtmlWriter(object):
     def __writeSeriesResult_coc(self):
         doc = div(cls="LostTimeContent")
         with doc:
-            style(".season1{ color: Red;} .season2{ color: Crimson;} .season3{ color: OrangeRed;}")
+            style(".season1{ color: Red;} .season2{ color: Crimson;} .season3{ color: FireBrick;}")
             with div(cls="lg-mrg-bottom"):
                 h2("Season Standings")
                 self.seriesclasses.sort(key=lambda x: x.shortname)
