@@ -286,7 +286,7 @@ class SeriesHtmlWriter(object):
     def __writeSeriesResult_coc(self):
         doc = div(cls="LostTimeContent")
         with doc:
-            style(".season1{ color: Red;} .season2{ color: Crimson;} .season3{ color: FireBrick;}")
+            style(".season1{ color: Red;} .season2{ color: Crimson;} .season3{ color: FireBrick;} .season-pts{ text-decoration: underline;}")
             with div(cls="lg-mrg-bottom"):
                 h2("Season Standings")
                 self.seriesclasses.sort(key=lambda x: x.shortname)
@@ -305,6 +305,7 @@ class SeriesHtmlWriter(object):
                             th('#{0}'.format(i))
                         th('Season')
                     for r in self.results[sc.shortname]:
+                        bestscores = r['scores'][:self.series.scoreeventscount]
                         scores = []
                         for eid in [int(x) for x in self.series.eventids.split(',')]:
                             try:
@@ -319,16 +320,24 @@ class SeriesHtmlWriter(object):
                                 td("{0}".format(r['club']))
                             elif sc.classtype == 'team':
                                 td("{0} ({1})".format(self.clubcodes[r['name']][0].name, r['name']))
+
                             for s in scores:
                                 # td(s)
+                                score_decorators = ''
+                                d = td(s[0])
+                                if s[0] in bestscores:
+                                    score_decorators = 'season-pts'
+                                    bestscores.remove(s[0])
                                 if s[1] == 1:
-                                    td(s[0], cls="season1")
+                                    score_decorators += " season1"
                                 elif s[1] == 2:
-                                    td(s[0], cls="season2")
+                                    score_decorators += " season2"
                                 elif s[1] == 3:
-                                    td(s[0], cls="season3")
-                                else:
-                                    td(s[0])
+                                    score_decorators += " season3"
+                                if score_decorators != '':
+                                    with d:
+                                        attr(cls = score_decorators)
+
                             td(int(r['score']))
         return doc
 
