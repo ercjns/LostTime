@@ -4,6 +4,8 @@ from flask import Blueprint, url_for, redirect, request, render_template, jsonif
 from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, Series, SeriesClass, ClubCode
 from _output_templates import SeriesHtmlWriter
 from os.path import join
+from fuzzywuzzy import fuzz
+import itertools
 
 
 seriesResult = Blueprint("seriesResult", __name__, static_url_path='/download', static_folder='../static/userfiles')
@@ -138,6 +140,40 @@ def _calculateSeries(seriesid):
                 scresultdict.setdefault(r.teamname_short, defaultdict)['results'][r.eventid] = r
         else:
             raise "Didn't find any results"
+
+        # Check to see if any entires in scresultdict might need to be combined
+        possible_dupes = [(k,v) for k, v in scresultdict.iteritems() if False in scresultdict[k]['results'].values()]
+
+        name_matches = []
+        for r1, r2 in itertools.combinations(possible_dupes, 2):
+            ratio1 = fuzz.ratio(r1[1]['name'], r2[1]['name'])
+            if ratio1 > 70: # needs tuning. 70 to 80 seems about right.
+                # print r1[1]['name'], r2[1]['name'], ratio1
+                name_matches.append((r1, r2))
+
+        event_matches = []
+        for m1, m2 in name_matches:
+            attended_same_event = False
+            for matcheventkey in m1[1]['results'].keys():
+                if m1[1]['results'][matcheventkey] != False and m2[1]['results'][matcheventkey] != False:
+                    attended_same_event = True
+                    break
+            if not attended_same_event:
+                event_matches.append((m1, m2))
+
+        # for d1, d2 in event_matches:
+        #     d1_scores = []
+        #     d2_scores = []
+        #     for matcheventkey in d1[1]['results'].keys():
+        #         d1_score = d1[1]['results'][matcheventkey].score if d1[1]['results'][matcheventkey] else '--'
+        #         d1_scores.append(d1_score)
+        #         d2_score = d2[1]['results'][matcheventkey].score if d2[1]['results'][matcheventkey] else '--'
+        #         d2_scores.append(d2_score)
+
+        #     print d1[0], d1_scores
+        #     print d2[0], d2_scores
+        #     print '\n'
+
 
         for sr in scresultdict.values():
             sr['score'], sr['scores'] = _calculateSeriesScore(series, sr['results'].values())
