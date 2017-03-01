@@ -1,6 +1,6 @@
 #losttime/views/series_result.py
 
-from flask import Blueprint, url_for, redirect, request, render_template, jsonify
+from flask import Blueprint, url_for, redirect, request, render_template, jsonify, flash
 from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, Series, SeriesClass, ClubCode
 from _output_templates import SeriesHtmlWriter
 from os.path import join
@@ -160,19 +160,7 @@ def _calculateSeries(seriesid):
                     break
             if not attended_same_event:
                 event_matches.append((m1, m2))
-
-        # for d1, d2 in event_matches:
-        #     d1_scores = []
-        #     d2_scores = []
-        #     for matcheventkey in d1[1]['results'].keys():
-        #         d1_score = d1[1]['results'][matcheventkey].score if d1[1]['results'][matcheventkey] else '--'
-        #         d1_scores.append(d1_score)
-        #         d2_score = d2[1]['results'][matcheventkey].score if d2[1]['results'][matcheventkey] else '--'
-        #         d2_scores.append(d2_score)
-
-        #     print d1[0], d1_scores
-        #     print d2[0], d2_scores
-        #     print '\n'
+                flash("Is {0} ({1}) the same person as {2} ({3})?".format(m1[1]['name'], m1[1]['club'], m2[1]['name'], m2[1]['club']))
 
 
         for sr in scresultdict.values():
