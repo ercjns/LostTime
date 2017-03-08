@@ -39,14 +39,13 @@
 </div>
 
 <h4 class="form-section-title">Scoring - Individuals</h4>
-<p><i>To exclude a class from results, select "Do Not Display."</i></p>
-<!--<p>Add JavaScript here to quickly set presets for WIOL scoring based on hard-coded class names.</p>-->
-<div class="row">
+<p>Preset Scoring Schemes: <button type="button" class="btn btn-default btn-sm" onclick=setCOCWiolScoring()>COC: Winter O / WIOL</button> <button type="button" class="btn btn-default btn-sm" onclick=setCOCUltimateScoring()>COC: Ultimate O</button></p>
+<div class="row" id="indv-scoremethod">
 {% for ec in classes %}
 	<div class="col-sm-6 col-md-4">
 	<div class="form-group">
 	<label for="class-score-method-{{ ec.id }}" class="control-label">{{ ec.name }} ({{ ec.shortname }})</label>
-	<select name="class-score-method-{{ ec.id }}" class="form-control">
+	<select name="class-score-method-{{ ec.id }}" class="form-control" data-classshortname="{{ ec.shortname }}">
 		<option value="time"{{ 'selected' if ec.scoremethod == 'time' }}>Time (no score)</option>
 		<option value="worldcup"{{ 'selected' if ec.scoremethod == 'worldcup' }}>World Cup (100, 95, 92, 90...)</option>
 		<option value="1000pts" {{ 'selected' if ec.scoremethod == '1000pts' }}>1000pts Ratio to Winner</option>
@@ -71,7 +70,7 @@
 		<div class="radio">
 			<label>
 				<input type="radio" name="event-team-score-method" value="wiol">
-				WIOL (COC) - sum top 3 individuals per team per class
+				COC: WIOL - sum top 3 individuals per team per class
 			</label>
 		</div>
 	</div>
@@ -107,4 +106,28 @@
 {% endblock %}
 
 {% block bottomscripts %}
+<script>
+function setCOCUltimateScoring() {
+	$('[data-classshortname="UJM"]').val("1000pts")
+	$('[data-classshortname="UJF"]').val("1000pts")
+	$('[data-classshortname="UOM"]').val("1000pts")
+	$('[data-classshortname="UOF"]').val("1000pts")
+	$('[data-classshortname="UMM"]').val("1000pts")
+	$('[data-classshortname="UMF"]').val("1000pts")
+}
+function setCOCWiolScoring() {
+	$('[data-classshortname="8F"]').val("worldcup")
+	$('[data-classshortname="8M"]').val("worldcup")
+	$('[data-classshortname="W1F"]').val("worldcup")
+	$('[data-classshortname="W1M"]').val("worldcup")
+	$('[data-classshortname="W2F"]').val("worldcup")
+	$('[data-classshortname="W2M"]').val("worldcup")
+	$('[data-classshortname="W3F"]').val("worldcup")
+	$('[data-classshortname="W4M"]').val("worldcup")
+	$('[data-classshortname="W5M"]').val("worldcup")
+	$('[data-classshortname="W6F"]').val("worldcup")
+	$('[data-classshortname="W6M"]').val("worldcup")
+	$('input[name="event-team-score-method"][value="wiol"]').prop('checked', 'checked')
+}
+</script>
 {% endblock%}
