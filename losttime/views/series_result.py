@@ -55,6 +55,8 @@ def series_info(seriesid):
             seriesteamclasstable.setdefault(etc.shortname, starterdict)[etc.eventid] = etc
         seriesteamclasses = sorted(seriesteamclasstable.items(), key=lambda x: x[0])
 
+        verifyScoringMethods(seriesclasses + seriesteamclasses)
+
         return render_template('seriesresult/info.html',
                                series=series,
                                events=events,
@@ -73,9 +75,8 @@ def series_info(seriesid):
         db.session.add(series)
         db.session.commit()
 
-        # delete seriesClass and seriesResult objects with this seriesid
+        # delete seriesClass objects with this seriesid
         SeriesClass.query.filter_by(seriesid=series.id).delete()
-        # SeriesResult.query.filter_by(seriesid=series.id).delete()
 
         for c in formdata['classes']:
             if len(c['eventclasses']) == 0:
@@ -129,8 +130,6 @@ def _calculateSeries(seriesid):
                 if r.resultstatus == 'nc':
                     continue
                 defaultdict = {'name':r.name, 'club':r.club_shortname, 'results':{x:False for x in eventids}}
-                # Key: NAME-CLUBCODE causes issues if club is inconsistent
-                # Key: NAME causes issues if people have the same name.
                 seriesresultkey = '{0}-{1}'.format(r.name.upper(), r.club_shortname)
                 scresultdict.setdefault(seriesresultkey, defaultdict)['results'][r.eventid] = r
         elif sc.classtype == 'team':
@@ -240,3 +239,18 @@ def sortTiedSeriesResults(a, b):
         return -1
     else:
         return 0
+
+def verifyScoringMethods(seriesclasslist):
+    """Flashes a message if events comprising a series class use
+    more than one scoring methond (and probably shouldn't be combined)
+    """
+    for scid, scinfo in seriesclasslist:
+        methods = []
+        for eid, ec in scinfo.iteritems():
+            if eid == 'name' or not ec:
+                continue
+            methods.append(ec.scoremethod)
+        if len(set(methods)) > 1:
+            flash("Events in class {0} use different scoring methods".format(
+                scinfo['name']
+            ))
