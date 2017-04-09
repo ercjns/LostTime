@@ -11,7 +11,9 @@
 # www.ercjns.com
 # 2016
 
+import csv
 from bs4 import BeautifulSoup as BS
+
 
 class Event(object):
     def __init__(self, name, date, venue):
@@ -58,7 +60,6 @@ class OrienteerResultReader(object):
     def __init__(self, file):
         self.file = file
         self.filetype = file.rsplit('.', 1)[1].lower()
-        
         if self.filetype == 'xml':
             self.isValid = self._validateXML()
         elif self.filetype == 'csv':
@@ -77,11 +78,11 @@ class OrienteerResultReader(object):
         if self.xmlv not in [2, 3]:
             return False
         return True
-    
+
     def _validateCSV(self):
         with open(self.file, 'r') as csvfile:
-            self.csvreader = csv.reader(csvfile, delimiter=',')
-            self.csvcols = self._getCSVcols(next(csvreader))
+            reader = csv.reader(csvfile, delimiter=',')
+            self.csvcols = self._getCSVcols(next(reader))
             if set(['name','class','time']) <= set(self.csvcols.keys()):
                 return True
         return False
@@ -93,7 +94,7 @@ class OrienteerResultReader(object):
             if 'name' in val:
                 datacols['name'] = idx
                 continue
-            elif 'class' in val:
+            elif 'class' in val and 'classlong' not in val:
                 datacols['class'] = idx
                 continue
             elif 'time' in val:
@@ -101,6 +102,9 @@ class OrienteerResultReader(object):
                 continue
             elif 'club' in val:
                 datacols['club'] = idx
+                continue
+            elif 'classlong' in val:
+                datacols['classlong'] = idx
                 continue
             else:
                 continue
@@ -124,26 +128,29 @@ class OrienteerResultReader(object):
         else:
             return 'unknown'
 
-
     def getEventMeta(self):
         #return Event object
         if self.filetype == 'xml':
             return self._getEventXML()
+        elif self.filetype == 'csv':
+            return self._getEventCSV()
         return None
 
     def getEventClasses(self):
         #return list of EventClass objects
         if self.filetype == 'xml':
             return self._getEventClassesXML()
+        elif self.filetype == 'csv':
+            return self._getEventClassesCSV()
         return None
 
     def getEventClassPersonResults(self, Oec):
         #return list of EPR objects
         if self.filetype == 'xml':
             return self._getEventClassPersonResultsXML(Oec)
+        elif self.filetype == 'csv':
+            return self._getEventClassPersonResultsCSV(Oec)
         return None
-
-
 
 
 ##########
@@ -336,7 +343,95 @@ class OrienteerResultReader(object):
 ##########
 # CSV Helper Functions
 ##########
+    def _getEventCSV(self):
+        return Event(
+            None,
+            None,
+            None,
+        )
+    def _getEventClassesCSV(self):
+        eventClasses = []
+        known_codes = []
+        with open(self.file, 'r') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+            next(reader) # skip header line
+            for line in reader:
+                class_short = self.__CSVgetEventClassShortName(line)
+                class_full = self.__CSVgetEventClassName(line)
+                if class_short in known_codes:
+                    continue
+                eventclass = EventClass(
+                    None,
+                    class_full,
+                    class_short,
+                    )
+                eventClasses.append(eventclass)
+                known_codes.append(class_short)
+        return eventClasses
+    def _getEventClassPersonResultsCSV(self, Oecr):
+        results = []
+        # May need to do something to get back to first line?
+        # Is there a better way than looping the entire file every time?
+        with open(self.file, 'r') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+            next(reader) # skip header line
+            for line in reader:
+                if self.__CSVgetEventClassShortName(line) != Oecr.shortname:
+                    continue
+                name = self.__CSVgetPersonResultName(line)
+                club = self.__CSVgetPersonResultClubShort(line)
+                time, coursestatus, resultstatus = self.__CSVgetPersonResultTime(line)
+                pr = EventPersonResult(
+                    name,
+                    None, # Bib
+                    None, # SiCard
+                    club,
+                    coursestatus,
+                    resultstatus,
+                    time,
+                )
+                results.append(pr)
+        return results
+
+
 ##########
 # CSV Parsing Functions
 ##########
 
+    def __CSVgetEventClassShortName(self, line):
+        return line[self.csvcols['class']].strip('\"\'\/\\ ')
+    def __CSVgetEventClassName(self, line):
+        try:
+            return line[self.csvcols['classlong']].strip('\"\'\/\\ ')
+        except:
+            return self.__CSVgetEventClassShortName(line)
+    def __CSVgetPersonResultName(self, line):
+        return str(line[self.csvcols['name']].strip('\"\'\/\\ '))
+    def __CSVgetPersonResultClubShort(self, line):
+        try:
+            return line[self.csvcols['club']].strip('\"\'\/\\ ')
+        except:
+            return None
+    def __CSVgetPersonResultTime(self, line):
+        timestr = line[self.csvcols['time']].strip('\"\'\/\\ ').lower()
+        timestr = timestr.split(':')
+        if len(timestr) == 3:
+            # HH:MM:SS
+            hours = int(timestr[0])
+            mins = int(timestr[1])
+            secs = int(timestr[2])
+            time = hours*3600 + mins*60 + secs
+            return time, 'ok', 'ok'
+        elif len(timestr) == 2:
+            # MMM:SS
+            mins = int(timestr[0])
+            secs = int(timestr[1])
+            time = mins*60 + secs
+            return time, 'ok', 'ok'
+        else:
+            if timestr in ['dnf', 'mp', 'msp']:
+                return None, timestr, 'ok'
+            elif timestr in ['dns', 'dsq', 'nc']:
+                return None, None, timestr
+            else:
+                raise ValueError("Unknown time value {0}".format(timestr))
