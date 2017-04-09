@@ -11,7 +11,7 @@
 # www.ercjns.com
 # 2016
 
-import csv
+import csv, unicodedata
 from bs4 import BeautifulSoup as BS
 
 
@@ -406,7 +406,8 @@ class OrienteerResultReader(object):
         except:
             return self.__CSVgetEventClassShortName(line)
     def __CSVgetPersonResultName(self, line):
-        return str(line[self.csvcols['name']].strip('\"\'\/\\ '))
+        name = unicode(line[self.csvcols['name']].strip('\"\'\/\\ '), 'utf-8')
+        return unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
     def __CSVgetPersonResultClubShort(self, line):
         try:
             return line[self.csvcols['club']].strip('\"\'\/\\ ')
