@@ -54,7 +54,7 @@ Dropzone.autoDiscover = false;
 var dzOptions = {
 	url: "{{url_for('eventResult.upload_event')}}",
 	paramName: "eventFile",
-	acceptedFiles: "text/xml",
+	acceptedFiles: "text/xml,.csv",
 	maxFiles: 1,
 	dictMaxFilesExceeded: "You may only upload one results file.",
 	autoProcessQueue: false,

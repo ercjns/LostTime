@@ -27,7 +27,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 eventfilepath = join('losttime', 'static', 'userfiles')
-eventfiles = UploadSet('eventfiles', ('xml',), lambda app:eventfilepath)
+eventfiles = UploadSet('eventfiles', ('xml', 'csv'), lambda app:eventfilepath)
 entryfilepath = join('losttime', 'static', 'userfiles')
 entryfiles = UploadSet('entryfiles', ('csv',), lambda app:entryfilepath)
 configure_uploads(app, (eventfiles, entryfiles))

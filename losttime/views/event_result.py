@@ -4,7 +4,7 @@ from flask import Blueprint, url_for, redirect, request, render_template, jsonif
 from datetime import datetime
 from losttime import eventfiles
 from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, ClubCode
-from _orienteer_data import OrienteerXmlReader
+from _orienteer_data import OrienteerResultReader
 from _output_templates import EventHtmlWriter
 from os import remove
 from os.path import join
@@ -27,36 +27,45 @@ def upload_event():
 
     elif request.method == 'POST':
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        filename = 'event_{0}.xml'.format(timestamp)
+        filename = 'eventResult_{0}.'.format(timestamp)
         try:
+            # filename ending with '.' applies extension to end
             infile = eventfiles.save(request.files['eventFile'], name=filename)
         except:
             return jsonify(error="Failed to save file, try again later"), 500
 
-
-        reader = OrienteerXmlReader(eventfiles.path(infile))
-        if not reader.validiofxml:
+        reader = OrienteerResultReader(eventfiles.path(infile))
+        if not reader.isValid:
             remove(eventfiles.path(infile))
-            return jsonify(error='Could not parse XML, please verify it is a XML v3 <ResultList> file.'), 422
-        eventdata = reader.getEventMeta()
+            return jsonify(error='Could not parse results from that file.'), 422
 
-        new_event = Event(eventdata['name'], eventdata['date'], eventdata['venue'], None)
+        Oevent = reader.getEventMeta()
+        new_event = Event(Oevent.name, Oevent.date, Oevent.venue, None)
         db.session.add(new_event)
         db.session.commit()
         eventid = new_event.id
 
-        for ec in eventdata['classes']:
-            new_ec = EventClass(eventid, ec.name, ec.shortname)
+        for Oec in reader.getEventClasses():
+            new_ec = EventClass(eventid, Oec.name, Oec.shortname, Oec.scoremethod)
             db.session.add(new_ec)
-            db.session.commit() # must commit to get id (?)
+            db.session.commit()
             classid = new_ec.id
 
-            results = reader.getClassPersonResults(ec.soupCR)
-            for pr in results:
-                new_pr = PersonResult(eventid, classid, pr.sicard, pr.name, pr.bib, pr.clubshortname, pr.coursestatus, pr.resultstatus, pr.time)
+            for Oepr in reader.getEventClassPersonResults(Oec):
+                new_pr = PersonResult(
+                    eventid,
+                    classid,
+                    Oepr.sicard,
+                    Oepr.name,
+                    Oepr.bib,
+                    Oepr.clubshortname,
+                    Oepr.coursestatus,
+                    Oepr.resultstatus,
+                    Oepr.time,
+                )
                 db.session.add(new_pr)
-        db.session.commit()
 
+        db.session.commit()
         remove(eventfiles.path(infile))
         return jsonify(eventid=eventid), 201
 
