@@ -430,6 +430,7 @@ class OrienteerResultReader(object):
             time = mins*60 + secs
             return time, 'ok', 'ok'
         else:
+            timestr = str(timestr[0])
             if timestr in ['dnf', 'mp', 'msp']:
                 return None, timestr, 'ok'
             elif timestr in ['dns', 'dsq', 'nc']:
