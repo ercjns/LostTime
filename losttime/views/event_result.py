@@ -107,7 +107,7 @@ def event_info(eventid):
         for key,doc in docdict.iteritems():
             filename = join(eventResult.static_folder, 'EventResult-{0:03d}-{1}.html'.format(int(eventid),key))
             with open(filename, 'w') as f:
-                f.write(doc.render())
+                f.write(doc.render().encode('utf-8'))
 
         return redirect(url_for('eventResult.event_results', eventid=eventid))
 
@@ -120,14 +120,14 @@ def event_results(eventid):
         indvfn = 'EventResult-{0:03d}-indv.html'.format(int(eventid))
         filepath = join(eventResult.static_folder, indvfn)
         with open(filepath) as f:
-            indvhtmldoc = f.read()
+            indvhtmldoc = f.read().decode('utf-8')
     except IOError:
         return "It seems that there are no event results files for event {0}".format(eventid), 404
     try:
         teamfn = 'EventResult-{0:03d}-team.html'.format(int(eventid))
         filepath = join(eventResult.static_folder, teamfn)
         with open(filepath) as f:
-            teamhtmldoc = f.read()
+            teamhtmldoc = f.read().decode('utf-8')
     except:
         teamfn = None
         teamhtmldoc = None

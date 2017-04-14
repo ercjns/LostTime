@@ -5,7 +5,7 @@ from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass,
 from _output_templates import SeriesHtmlWriter
 from os.path import join
 from fuzzywuzzy import fuzz
-import itertools
+import itertools, unicodedata
 
 
 seriesResult = Blueprint("seriesResult", __name__, static_url_path='/download', static_folder='../static/userfiles')
@@ -100,7 +100,7 @@ def series_info(seriesid):
         doc = writer.seriesResult()
         filename = join(seriesResult.static_folder, 'SeriesResult-{0:03d}.html'.format(int(seriesid)))
         with open(filename, 'w') as f:
-            f.write(doc.render())
+            f.write(doc.render().encode('utf-8'))
 
         return jsonify(seriesid=seriesid), 201
 
@@ -110,7 +110,7 @@ def series_result(seriesid):
         fn = 'SeriesResult-{0:03d}.html'.format(int(seriesid))
         filepath = join(seriesResult.static_folder, fn)
         with open(filepath) as f:
-            htmldoc = f.read()
+            htmldoc = f.read().decode('utf-8')
     except IOError:
         return "couldn't find that file...", 404
     return render_template('seriesresult/result.html', seriesid=seriesid, thehtml=htmldoc, fn=fn)
@@ -130,7 +130,8 @@ def _calculateSeries(seriesid):
                 if r.resultstatus == 'nc':
                     continue
                 defaultdict = {'name':r.name, 'club':r.club_shortname, 'results':{x:False for x in eventids}}
-                seriesresultkey = '{0}-{1}'.format(r.name.upper(), r.club_shortname)
+                ascii_name = unicodedata.normalize('NFKD', r.name.upper()).encode('ascii', 'ignore')
+                seriesresultkey = '{0}-{1}'.format(ascii_name, r.club_shortname)
                 scresultdict.setdefault(seriesresultkey, defaultdict)['results'][r.eventid] = r
         elif sc.classtype == 'team':
             results = TeamResult.query.filter(TeamResult.teamclassid.in_(ecids)).all()
