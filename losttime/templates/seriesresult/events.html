@@ -23,7 +23,18 @@
 <div class="row">
 <div class="col-sm-10 col-md-5 col-sm-offset-1">
 <h4 class="form-section-title">Available Events</h4>
-<p>Click on any event to add it to the series.</p>
+<p>Click on an event to add it to the series.</p>
+<p>
+Show results from the past <select name="event-age" id="event-age-select">
+    <option value="3">3 months</option>
+    <option value="6" selected>6 months</option>
+    <option value="9">9 months</option>
+    <option value="12">12 months</option>
+    <option value="18">18 months</option>
+    <option value="99">show all</option>
+</select>
+</p>
+
 <table class="table table-hover" id="eventstable">
     <thead>
         <tr>
@@ -80,6 +91,34 @@ function toggleEvent(tr){
         $("#seriestable").append(tr);
     }
 }
+
+$('#event-age-select').change(
+    function filterEventsDate(age){
+        var age = parseInt($(this).val());
+        var limit = (1000*60*60*24*30) * age
+        var now = Date.now();
+        var trs = $('#eventstable').find('tbody tr');
+        for (i = 0; i < trs.length; i++) {
+            date = $(trs[i]).find('td')[2]
+            if(age == 99) {
+                $(trs[i]).show();
+            } else {
+                if (date) {
+                    var res_date = new Date(date.textContent);
+                    var elapsed = now - res_date;
+                    if (elapsed < limit) {
+                        $(trs[i]).show();
+                    } else {
+                        $(trs[i]).hide();
+                    }
+                } else {
+                    $(trs[i]).hide();
+                }
+            }
+        }
+    }
+).change()
+
 
 function createSeries() {
     series = {
