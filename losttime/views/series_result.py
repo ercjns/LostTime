@@ -17,8 +17,9 @@ def home():
 @seriesResult.route('/events', methods=['GET', 'POST'])
 def select_events():
     if request.method == 'GET':
-        current_events = [3, 36, 26, 34, 35, 30]
-        events = Event.query.filter((Event.id.in_(current_events)) | (Event.id > 36)).all()
+        # current_events = [3, 36, 26, 34, 35, 30]
+        # events = Event.query.filter((Event.id.in_(current_events)) | (Event.id > 36)).all()
+        events = Event.query.all()
         return render_template('seriesresult/events.html', events=events)
 
     elif request.method == 'POST':
