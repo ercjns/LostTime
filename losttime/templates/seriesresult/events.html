@@ -84,12 +84,45 @@ Show results from the past <select name="event-age" id="event-age-select">
 
 {% block bottomscripts %}
 <script>
+
 function toggleEvent(tr){
-    if ($(tr).closest('table').attr('id') == "seriestable") {
-        $("#eventstable").append(tr);
+    console.log(tr);
+    if ($(tr).closest('table').attr('id') == "eventstable") {
+        //copy to seriestable
+        $(tr).clone().appendTo("#seriestable");
+        //hide in eventstable
+        $(tr).hide();
     } else {
-        $("#seriestable").append(tr);
+        //show in eventstable
+        $('tr[data-id="' + $(tr).data('id') + '"]').show();
+        //remove from seriestable
+        $(tr).remove();
     }
+}
+
+function fetchExistingSeriesEvents() {
+    //fetch the id from the seriescode
+    var serieskey = $("#seriescode").val();
+    //clear all the events from the right side
+    var toRemove = $('#seriestable tbody tr').toArray();
+    console.log(toRemove);
+    toRemove.forEach(toggleEvent);
+    
+    //query for event ids
+    jqxhr = $.get("{{ url_for('seriesResult.get_series_events', serieskey='') }}".concat(String(serieskey)))
+      .done(function(data) {
+        console.log("done handler");
+        console.log(data);
+        data.forEach(function(element) {
+            var row = $('tr[data-id=' + element + ']');
+            toggleEvent(row);
+        }, this);
+      })
+      .fail(function(data) {
+        console.log("fail handler");
+        console.log(data);
+        //show a message failed to get series events
+      });
 }
 
 $('#event-age-select').change(

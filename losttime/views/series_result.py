@@ -32,6 +32,14 @@ def select_events():
 
         return jsonify(seriesid=series.id), 202
 
+@seriesResult.route('/getEvents', methods=['GET'])
+def get_series_events():
+    serieskey = request.args.get('serieskey')
+    my_series = Series.query.get(serieskey)
+    events = my_series.eventids.split(',')
+    print(events)
+    return jsonify(events), 200
+
 @seriesResult.route('/info/<seriesid>', methods=['GET', 'POST'])
 def series_info(seriesid):
     if request.method == 'GET':
