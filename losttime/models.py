@@ -45,9 +45,12 @@ class PersonResult(db.Model):
     resultstatus = db.Column(db.String) # OK, DSQ, NC
     time = db.Column(db.Integer)
     position = db.Column(db.Integer)
-    score = db.Column(db.Float)
+    ScoreO_points = db.Column(db.Integer) #ScoreO points
+    ScoreO_penalty = db.Column(db.Integer) #ScoreO points penalty
+    ScoreO_net = db.Column(db.Integer) #ScoreO final score
+    score = db.Column(db.Float) #Season / carried score
 
-    def __init__(self, eventid, classid, sicard, name, bib, clubshort, coursestatus, resultstatus, time):
+    def __init__(self, eventid, classid, sicard, name, bib, clubshort, coursestatus, resultstatus, time, scoreO=None):
         self.eventid = eventid
         self.classid = classid
         self.sicard = sicard
@@ -57,6 +60,10 @@ class PersonResult(db.Model):
         self.coursestatus = coursestatus
         self.resultstatus = resultstatus
         self.time = time
+        if scoreO != None:
+            self.ScoreO_points = scoreO['points']
+            self.ScoreO_penalty = scoreO['penalty']
+            self.ScoreO_net = self.ScoreO_points - self.ScoreO_penalty
         return
 
     def timetommmss(self):

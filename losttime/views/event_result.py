@@ -34,7 +34,8 @@ def upload_event():
         except:
             return jsonify(error="Failed to save file, try again later"), 500
 
-        reader = OrienteerResultReader(eventfiles.path(infile))
+        isScoreO = request.form['event-type']
+        reader = OrienteerResultReader(eventfiles.path(infile), isScoreO)
         if not reader.isValid:
             remove(eventfiles.path(infile))
             return jsonify(error='Could not parse results from that file.'), 422
@@ -52,6 +53,10 @@ def upload_event():
             classid = new_ec.id
 
             for Oepr in reader.getEventClassPersonResults(Oec):
+                if isScoreO:
+                    ScoreO_data = {'points': Oepr.ScoreO_points, 'penalty': Oepr.ScoreO_penalty}
+                else:
+                    ScoreO_data = None
                 new_pr = PersonResult(
                     eventid,
                     classid,
@@ -62,6 +67,7 @@ def upload_event():
                     Oepr.coursestatus,
                     Oepr.resultstatus,
                     Oepr.time,
+                    ScoreO_data
                 )
                 db.session.add(new_pr)
 

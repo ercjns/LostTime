@@ -32,13 +32,39 @@
 		</div>
 	</div>
 </div>
+</div>
+</div> <!-- row -->
 
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
+<h4 class="form-section-title">Event Type</h4>
+<div class="row">
+	<div class="col-md-7">
+	<div class="form-group">
+		<div class="radio">
+			<label>
+				<input type="radio" name="event-type" value="standard" checked>
+				Standard point-to-point
+			</label>
+		</div>
+		<div class="radio">
+			<label>
+				<input type="radio" name="event-type" value="score">
+				Score-O
+			</label>
+		</div>
+	</div>
+	</div>
+</div>
+</div>
+</div> <!-- row -->
+
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
 <a href="{{ url_for('home_page') }}" class="btn btn-default"><i class="fa fa-home"></i> Home</a>
 <a id="uploadButton" onclick="sendFile()" class="btn btn-default btn-primary disabled">Go! <i class="fa fa-arrow-circle-right"></i></a>
-
-
 </div>
-</div>
+</div> <!-- row -->
 {% endblock %}
 
 {% block bottomscripts %}
@@ -67,6 +93,10 @@ var dzOptions = {
 		this.on("maxfilesexceeded", function(file){
 			$("#uploadButton").addClass("disabled")
 		});
+		this.on('sending', function(file, xhr, formData){
+			var eventType = $("input[type=radio][name=event-type]:checked").val();
+            formData.append('event-type', eventType);
+        });
 		this.on("error", function(file, message) {
 			var node, _i, _len, _ref, _results;
 			if (file.previewElement) {
@@ -90,7 +120,7 @@ var dzOptions = {
 		});
 		this.on("reset", function() {
 			$("#uploadButton").addClass("disabled")
-        	return this.element.classList.remove("dz-started");
+			return this.element.classList.remove("dz-started");
 		});
 		this.on("success", function(file, response) {
 			// console.log('Successfully saved event to database with id: '.concat(String(response.eventid)));
