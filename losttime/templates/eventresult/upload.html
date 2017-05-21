@@ -12,11 +12,50 @@
 <h3 class="page-title">Post Process Event Results Step 1: File Upload</h3>
 <div class="pinkline"></div>
 <h4 class="form-section-title">Event File</h4>
-<p>Use your event software to save results in the IOF <strong>XML v3</strong> format.</p> 
+<p>Use your event software to save results in the IOF <strong>XML v3</strong> format for point to point courses. For events that didn't use e-punch, or for other types of events, you can upload event results as a simple <strong>csv</strong> file.</p>
+
+<p><a onclick="togglecsvtable()" id="spectogglelink">Show the csv spec</a></p>
+<div id="csvspec" style="display:none;">
+	<table class="table table-striped table-condensed">
+		<tr>
+			<th>CSV Column Header</th>
+			<th>Definition</th>
+		</tr>
+		<tr>
+			<td><code>name</code></td>
+			<td><em>Required</em>. First and Last name in a single column. </td>
+		</tr>
+		<tr>
+			<td><code>class</code></td>
+			<td><em>Required</em>. Class code abbreviation</td>
+		</tr> 
+		<tr>
+			<td><code>classlong</code></td>
+			<td>Full name of class.</td>
+		</tr>
+		<tr>
+			<td><code>club</code></td>
+			<td>Club code abbreviation</td>
+		</tr>
+		<tr>
+			<td><code>time</code></td>
+			<td><em>Required</em>. Time may be formatted as <code>HH:MM:SS</code>, <code>MMM:SS</code>, or <code>SSS</code>. Will attempt to properly interpret values imported as <code>MM:SS:00</code>.</td>
+		</tr>
+		<tr>
+			<td><code>points</code></td>
+			<td><em>Score O only, Required</em>. The total point value collected. <strong>Not the net score.</strong> Score O scores are calculated as <code>points - penalty</code></td>
+		</tr>
+		<tr>
+			<td><code>penalty</code></td>
+			<td><em>Score O only, Required</em>. The penalty value in points. Absolute value is taken: penalty <code>80</code> and penalty <code>-80</code> will both subtract 80 from <code>points</code></td>
+		</tr>
+	</table>
+	<p>If the exact string is found <em>within</em> a column header in the csv file, it is a match: column header <code>ScoreO Penalty</code> in the csv file matches <code>penalty</code>. The csv file may include any set of these columns in any order. Columns in the file that do not match will be ignored. Some behavior is currently ambiguous: if your file contains columns <code>club name</code> and <code>club code</code>, you might see unexpected data in <code>name</code> output.</p>
+</div>
 
 
 <div id="theDropzone" class="dropzone">
-	<div class="dz-default dz-message"><span>Drop XML file here (or click for file browser)</span></div>
+	<div class="dz-default dz-message"><span>Drop XML or CSV file here (or click for file browser)</span></div>
 </div>
 
 <div class="files" id="previews">
@@ -133,6 +172,17 @@ var myDropzone = new Dropzone("div#theDropzone", dzOptions);
 function sendFile() {
 	$('#uploadButton').after('<span id="spinner"><i class="fa fa-cog fa-spin fa-2x fa-fw" style="vertical-align:middle;"></i><span class="sr-only">Loading...</span></span>');
 	myDropzone.processQueue();
+}
+
+function togglecsvtable() {
+	if ($("#csvspec").css('display') == 'none') {
+		$("#csvspec").show();
+		$("#spectogglelink").text("Hide the csv spec");
+	}
+	else {
+		$("#csvspec").hide();
+		$("#spectogglelink").text("Show the csv spec");
+	}
 }
 </script>
 {% endblock %}
