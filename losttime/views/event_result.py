@@ -34,14 +34,19 @@ def upload_event():
         except:
             return jsonify(error="Failed to save file, try again later"), 500
 
-        isScoreO = request.form['event-type']
+        if request.form['event-type'] == 'score':
+            isScoreO = True
+            event_type = 'score'
+        else:
+            isScoreO = False
+            event_type = 'standard'
         reader = OrienteerResultReader(eventfiles.path(infile), isScoreO)
         if not reader.isValid:
             remove(eventfiles.path(infile))
             return jsonify(error='Could not parse results from that file.'), 422
 
         Oevent = reader.getEventMeta()
-        new_event = Event(Oevent.name, Oevent.date, Oevent.venue, None)
+        new_event = Event(Oevent.name, Oevent.date, Oevent.venue, None, event_type)
         db.session.add(new_event)
         db.session.commit()
         eventid = new_event.id
@@ -173,6 +178,21 @@ def _assignPositions(eventid):
                 db.session.commit()
                 db.session.flush()
 
+            elif ec.scoremethod in ['score', 'score1000']:
+                ec_results.sort(key=lambda x: x.time) #secondary key
+                ec_results.sort(key=lambda x: x.ScoreO_net, reverse=True) #primary key
+                prev_result = (0, 1, -1, -1) # (position, results in current position, time, score)
+                for i in range(len(ec_results)):
+                    if ec_results[i].coursestatus != 'ok' or ec_results[i].resultstatus != 'ok':
+                        ec_results[i].position = -1
+                        continue
+                    ec_results[i].position = prev_result[0] + prev_result[1]
+                    if ec_results[i].time == prev_result[2] and ec_results[i].ScoreO_net == prev_result[3]:
+                        ec_results[i].position = prev_result[0]
+                        prev_result = (ec_results[i].position, prev_result[1]+1, ec_results[i].time, ec_results[i].ScoreO_net)
+                    else:
+                        prev_result = (ec_results[i].position, 1, ec_results[i].time, ec_results[i].ScoreO_net)
+
             elif ec.scoremethod in ['alpha', 'hide']:
                 continue
             else:
@@ -233,6 +253,29 @@ def _assignScores(eventid):
                 else:
                     r.score = 0
             db.session.add_all(results)
+        elif ec.scoremethod == 'score':
+            results = PersonResult.query.filter_by(eventid=eventid).filter_by(classid=ec.id).all()
+            for r in results:
+                if r.position > 0:
+                    r.score = r.ScoreO_net
+                else:
+                    r.score = 0
+        elif ec.scoremethod == 'score1000':
+            results = PersonResult.query.filter_by(eventid=eventid).filter_by(classid=ec.id).all()
+            win_time, win_score = next(((x.time, x.ScoreO_net) for x in results if x.position == 1), 0)
+            print(win_time, win_score)
+            for r in results:
+                if r.ScoreO_net == win_score:
+                    r.score = round((float(win_time) / r.time) * 1000)
+            slowestSweepScore = min([x.score for x in results if x.score > 0])
+            for r in results:
+                if r.score != None:
+                    continue
+                if r.position > 0:
+                    r.score = round((r.ScoreO_net / float(win_score)) * slowestSweepScore)
+                else:
+                    r.score = 0
+
         elif ec.scoremethod in ['', 'hide', 'alpha']:
             continue
         else:

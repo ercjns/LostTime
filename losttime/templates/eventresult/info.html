@@ -46,11 +46,16 @@
 	<div class="form-group">
 	<label for="class-score-method-{{ ec.id }}" class="control-label">{{ ec.name }} ({{ ec.shortname }})</label>
 	<select name="class-score-method-{{ ec.id }}" class="form-control" data-classshortname="{{ ec.shortname }}">
-		<option value="time"{{ 'selected' if ec.scoremethod == 'time' }}>Time (no score)</option>
-		<option value="worldcup"{{ 'selected' if ec.scoremethod == 'worldcup' }}>World Cup (100, 95, 92, 90...)</option>
-		<option value="1000pts" {{ 'selected' if ec.scoremethod == '1000pts' }}>1000pts Ratio to Winner</option>
-		<option value="alpha"{{ 'selected' if ec.scoremethod == 'alpha' }}>No Rank (alphabetical list)</option>
-		<option value="hide"{{ 'selected' if ec.scoremethod == 'hide' }}>Do Not Display</option>
+		{% if event.type == 'standard' %}
+			<option value="time"{{ 'selected' if ec.scoremethod == 'time' }}>Time (no score)</option>
+			<option value="worldcup"{{ 'selected' if ec.scoremethod == 'worldcup' }}>World Cup (100, 95, 92, 90...)</option>
+			<option value="1000pts" {{ 'selected' if ec.scoremethod == '1000pts' }}>1000pts Ratio to Winner</option>
+		{% elif event.type == 'score' %}
+			<option value="score"{{ 'selected' if ec.scoremethod == 'score' }}>Score O: Points</option>
+			<option value="score1000"{{ 'selected' if ec.scoremethod == 'score1000' }}>Score O: 1000pts Ratio</option>
+		{% endif %}
+			<option value="alpha"{{ 'selected' if ec.scoremethod == 'alpha' }}>No Rank (alphabetical list)</option>
+			<option value="hide"{{ 'selected' if ec.scoremethod == 'hide' }}>Do Not Display</option>
 	</select>
 	</div>
 	</div>

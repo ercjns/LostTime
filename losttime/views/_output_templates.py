@@ -71,29 +71,37 @@ class EventHtmlWriter(object):
                     h3(ec.name, id=ec.shortname)
                     t = table(cls='table table-striped table-condensed', id='ResultsTable-{0}'.format(ec.shortname))
                     with t.add(tr(id='column-titles')):
-                        if ec.scoremethod in ['time', 'worldcup', '1000pts']:
+                        if ec.scoremethod in ['time', 'worldcup', '1000pts', 'score', 'score1000']:
                             classresults = _sortByPosition(classresults)
                             th('Pos.')
                         th('Name')
                         if ec.scoremethod in ['alpha']:
                             classresults = _sortByName(classresults)
                         th('Club')
+                        if ec.scoremethod in ['score', 'score1000']:
+                            th('Points')
+                            th('Penalty')
+                            th('Total')
                         th('Time')
-                        if ec.scoremethod in ['1000pts', 'worldcup']:
+                        if ec.scoremethod in ['1000pts', 'worldcup', 'score1000']:
                             th('Score')
                     for pr in classresults:
                         with t.add(tr()):
-                            if ec.scoremethod in ['time', 'worldcup', '1000pts']:
+                            if ec.scoremethod in ['time', 'worldcup', '1000pts', 'score', 'score1000']:
                                 td(pr.position) if pr.position > 0 else td()
                             td(pr.name)
                             td(pr.club_shortname) if pr.club_shortname else td()
+                            if ec.scoremethod in ['score', 'score1000']:
+                                td(pr.ScoreO_points)
+                                td(pr.ScoreO_penalty)
+                                td(pr.ScoreO_net)
                             if pr.coursestatus in ['ok']:
                                 td(pr.timetommmss())
                             elif pr.resultstatus in ['ok']:
                                 td('{1} {0}'.format(pr.timetommmss(), pr.coursestatus))
                             else:
                                 td('{1} {2} {0}'.format(pr.timetommmss(), pr.coursestatus, pr.resultstatus))
-                            if (ec.scoremethod in ['worldcup', '1000pts']):
+                            if (ec.scoremethod in ['worldcup', '1000pts', 'score1000']):
                                 td('{0:d}'.format(int(pr.score))) if pr.score is not None else td()
         return doc # __writeEventResultIndv
 
@@ -133,20 +141,28 @@ class EventHtmlWriter(object):
                     h3(ec.name, id=ec.shortname)
                     t = table(cls="table table-striped", id='ResultsTable-{0}'.format(ec.shortname)).add(tbody())
                     with t.add(tr(id="column-titles")):
-                        if ec.scoremethod in ['time', 'worldcup', '1000pts']:
+                        if ec.scoremethod in ['time', 'worldcup', '1000pts', 'score', 'score1000']:
                             classresults = _sortByPosition(classresults)
                             th('Pos.')
                         th('Name')
                         th('Club')
+                        if ec.scoremethod in ['score', 'score1000']:
+                            th('Points')
+                            th('Penalty')
+                            th('Total')
                         th('Time')
-                        if ec.scoremethod in ['1000pts', 'worldcup']:
+                        if ec.scoremethod in ['1000pts', 'worldcup', 'score1000']:
                             th('Score')
                     for pr in classresults:
                         with t.add(tr()):
-                            if ec.scoremethod in ['time', 'worldcup', '1000pts']:
+                            if ec.scoremethod in ['time', 'worldcup', '1000pts', 'score', 'score1000']:
                                 td(pr.position) if pr.position > 0 else td()
                             td(pr.name)
                             td(pr.club_shortname) if pr.club_shortname else td()
+                            if ec.scoremethod in ['score', 'score1000']:
+                                td(pr.ScoreO_points)
+                                td(pr.ScoreO_penalty)
+                                td(pr.ScoreO_net)
                             if pr.coursestatus in ['ok']:
                                 td(pr.timetommmss())
                             elif pr.resultstatus in ['ok']:
@@ -155,7 +171,7 @@ class EventHtmlWriter(object):
                                 td('{0}'.format(pr.resultstatus))
                             else:
                                 td('{0} {1}*'.format(pr.resultstatus, pr.timetommmss()))
-                            if (ec.scoremethod in ['worldcup', '1000pts']):
+                            if (ec.scoremethod in ['worldcup', '1000pts', 'score1000']):
                                 td('{0:d}'.format(int(pr.score))) if pr.score is not None else td()
                 p(a("Menu", href="#lt-top"), cls="lg-mrg-bottom text-center")
             if len(self.teamclasses) > 0:
