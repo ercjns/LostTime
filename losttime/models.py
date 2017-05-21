@@ -9,13 +9,15 @@ class Event(db.Model):
     date = db.Column(db.DateTime)
     venue = db.Column(db.String)
     host = db.Column(db.String)
+    type = db.Column(db.String)
     created = db.Column(db.DateTime)
 
-    def __init__(self, name, date, venue, host):
+    def __init__(self, name, date, venue, host, type='standard'):
         self.name = name
         self.date = date
         self.venue = venue
         self.host = host
+        self.type = type
         self.created = datetime.now()
         return
 
@@ -45,9 +47,12 @@ class PersonResult(db.Model):
     resultstatus = db.Column(db.String) # OK, DSQ, NC
     time = db.Column(db.Integer)
     position = db.Column(db.Integer)
-    score = db.Column(db.Float)
+    ScoreO_points = db.Column(db.Integer) #ScoreO points
+    ScoreO_penalty = db.Column(db.Integer) #ScoreO points penalty
+    ScoreO_net = db.Column(db.Integer) #ScoreO final score
+    score = db.Column(db.Float) #Season / carried score
 
-    def __init__(self, eventid, classid, sicard, name, bib, clubshort, coursestatus, resultstatus, time):
+    def __init__(self, eventid, classid, sicard, name, bib, clubshort, coursestatus, resultstatus, time, scoreO=None):
         self.eventid = eventid
         self.classid = classid
         self.sicard = sicard
@@ -57,6 +62,12 @@ class PersonResult(db.Model):
         self.coursestatus = coursestatus
         self.resultstatus = resultstatus
         self.time = time
+        if scoreO != None:
+            self.ScoreO_points = scoreO['points']
+            self.ScoreO_penalty = scoreO['penalty']
+            self.ScoreO_net = self.ScoreO_points - self.ScoreO_penalty
+            if self.ScoreO_net < 0:
+                self.ScoreO_net = 0
         return
 
     def timetommmss(self):

@@ -38,7 +38,7 @@ class EventClass(object):
 
 
 class EventPersonResult(object):
-    def __init__(self, name, bib, si, clubshort, coursestatus, resultstatus, time):
+    def __init__(self, name, bib, si, clubshort, coursestatus, resultstatus, time, score_points=None, score_penalty=None):
         self.name = name
         self.bib = bib
         self.sicard = si
@@ -49,6 +49,9 @@ class EventPersonResult(object):
         self.score = None
         self.position = None
 
+        self.ScoreO_points = score_points
+        self.ScoreO_penalty = score_penalty
+
         self.event = None
         self.eventclass = None
         self.eventcourse = None
@@ -57,8 +60,9 @@ class EventPersonResult(object):
         return 'EventPersonResult {0} ({1})'.format(self.name, self.clubshortname)
 
 class OrienteerResultReader(object):
-    def __init__(self, file):
+    def __init__(self, file, ScoreO=False):
         self.file = file
+        self.ScoreO = ScoreO
         self.filetype = file.rsplit('.', 1)[1].lower()
         if self.filetype == 'xml':
             self.isValid = self._validateXML()
@@ -83,8 +87,11 @@ class OrienteerResultReader(object):
         with open(self.file, 'r') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             self.csvcols = self._getCSVcols(next(reader))
-            if set(['name','class','time']) <= set(self.csvcols.keys()):
-                return True
+            if set(['name', 'class', 'time']) <= set(self.csvcols.keys()):
+                if not self.ScoreO:
+                    return True
+                elif 'points' in self.csvcols.keys():
+                    return True
         return False
 
     def _getCSVcols(self, headerline):
@@ -106,6 +113,10 @@ class OrienteerResultReader(object):
             elif 'classlong' in val:
                 datacols['classlong'] = idx
                 continue
+            elif 'points' in val:
+                datacols['points'] = idx
+            elif 'penalty' in val:
+                datacols['penalty'] = idx
             else:
                 continue
         return datacols
@@ -381,6 +392,12 @@ class OrienteerResultReader(object):
                 name = self.__CSVgetPersonResultName(line)
                 club = self.__CSVgetPersonResultClubShort(line)
                 time, coursestatus, resultstatus = self.__CSVgetPersonResultTime(line)
+                if self.ScoreO:
+                    score_points = self.__CSVgetPersonResultScorePoints(line)
+                    score_penalty = self.__CSVgetPersonResultScorePenalty(line)
+                else:
+                    score_points = None
+                    score_penalty = None
                 pr = EventPersonResult(
                     name,
                     None, # Bib
@@ -389,6 +406,8 @@ class OrienteerResultReader(object):
                     coursestatus,
                     resultstatus,
                     time,
+                    score_points,
+                    score_penalty
                 )
                 results.append(pr)
         return results
@@ -421,6 +440,11 @@ class OrienteerResultReader(object):
             hours = int(timestr[0])
             mins = int(timestr[1])
             secs = int(timestr[2])
+            if hours >= 8 and secs == 0:
+                #likely excel being dumb "45:24:00"
+                secs = mins
+                mins = hours
+                hours = 0
             time = hours*3600 + mins*60 + secs
             return time, 'ok', 'ok'
         elif len(timestr) == 2:
@@ -437,3 +461,14 @@ class OrienteerResultReader(object):
                 return None, None, timestr
             else:
                 raise ValueError("Unknown time value {0}".format(timestr))
+    def __CSVgetPersonResultScorePoints(self, line):
+        points = line[self.csvcols['points']].strip('\"\'\/\\ ')
+        try:
+            return int(points)
+        except:
+            raise ValueError("unknown Score O point value {0}".format(points))
+    def __CSVgetPersonResultScorePenalty(self, line):
+        try:
+            return abs(int(line[self.csvcols['penalty']].strip('\"\'\/\\ ')))
+        except:
+            return 0

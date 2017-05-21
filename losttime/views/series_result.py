@@ -261,6 +261,7 @@ def verifyScoringMethods(seriesclasslist):
                 continue
             methods.append(ec.scoremethod)
         if len(set(methods)) > 1:
-            flash("Events in class {0} use different scoring methods".format(
-                scinfo['name']
-            ))
+            if set(methods) != set(['1000pts', 'score1000']):
+                flash("Events in class {0} use different scoring methods".format(
+                    scinfo['name']
+                ))
