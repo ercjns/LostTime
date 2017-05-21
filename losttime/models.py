@@ -9,13 +9,15 @@ class Event(db.Model):
     date = db.Column(db.DateTime)
     venue = db.Column(db.String)
     host = db.Column(db.String)
+    type = db.Column(db.String)
     created = db.Column(db.DateTime)
 
-    def __init__(self, name, date, venue, host):
+    def __init__(self, name, date, venue, host, type='standard'):
         self.name = name
         self.date = date
         self.venue = venue
         self.host = host
+        self.type = type
         self.created = datetime.now()
         return
 
@@ -64,6 +66,8 @@ class PersonResult(db.Model):
             self.ScoreO_points = scoreO['points']
             self.ScoreO_penalty = scoreO['penalty']
             self.ScoreO_net = self.ScoreO_points - self.ScoreO_penalty
+            if self.ScoreO_net < 0:
+                self.ScoreO_net = 0
         return
 
     def timetommmss(self):
