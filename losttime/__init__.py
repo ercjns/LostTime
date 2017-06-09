@@ -5,6 +5,7 @@ from flask import render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_uploads import UploadSet, configure_uploads
+from flask_sslify import SSLify
 
 from os.path import join
 
@@ -12,6 +13,8 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 app = Flask(__name__, instance_relative_config=True)
+
+sslify = SSLify(app)
 
 app.config.from_object('config')
 try:
