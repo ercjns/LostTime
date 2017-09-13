@@ -1,6 +1,7 @@
 # losttime/views/_output_templates.py
 
 import datetime
+import pytz
 import csv, fileinput, sys
 import dominate
 from dominate.tags import *
@@ -481,7 +482,11 @@ class EntryWriter(object):
         rentalDocA += rentalDoc + '</table>\n'
         rentalDocB += rentalDoc + '</table>\n'
         ownersDoc += '</table>\n'
-        timestamp = '<p id="createdate">{}</p>'.format(datetime.datetime.now().strftime('%H:%M %A %d %b %Y'))
+        pacificTZ = pytz.timezone('US/Pacific')
+        utc = pytz.timezone('UTC')
+        now = utc.localize(datetime.datetime.utcnow())
+        localtime = now.astimezone(pacificTZ)
+        timestamp = '<p id="createdate">{}</p>'.format(localtime.strftime('%H:%M %A %d %b %Y %Z%z'))
         header = '<!DOCTYPE html><html>\n<head>\n' + timestamp + '</head>\n'
         pagebreak = '\n<p style="page-break-before: always" ></p>\n'
         doc = header + ownersDoc + pagebreak + rentalDocA + pagebreak + rentalDocB + '</body></html>\n'
