@@ -37,16 +37,21 @@ def upload_entries():
             except:
                 return jsonify(error="Server error: Failed to save file"), 500
 
-        writer = EntryWriter(infiles, 'OE', request.form['entry-type'])
+        writer = EntryWriter(infiles, request.form['entry-format'], request.form['entry-type'])
         try:
             doc = writer.writeEntries()
         except:
             for path in infiles:
                 remove(path)
             return jsonify(error="Unable to parse entries from this csv file"), 400
-        outfilename = join(entryManager.static_folder, 'EntryForOE-{0}.csv'.format(request.form['stamp']))
-        with open(outfilename, 'w') as out:
-            out.write(doc)
+        if request.form['entry-format'] == 'OE':
+            outfilename = join(entryManager.static_folder, 'EntryForOE-{0}.csv'.format(request.form['stamp']))
+            with open(outfilename, 'w') as out:
+                out.write(doc)
+        elif request.form['entry-format'] == 'CheckIn':
+            outfilename = join(entryManager.static_folder, 'EntryForCheckIn-{0}.pdf'.format(request.form['stamp']))
+            from weasyprint import HTML
+            HTML(string=doc).write_pdf(outfilename, stylesheets=[join(entryManager.static_folder,'CheckInEntries.css')])
         for path in infiles:
             remove(path)
         return jsonify(stamp=request.form['stamp']), 201
@@ -59,11 +64,16 @@ def download_entries(entryid):
     """
     entryfn = 'EntryForOE-{0}.csv'.format(entryid)
     if isfile(join(entryManager.static_folder, entryfn)):
-        stats = _entries_stats(join(entryManager.static_folder, entryfn))
+        stats = _entries_stats_OE(join(entryManager.static_folder, entryfn))
         return render_template('entrymanager/download.html', entryfn=entryfn, stats=stats)
+
+    entryfn = 'EntryForCheckIn-{0}.pdf'.format(entryid)
+    if isfile(join(entryManager.static_folder, entryfn)):
+        return render_template('entrymanager/download.html', entryfn=entryfn)
+
     return("Hmm... we didn't find that file"), 404
 
-def _entries_stats(filename):
+def _entries_stats_OE(filename):
     with open(filename, 'r') as f:
         numentries = 0
         categories = []

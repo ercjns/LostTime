@@ -47,7 +47,7 @@ class EventHtmlWriter(object):
                  href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css',
                  integrity='sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7',
                  crossorigin='anonymous')
-            link(rel='stylsheet',
+            link(rel='stylesheet',
                  href='https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css')
             meta(name='viewport', content='width=device-width, initial-scale=1.0')
         with doc:
@@ -369,8 +369,10 @@ class EntryWriter(object):
     def writeEntries(self):
         if self.format == 'OE':
             return self.__writeOEentries()
+        elif self.format == 'CheckIn':
+            return self.__writeCheckInEntries()
         else:
-            raise KeyError("Unrecognized output format for entries")
+            raise KeyError("Unrecognized output format for entries: {}".format(self.format))
 
     def __writeOEentries(self):
         template = ';{0};;{1};;{2};{3};;{4};;{5};;;;0;;;;;;{6};;;;;{7};;;;;;;;;;;;;;;;;;;;;;;{8};0;X;;;;;;\n'
@@ -420,6 +422,72 @@ class EntryWriter(object):
                     doc += regline
         return doc
 
+    def __writeCheckInEntries(self):
+        rentalDocA = '<h2>Pre-Registered List: RENTAL e-punches (List A)</h2>\n'
+        rentalDocB = '<h2>Pre-Registered List: RENTAL e-punches (List B)</h2>\n'
+        rentalDoc = '<h4>REGISTRATION VOLUNTEERS</h4><p>Check off ALL participants in the first column as they arrive. Collect money from those who owe it and mark it out.</br>Write in e-punch numbers (clearly!) and bring this page to finish ASAP while using the other copy of this list.</p>\n'
+        rentalDoc += '<h4>FINISH VOLUNTEERS</h4><p>For any handwritten e-punch numbers without check marks, find the name in the e-punch software, enter the number, and add a check to this form. Return this list registration.</p>\n<hr />\n'
+        ownersDoc = '<h2>Pre-Registered List: OWNED e-punches</h2>\n'
+        ownersDoc += '<h4>REGISTRATION VOLUNTEERS</h4><p>Check off ALL participants in the first column as they arrive. Collect money from those who owe it and mark it out when paid.</p>\n<hr />\n'
+        
+        tablehead = '<table>\n<thead><tr><th class="check">&#x2714;</th><th>First</th><th>Last</th><th>Owes</th><th>Course</th><th>E-Punch</th><th>Club</th><th>Phone</th><th>Emergency Phone</th><th>Car</th></tr></thead>\n'
+
+        rentalDoc += tablehead
+        ownersDoc += tablehead
+        OWN_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td>{}</td><td class="punch">{}</td><td>{}</td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
+        RENT_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td>{}</td><td class="rentpunch"></td><td>{}</td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
+
+        for f in self.files:
+
+            for line in fileinput.input(files=(f), inplace=True):
+                line = line.replace('\0', '')
+                sys.stdout.write(line)
+
+            with open(f, 'r') as currentfile:
+                regreader = csv.reader(currentfile, delimiter=',')
+                datacols = self.__identify_columns(next(regreader))
+                
+                for line in regreader:
+                    first = line[datacols['first']].strip('\"\'\/\\ ').replace('_', ' ')
+                    last = line[datacols['last']].strip('\"\'\/\\ ').replace('_', ' ')
+                    club = line[datacols['club']].strip('\"\'\/\\ ')
+                    cat = line[datacols['cat']].strip('\"\'\/\\ ')
+                    sex = line[datacols['sex']].strip('\"\'\/\\ ')
+                    punch = line[datacols['punch']].strip('\"\'\/\\ ')
+                    paid = line[datacols['paid']].strip('\"\'\/\\ ')
+                    owed = line[datacols['owed']].strip('\"\'\/\\ ')
+                    phone = line[datacols['phone1']].strip('\"\'\/\\ ').replace('\\', ' ').replace('/', ' ').replace('-', '.')
+                    phone2 = line[datacols['phone2']].strip('\"\'\/\\ ').replace('\\', ' ').replace('/', ' ').replace('-', '.')
+                    license = line[datacols['license']].strip('\"\'\/\\ ')
+
+                    rental = True if len(punch) == 0 else False
+                    paid = True if len(owed) == 0 else False
+                    
+
+                    if (first == '') and (last == '') and (club == '') and (cat == ''):
+                        continue
+                    if not paid:
+                        owed = '${}'.format(owed)
+                        box = owed
+                    else:
+                        box = ''
+
+                    if rental:
+                        newline = RENT_TEMPLATE.format(box, first, last, owed, cat, club, phone, phone2, license)
+                        rentalDoc += newline
+                    else:
+                        newline = OWN_TEMPLATE.format(box, first, last, owed, cat, punch, club, phone, phone2, license)
+                        ownersDoc += newline
+        rentalDocA += rentalDoc + '</table>\n'
+        rentalDocB += rentalDoc + '</table>\n'
+        ownersDoc += '</table>\n'
+        timestamp = '<p id="createdate">{}</p>'.format(datetime.datetime.now().strftime('%H:%M %A %d %b %Y'))
+        header = '<!DOCTYPE html><html>\n<head>\n' + timestamp + '</head>\n'
+        pagebreak = '\n<p style="page-break-before: always" ></p>\n'
+        doc = header + ownersDoc + pagebreak + rentalDocA + pagebreak + rentalDocB + '</body></html>\n'
+        return doc
+
+
     def __identify_columns(self, headerline):
         """return dict of indexes for output columns"""
         datacols = {}
@@ -451,6 +519,21 @@ class EntryWriter(object):
                 continue
             elif 'nc' in val and 'emergency' not in val:
                 datacols['nc'] = idx
+                continue
+            elif 'paid' in val:
+                datacols['paid'] = idx
+                continue
+            elif 'owed' in val:
+                datacols['owed'] = idx
+                continue
+            elif 'phone' in val and 'emergency' not in val:
+                datacols['phone1'] = idx
+                continue
+            elif 'emergencyphone' in val:
+                datacols['phone2'] = idx
+                continue
+            elif 'license' in val:
+                datacols['license'] = idx
                 continue
             else:
                 continue
