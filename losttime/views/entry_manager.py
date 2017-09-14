@@ -37,7 +37,7 @@ def upload_entries():
             except:
                 return jsonify(error="Server error: Failed to save file"), 500
 
-        writer = EntryWriter(infiles, request.form['entry-format'], request.form['entry-type'])
+        writer = EntryWriter(infiles, request.form['entry-format'], request.form['entry-type'], request.form['entry-punch'])
         try:
             doc = writer.writeEntries()
         except:

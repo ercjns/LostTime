@@ -361,10 +361,11 @@ class SeriesHtmlWriter(object):
 
 
 class EntryWriter(object):
-    def __init__(self, infiles, format, eventtype='standard', bibstart=1001):
+    def __init__(self, infiles, format, eventtype='standard', punchtype='epunch', bibstart=1001):
         self.files = infiles
         self.format = format
         self.eventtype = eventtype
+        self.epunch = True if punchtype == 'epunch' else False
         self.bibnum = _nextbib(bibstart)
 
     def writeEntries(self):
@@ -424,19 +425,28 @@ class EntryWriter(object):
         return doc
 
     def __writeCheckInEntries(self):
-        rentalDocA = '<h2>Pre-Registered List: RENTAL e-punches (List A)</h2>\n'
-        rentalDocB = '<h2>Pre-Registered List: RENTAL e-punches (List B)</h2>\n'
-        rentalDoc = '<h4>REGISTRATION VOLUNTEERS</h4><p>Check off ALL participants in the first column as they arrive. Collect money from those who owe it and mark it out.</br>Write in e-punch numbers (clearly!) and bring this page to finish ASAP while using the other copy of this list.</p>\n'
-        rentalDoc += '<h4>FINISH VOLUNTEERS</h4><p>For any handwritten e-punch numbers without check marks, find the name in the e-punch software, enter the number, and add a check to this form. Return this list registration.</p>\n<hr />\n'
-        ownersDoc = '<h2>Pre-Registered List: OWNED e-punches</h2>\n'
-        ownersDoc += '<h4>REGISTRATION VOLUNTEERS</h4><p>Check off ALL participants in the first column as they arrive. Collect money from those who owe it and mark it out when paid.</p>\n<hr />\n'
-        
-        tablehead = '<table>\n<thead><tr><th class="check">&#x2714;</th><th>First</th><th>Last</th><th>Owes</th><th>Course</th><th>E-Punch</th><th>Club</th><th>Phone</th><th>Emergency Phone</th><th>Car</th></tr></thead>\n'
+        if self.epunch:
+            rentalDocA = '<h2>Pre-Registered List: RENTAL e-punches (List A)</h2>\n'
+            rentalDocB = '<h2>Pre-Registered List: RENTAL e-punches (List B)</h2>\n'
+            rentalDoc = '<h4>REGISTRATION VOLUNTEERS</h4><p>Check off ALL participants in the first column as they arrive. Collect money from those who owe it and mark it out.</br>Write in e-punch numbers (clearly!) and bring this page to finish ASAP while using the other copy of this list.</p>\n'
+            rentalDoc += '<h4>FINISH VOLUNTEERS</h4><p>For any handwritten e-punch numbers without check marks, find the name in the e-punch software, enter the number, and add a check to this form. Return this list registration.</p>\n<hr />\n'
 
-        rentalDoc += tablehead
-        ownersDoc += tablehead
-        OWN_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td>{}</td><td class="punch">{}</td><td>{}</td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
-        RENT_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td>{}</td><td class="rentpunch"></td><td>{}</td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
+            ownersDoc = '<h2>Pre-Registered List: OWNED e-punches</h2>\n'
+            ownersDoc += '<h4>REGISTRATION VOLUNTEERS</h4><p>Check off ALL participants in the first column as they arrive. Collect money from those who owe it and mark it out when paid.</p>\n<hr />\n'
+
+            tablehead = '<table>\n<thead><tr><th class="check">&#x2714;</th><th>First</th><th>Last</th><th>Owes</th><th>Course</th><th>E-Punch</th><th>Club</th><th>Phone</th><th>Emergency Phone</th><th>Car</th></tr></thead>\n'
+
+            rentalDoc += tablehead
+            ownersDoc += tablehead
+            OWN_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td>{}</td><td class="punch">{}</td><td>{}</td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
+            RENT_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td>{}</td><td class="rentpunch"></td><td>{}</td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
+
+        else:
+            manualDoc = '<h2>Pre-Registered List: MANUAL PUNCH event</h2>\n'
+            manualDoc += '<h4>REGISTRATION VOLUNTEERS</h4><p>Check off ALL participants in the first column as they arrive. Collect money from those who owe it and mark it out when paid.</p>\n<hr />\n'
+            manualDoc += '<table>\n<thead><tr><th class="check">&#x2714;</th><th>First</th><th>Last</th><th>Owes</th><th>Course</th><th>Club</th><th>Phone</th><th>Emergency Phone</th><th>Car</th></tr></thead>\n'
+        
+            MANUAL_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td>{}</td><td>{}</td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
 
         for f in self.files:
 
@@ -454,7 +464,7 @@ class EntryWriter(object):
                     club = line[datacols['club']].strip('\"\'\/\\ ')
                     cat = line[datacols['cat']].strip('\"\'\/\\ ')
                     sex = line[datacols['sex']].strip('\"\'\/\\ ')
-                    punch = line[datacols['punch']].strip('\"\'\/\\ ')
+                    punch = line[datacols['punch']].strip('\"\'\/\\ ') if self.epunch else ''
                     paid = line[datacols['paid']].strip('\"\'\/\\ ')
                     owed = line[datacols['owed']].strip('\"\'\/\\ ')
                     phone = line[datacols['phone1']].strip('\"\'\/\\ ').replace('\\', ' ').replace('/', ' ').replace('-', '.')
@@ -473,23 +483,36 @@ class EntryWriter(object):
                     else:
                         box = ''
 
-                    if rental:
+                    if rental and self.epunch:
                         newline = RENT_TEMPLATE.format(box, first, last, owed, cat, club, phone, phone2, license)
                         rentalDoc += newline
-                    else:
+                    elif self.epunch:
                         newline = OWN_TEMPLATE.format(box, first, last, owed, cat, punch, club, phone, phone2, license)
                         ownersDoc += newline
-        rentalDocA += rentalDoc + '</table>\n'
-        rentalDocB += rentalDoc + '</table>\n'
-        ownersDoc += '</table>\n'
+                    else:
+                        newline = MANUAL_TEMPLATE.format(box, first, last, owed, cat, club, phone, phone2, license)
+                        manualDoc += newline
+        
+        if self.epunch:
+            rentalDocA += rentalDoc + '</table>\n'
+            rentalDocB += rentalDoc + '</table>\n'
+            ownersDoc += '</table>\n'
+        else:
+            manualDoc += '</table>\n'
+
         pacificTZ = pytz.timezone('US/Pacific')
         utc = pytz.timezone('UTC')
         now = utc.localize(datetime.datetime.utcnow())
         localtime = now.astimezone(pacificTZ)
         timestamp = '<p id="createdate">{}</p>'.format(localtime.strftime('%H:%M %A %d %b %Y %Z%z'))
+
         header = '<!DOCTYPE html><html>\n<head>\n' + timestamp + '</head>\n'
         pagebreak = '\n<p style="page-break-before: always" ></p>\n'
-        doc = header + ownersDoc + pagebreak + rentalDocA + pagebreak + rentalDocB + '</body></html>\n'
+
+        if self.epunch:
+            doc = header + ownersDoc + pagebreak + rentalDocA + pagebreak + rentalDocB + '</body></html>\n'
+        else:
+            doc = header + manualDoc + '</body></html>\n'
         return doc
 
 

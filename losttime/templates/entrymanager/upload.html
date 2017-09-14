@@ -85,6 +85,18 @@
 <form>
 <div class="row">
 	<div class="col-sm-6">
+	<h4 class="form-section-title">Output Format</h4>
+		<div class="form-group">
+		<select onChange="outputoptions()" id="entry-format-select" name="entry-format" class="form-control">
+			<option value="OE" selected>Sport Software csv</option>
+			<option value="xml" disabled>IOF XML v3 EntryList</option>
+			<option value="CheckIn">Check-In Table PDF</option>
+		</select>
+		</div>
+	</div>
+</div>
+<div class="row" id="event-type-row">
+	<div class="col-sm-6">
 	<h4 class="form-section-title">Event Type</h4>
 	<div class="form-group">
 		<div class="radio">
@@ -101,16 +113,24 @@
 		</div>
 	</div>
 	</div>
-
+</div>
+<div class="row" id="punch-system-row">
 	<div class="col-sm-6">
-	<h4 class="form-section-title">Output Format</h4>
-		<div class="form-group">
-		<select name="entry-format" class="form-control">
-			<option value="OE" selected>Sport Software csv</option>
-			<option value="xml" disabled>IOF XML v3 EntryList</option>
-			<option value="CheckIn">Check-In Table PDF</option>
-		</select>
+	<h4 class="form-section-title">Punch System</h4>
+	<div class="form-group">
+		<div class="radio">
+			<label>
+				<input type="radio" name="entry-punch" value="epunch" checked>
+				Electronic Punching
+			</label>
 		</div>
+		<div class="radio">
+			<label>
+				<input type="radio" name="entry-punch" value="manualpunch">
+				Manual Punching
+			</label>
+		</div>
+	</div>
 	</div>
 </div>
 </form>
@@ -166,8 +186,9 @@ var dzOptions = {
 		});
 		this.on("sending", function(file, xhr, formData) {
 			formData.append("stamp", {{ stamp }});
-			formData.append("entry-type", $("input[name=entry-type]:checked").val());
 			formData.append("entry-format", $("option:selected").val());
+			formData.append("entry-type", $("input[name=entry-type]:checked").val());
+			formData.append("entry-punch", $("input[name=entry-punch]:checked").val());
 		});
 		this.on("success", function(file, response) {
 			window.location.href = "{{ url_for('entryManager.download_entries', entryid=stamp) }}";
@@ -197,5 +218,16 @@ function togglecsvtable() {
 		$("#spectogglelink").text("Show the csv spec");
 	}
 }
+
+function outputoptions() {
+	if ($("#entry-format-select").val() == 'OE'){
+		$("#event-type-row").show();
+		$("#punch-system-row").hide();
+	} else if ($("#entry-format-select").val() == 'CheckIn'){
+		$("#event-type-row").hide();
+		$("#punch-system-row").show();
+	}
+}
+outputoptions();
 </script>
 {% endblock %}
