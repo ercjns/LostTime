@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Join{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+    <h3 class="page-title">Register</h3>
+    <div class="pinkline"></div>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+        {% for message in messages %}
+            <div class="alert alert-warning alert-dismissable fade in">
+            <i class="fa fa-exclamation-circle" aria-hidden="true"></i> {{ message }} <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <p>Register in order to more easily manage events and series, and to use your club's output templates.</p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+  <form action="{{url_for('auth.join')}}" method="POST" class="form-horizontal">
+  <div class="row form-group">
+    <label class="col-sm-3 control-label" for="email">E-mail Address</label>
+    <div class="col-sm-7 col-md-6">
+      <input name="email" type="email" class="form-control" placeholder="name@domain.tld" id="email" required>
+    </div>
+  </div>
+  <div class="row form-group">
+    <label class="col-sm-3 control-label" for="pw1">Create A Password</label>
+    <div class="col-sm-7 col-md-6">
+      <input name="pw1" type="password" class="form-control" placeholder="password" id="pw1" required>
+      <span id="userHelp" class="help-block"><em>at least 6 characters</em></span>
+    </div>
+  </div>
+  <div class="row form-group">
+    <label class="col-sm-3 control-label" for="pw2">Confirm Password</label>
+    <div class="col-sm-7 col-md-6">
+      <input name="pw2" type="password" class="form-control" placeholder="confirm" id="pw2" required>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-7 col-sm-offset-3">
+      <button type="submit" class="btn btn-lg btn-default" id="joinBtn" disabled>Register</button>
+    </div>
+  </div>
+  </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block bottomscripts %}
+<script>
+function checkPasswordMatch() {
+    var password = $("#pw1").val();
+    var confirmPassword = $("#pw2").val();
+    if (password.length > 5) {
+      $("#pw1").parent().removeClass("has-error has-success").addClass("has-success");
+    } else {
+      $("#pw1").parent().removeClass("has-error has-success").addClass("has-error");
+    }
+    if (password.length > 5 && password == confirmPassword) {
+        $("#pw2").parent().removeClass("has-error has-success").addClass("has-success");
+        $('#joinBtn').prop('disabled', false);
+    } else {
+        $("#pw2").parent().removeClass("has-error has-success").addClass("has-error");
+        $('#joinBtn').prop('disabled', true);
+    }
+}
+
+$(document).ready(function () {
+   $("#pw1, #pw2").keyup(checkPasswordMatch);
+});
+</script>
+{% endblock %}
