@@ -1,16 +1,37 @@
-#heroBody, #headerBar {
+nav {
 	background-image: url("mapmontageblur.jpg");
-    background-repeat: repeat-xy;
-	}
+	background-repeat: repeat-xy;
+}
 
-#heroBody .row {
-	margin-right: 0px;
-	margin-left: 0px;
+.navbar{
+	border: none;
+	border-radius: 0px;
+}
+
+.nav-img{
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+.nav-img > a > img{
+	height: 60px;
+	margin: 0px;
+}
+
+.navbar-default .navbar-nav > li > a{
+	margin-top: 8px;
+	color: black;
+	border: 2px solid rgba(0,0,0,0);
+	border-radius: 4px;
+}
+
+.navbar-default .navbar-nav > li > a:hover{
+	border-color: magenta;
 }
 
 div #HeroContent {
 	margin-top: 20vh;
-	}
+}
 
 .container-fluid {
 	background-color: #F7F7F7;
@@ -40,7 +61,7 @@ input:valid, input:focus:valid {
 	font-family: 'Open Sans', sans-serif;
 }
 
-.form-section-title {
+.form-section-title, .home-section {
 	color: #FF3000;
 	font-family: 'Alegreya Sans SC', sans-serif;
 	font-weight: 500;

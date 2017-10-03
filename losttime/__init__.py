@@ -39,18 +39,19 @@ migrate = Migrate(app, db)
 ### Setup Authentication
 from flask_login import LoginManager, current_user
 from flask_bcrypt import Bcrypt
+bcrypt = Bcrypt(app)
+
+from models import User
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "login"
+login_manager.login_view = "auth.login"
 login_manager.login_message = u"You'll need to login to access that page."
 login_manager.login_message_category = "info"
 
 @login_manager.user_loader
 def user_loader(user_id):
-    return db.User.query.get(user_id)
-
-bcrypt = Bcrypt(app)
+    return User.query.get(user_id)
 
 def requires_mod(f):
     @wraps(f)

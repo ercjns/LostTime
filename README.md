@@ -80,7 +80,7 @@ You'll need python 2.x and `virtualenvwrapper` installed on a linux machine (or 
 ## Database Management
 Using the Flask-Migrations package which leverages the Alembic package for managing database schema changes. Changes in models.py are detected and automatically create a migration script. After making changes, run the following: 
 ```bash
-python -m flask db migrate 
+python -m flask db migrate -m 'message'
 # review the new migration script in migrations/versions, then
 python -m flask db upgrade 
 ```

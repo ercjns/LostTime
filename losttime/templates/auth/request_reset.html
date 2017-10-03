@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Join{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+    <h3 class="page-title">Password Reset</h3>
+    <div class="pinkline"></div>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+        {% for message in messages %}
+            <div class="alert alert-warning alert-dismissable fade in">
+            <i class="fa fa-exclamation-circle" aria-hidden="true"></i> {{ message }} <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <p>Enter the email address you used to register. If there is a match, you'll receive a message with a link to reset your password. The password reset link is valid for 15 minutes after it is requested here.</p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+  <form action="{{url_for('auth.request_password_reset')}}" method="POST" class="form-horizontal">
+  <div class="row form-group">
+    <label class="col-sm-3 control-label" for="email">E-mail Address</label>
+    <div class="col-sm-7 col-md-6">
+      <input name="email" type="email" class="form-control" placeholder="name@domain.tld" id="email" required>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-7 col-sm-offset-3">
+      <button type="submit" class="btn btn-lg btn-default" id="goBtn">Request Reset</button>
+    </div>
+  </div>
+  </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block bottomscripts %}
+{% endblock %}
