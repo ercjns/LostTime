@@ -1,31 +1,56 @@
-{% extends "basics.html" %}
+{% extends "layout.html" %}
 
 {% block title %}LostTime{% endblock %}
 
-{% block body %}
-<body id="heroBody">
+{% block content %}
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="row">
+        <div class="col-sm-10 col-sm-offset-1">
+            {% for message in messages %}
+                <div class="alert alert-warning alert-dismissable fade in">
+                <i class="fa fa-exclamation-circle" aria-hidden="true"></i> {{ message }} <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endwith %}
+
 <div class="row">
-<div class="col-sm-12">
-<div id="HeroContent">
-<p>
-<img class="img-responsive center-block" src="{{ url_for('static', filename='LostTimeLogo.svg') }}" alt="Lost Time: utilties for orienteering event organizers">
-</p>
-<p class="text-center" style="margin-top: 5vh">
-<a class="btn btn-default" href="{{ url_for('entryManager.upload_entries') }}">Prepare Entries</a>
-<a class="btn btn-default" href="{{ url_for('eventResult.upload_event') }}">Single Event Results</a>
-<a class="btn btn-default" href="{{ url_for('seriesResult.select_events') }}">Series Results</a>
-</p>
+    <div class="col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
+        <h1 class="page-title">Lost Time Orienteering</h1>
+        <div class="pinkline"></div>
+        <p>Spend less time fussing with files and more time in the woods. Lost Time provides data processing tools to help streamline your pre- and post- processing so that setting up events and posting beautiful results are fast and accurate tasks. Recover your lost time!</p>
+    </div>
 </div>
+
+<div class="row">
+    <div class="col-sm-5 col-sm-offset-1 col-md-3 col-md-offset-2">
+        <h3 class="home-section text-center">Entries</h3>
+        <p class="text-center">
+            <a class="btn btn-primary" href="{{ url_for('entryManager.upload_entries') }}">
+                <i class="fa fa-address-card" aria-hidden="true"></i> Prepare Entries</a>
+        </p>
+        <p class="text-center">Format online pre-registration data so that it's ready for import into Sport Software. Create check-in sheets for the registration table.</p>
+    </div>
+    <div class="col-sm-5 col-md-3 col-md-offset-2">
+        <h3 class="home-section text-center">Results</h3>
+        <p class="text-center">
+            <a class="btn btn-primary" href="{{ url_for('eventResult.upload_event') }}">
+                <i class="fa fa-flag-checkered" aria-hidden="true"></i> Event Results</a>
+            <a class="btn btn-primary" href="{{ url_for('seriesResult.select_events') }}">
+                <i class="fa fa-database" aria-hidden="true"></i> Series Results</a>
+        </p>
+        <p class="text-center">Transform results files to look great on your website. Assign points using custom scoring methods. Compile series standings from results of multiple events.</p>
+    </div>
 </div>
+
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
+        <h3 class="page-title">Customization and Contributing</h3>
+        <div class="pinkline"></div>
+        <p>If you'd like to use LostTime for your club, there are generic templates available, but the tool is most powerful with customized formatting and scoring functions specific to your club. Send me an email to get started, or check out the source on <a href="https://github.com/ercjns/LostTime">github</a>. Pull requests are welcome!</p>
+    </div>
 </div>
-<footer style="margin-top: 5vh; margin-bottom: 5vh">
-    <p class="text-center">
-    A project by <a href="http://www.ercjns.com">Eric Jones</a>
-    </p>
-    <p class="text-center">
-    Questions? Suggestions? Need custom tools for your club? Just want to say thanks?<br />
-    <i class="fa fa-twitter" aria-hidden="true"></i> @ercjns <span style="margin-left:1em"><i class="fa fa-envelope" aria-hidden="true"></i> eric-at-ercjns-dot-com</span>
-    </p>
-</footer>
-</body>
 {% endblock %}
