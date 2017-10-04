@@ -23,7 +23,7 @@
                 <li><a href="{{ url_for('auth.join') }}"><i class="fa fa-user-plus" aria-hidden="true"></i> register</a></li>
                 <li><a href="{{ url_for('auth.login') }}"><i class="fa fa-sign-in" aria-hidden="true"></i> log in</a></li>
                 {% else %}
-                <li><a href="#"><i class="fa fa-user-circle-o" aria-hidden="true"></i> my account</a></li>
+                <li><a href="{{url_for('users.user_home')}}"><i class="fa fa-user-circle-o" aria-hidden="true"></i> my account</a></li>
                 <li><a href="{{url_for('auth.logout')}}"><i class="fa fa-sign-in" aria-hidden="true"></i> log out</a></li>
                 {% endif %}
             </ul>

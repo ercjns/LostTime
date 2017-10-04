@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Admin Events{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+    <h3 class="page-title">Admin Events</h3>
+    <div class="pinkline"></div>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+        {% for message in messages %}
+            <div class="alert alert-warning alert-dismissable fade in">
+            <i class="fa fa-exclamation-circle" aria-hidden="true"></i> {{ message }} <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <p>Manage events. Coming soon!</p>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block bottomscripts %}
+{% endblock %}

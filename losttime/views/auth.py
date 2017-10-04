@@ -56,6 +56,7 @@ def login():
         return redirect(url_for('login'))
 
 @auth.route("/logout")
+@flask_login.login_required
 def logout():
     flask_login.logout_user()
     flash("You have logged out.", 'info')
@@ -129,7 +130,7 @@ def reconfirm_email():
             flash(sent[1], 'error')
     else:
         flash("Please enter an email address", 'error')
-    return redirect(url_for('home_page'))
+    return redirect(url_for('users.user_home'))
 
 def send_verification_email(user):
     SUBJECT = "Confirm your e-mail for Lost Time Orienteering"

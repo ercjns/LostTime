@@ -92,11 +92,14 @@ app.register_blueprint(entryManagerBP, url_prefix='/entry-manager')
 from .views.series_result import seriesResult as seriesResultBP
 app.register_blueprint(seriesResultBP, url_prefix='/series-result')
 
-from .views.admin_api import admin as adminBP
-app.register_blueprint(adminBP, url_prefix='/admin')
-
 from .views.auth import auth as authBP
 app.register_blueprint(authBP)
+
+from .views.users import users as usersBP
+app.register_blueprint(usersBP)
+
+from .views.admin import admin as adminBP
+app.register_blueprint(adminBP, url_prefix='/admin')
 
 ### Homepage
 

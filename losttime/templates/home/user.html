@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Account Info{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+    <h3 class="page-title">Hello, {{ user.email }}</h3>
+    <div class="pinkline"></div>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+        {% for message in messages %}
+            <div class="alert alert-warning alert-dismissable fade in">
+            <i class="fa fa-exclamation-circle" aria-hidden="true"></i> {{ message }} <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <p>Manage your account information, edit results for previous events and series.</p>
+  </div>
+</div>
+
+{% if user.isMod %}
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <h3 class="section-title">LostTime Administration</h3>
+    <ul>
+      <li><a href="{{url_for('admin.admin_club_codes')}}">Manage Club Codes</a></li>
+      <li><a href="{{url_for('admin.admin_users')}}">Manage User Accounts</a></li>
+      <li><a href="{{url_for('admin.admin_events')}}">Manage Events</a></li>
+    </ul>
+  </div>
+</div>
+{% endif %}
+
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <h3 class="section-title">Account Information</h3>
+      <p>Email: {{ user.email }} 
+      {% if not user.isVerified %}
+        <a href="{{url_for('auth.reconfirm_email')}}">Verify your email address</a>
+      {% endif %}
+      </p>
+      <p>Change my password</p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <h3 class="section-title">My Events</h3>
+      <p>(list of events)</p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <h3 class="section-title">My Series</h3>
+      <p>(list of series)</p>
+  </div>
+</div>
+
+
+
+{% endblock %}
+
+{% block bottomscripts %}
+{% endblock %}

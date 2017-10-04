@@ -1,0 +1,155 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Admin Clubs{% endblock %}
+
+{% block addhead %}
+<link href="{{ url_for('static', filename='dropzone.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <h3 class="page-title">Admin Club Codes</h3>
+    <div class="pinkline"></div>
+  </div>
+</div>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    {% for message in messages %}
+    <div class="alert alert-warning alert-dismissable fade in">
+      <i class="fa fa-exclamation-circle" aria-hidden="true"></i> {{ message }} <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <p>Currently have {{codes|length}} club codes. <a href="{{url_for('.static', filename='clubcodes.json')}}">Download JSON</a>.</p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+
+    <div id="theDropzone">
+      <p id="loading-dz">
+        <span id="spinner"><i class="fa fa-refresh fa-spin fa-2x fa-fw" style="vertical-align:middle;"></i><span class="sr-only">Loading...</span></span>
+        Loding dropzone... if this persists more than a few seconds please reload the page
+      </p> 
+      <div class="dz-default dz-message"><span>To update clubs, drop club JSON file here, or click for file browser.</span></div>
+    </div>
+
+    <div class="files" id="previews">
+      <div id="template" class="dz-preview">
+        <div>
+          <p><span class="name" data-dz-name></span> (<span class="size" data-dz-size></span>) <strong class="error text-danger" data-dz-errormessage></strong> <span class="dz-remove" data-dz-remove>Remove</span></p>
+          
+        </div>
+        <div class="progress-bar-wrapper">
+          <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p>
+      <a id="uploadButton" onclick="sendFile()" class="btn btn-default btn-primary">Update Clubs <i class="fa fa-arrow-circle-right"></i></a>
+    </p>
+  </div>
+</div>
+
+
+
+
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <table class="table table-condensed table-striped">
+      <tr>
+        <th>Namespace</th>
+        <th>Code</th>
+        <th>Name</th>
+      </tr>
+      {% for code in codes %}
+      <tr>
+        <td>{{ code.namespace }}</td>
+        <td>{{ code.code }}</td>
+        <td>{{ code.name }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block bottomscripts %}
+<script src="{{ url_for('static', filename='dropzone.js') }}"></script>
+<script>
+Dropzone.autoDiscover = false;
+var previewNode = document.querySelector("#template");
+previewNode.id = "";
+var previewTemplate = previewNode.parentNode.innerHTML;
+previewNode.parentNode.removeChild(previewNode);
+
+
+var dzOptions = {
+	url: "{{url_for('admin.admin_club_codes')}}",
+	paramName: "clubCodesJSON",
+	acceptedFiles: "application/json, .json",
+	uploadMultiple: false,
+	parallelUploads: 9999,
+	autoProcessQueue: false,
+	previewTemplate: previewTemplate,
+	previewsContainer: "#previews",
+	init: function() {
+		this.on("error", function(file, message) {
+			var node, _i, _len, _ref, _results;
+			if (file.previewElement) {
+				file.previewElement.classList.add("dz-error");
+				if (typeof message !== "String" && message.error) {
+					message = message.error;
+				}
+
+				file.previewElement.querySelector(".progress-bar-wrapper").remove()
+				$('#spinner').remove();
+				// $("#uploadButton").addClass("disabled")
+
+				_ref = file.previewElement.querySelectorAll("[data-dz-errormessage]");
+				_results = [];
+				for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+					node = _ref[_i];
+					_results.push(node.textContent = message);
+				}
+				return _results;
+			}
+		});
+		this.on("sending", function(file, xhr, formData) {
+			// formData.append("stamp", {{ stamp }});
+		});
+		this.on("success", function(file, response) {
+			window.location.href = "{{ url_for('admin.admin_club_codes') }}";
+		});
+	}
+}
+var myDropzone = new Dropzone("div#theDropzone", dzOptions);
+document.getElementById("theDropzone").classList.add("dropzone");
+var element = document.getElementById("loading-dz");
+element.parentNode.removeChild(element);
+
+
+function sendFile() {
+	if (myDropzone.getQueuedFiles().length > 0){
+		$('#uploadButton').after('<span id="spinner"><i class="fa fa-cog fa-spin fa-2x fa-fw" style="vertical-align:middle;"></i><span class="sr-only">Loading...</span></span>');
+		myDropzone.processQueue();
+	}
+}
+</script>
+{% endblock %}
