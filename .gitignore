@@ -6,3 +6,4 @@ instance/
 *~
 venv/
 losttime/static/userfiles/
+losttime/static/adminfiles
