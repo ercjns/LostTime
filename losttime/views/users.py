@@ -2,7 +2,7 @@
 
 from flask import Blueprint, request, render_template, redirect, url_for, flash, abort
 import flask_login
-from losttime.models import db, User
+from losttime.models import db, User, Event
 from losttime.mailman import send_email
 from losttime import app
 
@@ -11,6 +11,12 @@ users = Blueprint("users", __name__, static_url_path='/')
 @users.route("/me", methods=['GET'])
 @flask_login.login_required
 def user_home():
-    if not flask_login.current_user.isVerified:
+    ltuser = flask_login.current_user
+    if not ltuser.isVerified:
         flash("Please Verify Your E-Mail Address")
-    return render_template('home/user.html', user=flask_login.current_user)
+    my_events = Event.query.filter_by(ltuserid=ltuser.id,replacedbyid=None,isProcessed=True).all()
+    my_old_events = Event.query.filter_by(ltuserid=ltuser.id,isProcessed=True).filter(Event.replacedbyid != None).all()
+    return render_template('home/user.html', 
+                           user=ltuser,
+                           events=my_events,
+                           old_events=my_old_events)

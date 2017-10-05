@@ -1,6 +1,7 @@
 #losttime/views/event_result.py
 
-from flask import Blueprint, url_for, redirect, request, render_template, jsonify
+from flask import Blueprint, url_for, redirect, request, render_template, jsonify, flash
+import flask_login
 from datetime import datetime
 from losttime import eventfiles
 from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, ClubCode
@@ -23,7 +24,8 @@ def upload_event():
     Read an xml <ResultList>, create Event, EventClass, and PersonResult entries
     """
     if request.method == 'GET':
-        return render_template('eventresult/upload.html')
+        replace = request.args.get('replace')
+        return render_template('eventresult/upload.html', replaceid=replace)
 
     elif request.method == 'POST':
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
@@ -46,7 +48,8 @@ def upload_event():
             return jsonify(error='Could not parse results from that file.'), 422
 
         Oevent = reader.getEventMeta()
-        new_event = Event(Oevent.name, Oevent.date, Oevent.venue, None, event_type)
+        ltuser = flask_login.current_user.get_id()
+        new_event = Event(Oevent.name, Oevent.date, Oevent.venue, None, event_type, ltuser)
         db.session.add(new_event)
         db.session.commit()
         eventid = new_event.id
@@ -87,9 +90,13 @@ def event_info(eventid):
     Select scoring methods for event classes, edit name, date, venue
     """
     if request.method == 'GET':
+        replace = request.args.get('replace')
         event_data = Event.query.get(eventid)
         classes = EventClass.query.filter_by(eventid=eventid).all()
-        return render_template('eventresult/info.html', event=event_data, classes=classes)
+        return render_template('eventresult/info.html', 
+                               event=event_data, 
+                               classes=classes,
+                               replaceid=replace)
 
     elif request.method == 'POST':
         event = Event.query.get(eventid)
@@ -119,6 +126,26 @@ def event_info(eventid):
             filename = join(eventResult.static_folder, 'EventResult-{0:03d}-{1}.html'.format(int(eventid),key))
             with open(filename, 'w') as f:
                 f.write(doc.render().encode('utf-8'))
+
+        replace = request.form['replace']
+        if replace != None:
+            prev = Event.query.get(replace)
+            if flask_login.current_user.id == prev.ltuserid:
+                prev.replacedbyid = eventid
+                db.session.add(prev)
+                old_events = Event.query.filter_by(replacedbyid=replace).all()
+                for old_event in old_events:
+                    old_event.replacedbyid = eventid
+                    db.session.add(old_event)
+                db.session.commit()
+                flash('Updated event {} with this event result.'.format(prev.name), 'info')
+            else:
+                flash("Didn't update event {}, that is not your event!".format(prev.name), 'warning')
+
+        event = Event.query.get(eventid)
+        event.isProcessed = True
+        db.session.add(event)
+        db.session.commit()
 
         return redirect(url_for('eventResult.event_results', eventid=eventid))
 

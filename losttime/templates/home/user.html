@@ -51,14 +51,55 @@
         <a href="{{url_for('auth.reconfirm_email')}}">Verify your email address</a>
       {% endif %}
       </p>
-      <p>Change my password</p>
+      <!-- <p>Change my password</p> -->
   </div>
 </div>
 
 <div class="row">
   <div class="col-sm-10 col-sm-offset-1">
-    <h3 class="section-title">My Events</h3>
-      <p>(list of events)</p>
+    <h3 class="section-title">My Event Results</h3>
+    <p><a href="{{url_for('eventResult.upload_event')}}">Create a new event result</a></p>
+    <table class="table table-condensed table-striped">
+      <tr>
+        <th>id</th>
+        <th>name</th>
+        <th>created</th>
+        <th></th>
+      </tr>
+      {% for event in events %}
+      <tr>
+        <td>{{ event.id }}</td>
+        <td><a href="{{url_for('eventResult.event_results', eventid=event.id)}}">{{ event.name }}</a></td>
+        <td>{{ event.created }}</td>
+        <td>
+          <a href="{{url_for('eventResult.upload_event', replace=event.id)}}">update this event</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    <p><a href="#" onclick="toggleOldEvents()" id="oldEventToggle">Show Old Versions</a></p>
+  </div>
+</div>
+
+<div class="row" id="oldEvents" style="display:none;">
+  <div class="col-sm-10 col-sm-offset-1">
+    <h3 class="section-title">Old / Replaced Events</h3>
+    <table class="table table-condensed table-striped">
+      <tr>
+        <th>id</th>
+        <th>name</th>
+        <th>created</th>
+        <th>replaced by</th>
+      </tr>
+      {% for event in old_events %}
+      <tr>
+        <td>{{ event.id }}</td>
+        <td><a href="{{url_for('eventResult.event_results', eventid=event.id)}}">{{ event.name }}</a></td>
+        <td>{{ event.created }}</td>
+        <td>{{ event.replacedbyid }}</td>
+      </tr>
+      {% endfor %}
+    </table>
   </div>
 </div>
 
@@ -74,4 +115,16 @@
 {% endblock %}
 
 {% block bottomscripts %}
+<script>
+function toggleOldEvents() {
+	if ($("#oldEvents").css('display') == 'none') {
+		$("#oldEvents").show();
+		$("#oldEventToggle").text("Hide Old Versions");
+	}
+	else {
+		$("#oldEvents").hide();
+		$("#oldEventToggle").text("Show Old Versions");
+	}
+}
+</script>
 {% endblock %}

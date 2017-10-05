@@ -41,20 +41,26 @@ class User(db.Model, UserMixin):
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    ltuserid = db.Column(db.Integer) # foreign key User.id
     name = db.Column(db.String)
     date = db.Column(db.DateTime)
     venue = db.Column(db.String)
     host = db.Column(db.String)
     type = db.Column(db.String)
     created = db.Column(db.DateTime)
+    replacedbyid = db.Column(db.Integer) # None or latest rev event ID.
+    isProcessed = db.Column(db.Boolean)
 
-    def __init__(self, name, date, venue, host, type='standard'):
+    def __init__(self, name, date, venue, host, type='standard', ltuser=None):
         self.name = name
         self.date = date
         self.venue = venue
         self.host = host
         self.type = type
         self.created = datetime.now()
+        self.ltuserid = ltuser
+        self.replacedbyid = None
+        self.isProcessed = False
         return
 
 class EventClass(db.Model):
