@@ -28,6 +28,7 @@
   <div class="col-sm-10 col-sm-offset-1">
     <table class="table">
       <tr>
+        <th>id</th>
         <th>Email</th>
         <th>Last Login</th>
         <th>isVerified</th>
@@ -35,6 +36,7 @@
       </tr>
     {% for user in users %}
       <tr>
+        <td>{{ user.id }}</td>
         <td>{{ user.email }}</td>
         <td>(date here)</td>
         <td>{{ user.isVerified }} 

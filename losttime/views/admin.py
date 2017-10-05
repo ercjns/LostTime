@@ -4,7 +4,7 @@ from os.path import join
 import json
 from flask import Blueprint, request, render_template, redirect, url_for, flash, jsonify
 import flask_login
-from losttime.models import db, User, ClubCode
+from losttime.models import db, User, ClubCode, Event
 from losttime.mailman import send_email
 from losttime import requires_mod
 
@@ -67,4 +67,6 @@ def admin_users():
 @flask_login.login_required
 @requires_mod
 def admin_events():
-    return render_template('admin/events.html')
+    events = Event.query.order_by(Event.id.desc()).all()
+    return render_template('admin/events.html',
+                           events = events)
