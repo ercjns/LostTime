@@ -163,7 +163,9 @@ function submitSeriesInfo() {
     console.log(series);
     $('#nextbutton').after('<span id="spinner"><i class="fa fa-cog fa-spin fa-2x fa-fw" style="vertical-align:middle;"></i><span class="sr-only">Loading...</span></span>');
 
-    posturl = "{{ url_for('seriesResult.series_info', seriesid='') }}".concat(String(series.id))
+    posturl = "{{ url_for('seriesResult.series_info', seriesid='') }}"
+        .concat(String(series.id))
+        .concat(String("?replace={{ replaceid }}"));
 
     jqxhr = $.post(posturl, JSON.stringify(series))
       .done(function(data) {

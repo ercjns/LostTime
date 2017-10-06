@@ -24,12 +24,6 @@
 {% endif %}
 {% endwith %}
 
-<div class="row">
-  <div class="col-sm-10 col-sm-offset-1">
-    <p>Manage your account information, edit results for previous events and series.</p>
-  </div>
-</div>
-
 {% if user.isMod %}
 <div class="row">
   <div class="col-sm-10 col-sm-offset-1">
@@ -38,6 +32,7 @@
       <li><a href="{{url_for('admin.admin_club_codes')}}">Manage Club Codes</a></li>
       <li><a href="{{url_for('admin.admin_users')}}">Manage User Accounts</a></li>
       <li><a href="{{url_for('admin.admin_events')}}">Manage Events</a></li>
+      <li><a href="{{url_for('admin.admin_series')}}">Manage Series</a></li>
     </ul>
   </div>
 </div>
@@ -47,8 +42,12 @@
   <div class="col-sm-10 col-sm-offset-1">
     <h3 class="section-title">Account Information</h3>
       <p>Email: {{ user.email }} 
-      {% if not user.isVerified %}
-        <a href="{{url_for('auth.reconfirm_email')}}">Verify your email address</a>
+      {% if user.isVerified %}
+      <span class="text-success">
+        <i class="fa fa-check-circle-o" aria-hidden="true"></i> Verified
+      </span>
+      {% else %}
+      <a href="{{url_for('auth.reconfirm_email')}}">Verify your email address</a>
       {% endif %}
       </p>
       <!-- <p>Change my password</p> -->
@@ -58,7 +57,8 @@
 <div class="row">
   <div class="col-sm-10 col-sm-offset-1">
     <h3 class="section-title">My Event Results</h3>
-    <p><a href="{{url_for('eventResult.upload_event')}}">Create a new event result</a></p>
+    <p><a class="btn btn-primary" href="{{ url_for('eventResult.upload_event') }}">
+        <i class="fa fa-flag-checkered" aria-hidden="true"></i> Create New Event Result</a></p>
     <table class="table table-condensed table-striped">
       <tr>
         <th>id</th>
@@ -83,7 +83,7 @@
 
 <div class="row" id="oldEvents" style="display:none;">
   <div class="col-sm-10 col-sm-offset-1">
-    <h3 class="section-title">Old / Replaced Events</h3>
+    <h3 class="section-title">Old / Replaced Results</h3>
     <table class="table table-condensed table-striped">
       <tr>
         <th>id</th>
@@ -106,9 +106,51 @@
 <div class="row">
   <div class="col-sm-10 col-sm-offset-1">
     <h3 class="section-title">My Series</h3>
-      <p>(list of series)</p>
+    <p><a class="btn btn-primary" href="{{ url_for('seriesResult.select_events') }}">
+        <i class="fa fa-database" aria-hidden="true"></i> Create New Series Result</a></p>
+    <table class="table table-condensed table-striped">
+      <tr>
+        <th>id</th>
+        <th>name</th>
+        <th>created</th>
+        <th></th>
+      </tr>
+      {% for s in series %}
+      <tr>
+        <td>{{ s.id }}</td>
+        <td><a href="{{url_for('seriesResult.series_result', seriesid=s.id)}}">{{ s.name }}</a></td>
+        <td>{{ s.updated }}</td>
+        <td>
+          <a href="{{url_for('seriesResult.select_events', replace=s.id)}}">update this series</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    <p><a href="#" onclick="toggleOldSeries()" id="oldSeriesToggle">Show Old Versions</a></p>
   </div>
 </div>
+
+<div class="row" id="oldSeries" style="display:none;">
+    <div class="col-sm-10 col-sm-offset-1">
+      <h3 class="section-title">Old / Replaced Series Results</h3>
+      <table class="table table-condensed table-striped">
+        <tr>
+          <th>id</th>
+          <th>name</th>
+          <th>created</th>
+          <th>replaced by</th>
+        </tr>
+        {% for s in old_series %}
+        <tr>
+          <td>{{ s.id }}</td>
+          <td><a href="{{url_for('seriesResult.series_result', seriesid=s.id)}}">{{ s.name }}</a></td>
+          <td>{{ s.udpated }}</td>
+          <td>{{ s.replacedbyid }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
 
 
 
@@ -124,6 +166,16 @@ function toggleOldEvents() {
 	else {
 		$("#oldEvents").hide();
 		$("#oldEventToggle").text("Show Old Versions");
+	}
+}
+function toggleOldSeries() {
+	if ($("#oldSeries").css('display') == 'none') {
+		$("#oldSeries").show();
+		$("#oldSeriesToggle").text("Hide Old Versions");
+	}
+	else {
+		$("#oldSeries").hide();
+		$("#oldSeriesToggle").text("Show Old Versions");
 	}
 }
 </script>

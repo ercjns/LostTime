@@ -127,10 +127,11 @@ def event_info(eventid):
             with open(filename, 'w') as f:
                 f.write(doc.render().encode('utf-8'))
 
-        replace = request.form['replace']
-        if replace != None:
-            prev = Event.query.get(replace)
-            if flask_login.current_user.id == prev.ltuserid:
+        replace = request.form['replace'] # string None
+        prev = Event.query.get(replace) # actually None
+        if prev != None:
+            ltuser = flask_login.current_user.get_id()
+            if (ltuser != None) and (int(ltuser) == prev.ltuserid):
                 prev.replacedbyid = eventid
                 db.session.add(prev)
                 old_events = Event.query.filter_by(replacedbyid=replace).all()

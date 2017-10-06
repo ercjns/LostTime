@@ -176,6 +176,7 @@ class ClubCode(db.Model):
 
 class Series(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    ltuserid = db.Column(db.Integer)
     name = db.Column(db.String)
     host = db.Column(db.String)
     updated = db.Column(db.DateTime)
@@ -184,9 +185,14 @@ class Series(db.Model):
     scoreeventscount = db.Column(db.Integer)
     scoreeventsneeded = db.Column(db.Integer)
     scoretiebreak = db.Column(db.String)
+    replacedbyid = db.Column(db.Integer) # None or latest rev event ID.
+    isProcessed = db.Column(db.Boolean)
 
-    def __init__(self, events):
+    def __init__(self, events, ltuser=None):
+        self.ltuserid = ltuser
         self.eventids = str(events).strip('[]').replace(' ', '')
+        self.replacedbyid = None
+        self.isProcessed = False
         return
 
 class SeriesClass(db.Model):
