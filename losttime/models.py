@@ -25,7 +25,7 @@ class User(db.Model, UserMixin):
         self.isVerified = isVerified
 
     def __repr__(self):
-        return '<User {0}>'.format(self.username)
+        return '<User {}: {}>'.format(self.id, self.email)
 
     @hybrid_property
     def password(self):
