@@ -50,10 +50,9 @@ def login():
             return redirect(url_for('auth.login'))
         if the_user.is_correct_password(request.form.get("pw")):
             flask_login.login_user(the_user)
-            flash("Logged in.", 'success')
-            return redirect(url_for('home_page'))
+            return redirect(url_for('users.user_home'))
         flash("Hmm, that password is not correct", 'danger')
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
 
 @auth.route("/logout")
 @flask_login.login_required
@@ -102,17 +101,27 @@ def reset_password(token):
         user = User.query.filter_by(email=email).first_or_404()
         return render_template('auth/reset.html', user=user, token=token)
     elif request.method == 'POST':
-        try:
-            email = tts.loads(token, salt='reset-pw', max_age=60*15)
-        except:
-            flash("Sorry, this page has expired.")
-            return redirect(url_for('home_page'))
-        user = User.query.filter_by(email=email).first_or_404()
+        if token == 'auth' and flask_login.current_user.is_authenticated:
+            user = flask_login.current_user
+        else:
+            try:
+                email = tts.loads(token, salt='reset-pw', max_age=60*15)
+                user = User.query.filter_by(email=email).first_or_404()
+            except:
+                flash("Something went wrong. Password not changed.")
+                return redirect(url_for('home_page'))
         user.password = request.form.get("pw1")
         db.session.add(user)
         db.session.commit()
         flash("Password updated", 'info')
         return redirect(url_for('home_page'))
+
+@auth.route("/change-password/", methods=['GET'])
+@flask_login.login_required
+def change_password():
+    user = flask_login.current_user
+    return render_template('auth/reset.html', user=user, token='auth')
+
 
 @auth.route("/verify-email-resend")
 @flask_login.login_required
@@ -157,14 +166,14 @@ def send_verification_email(user):
     return (True, msg)
 
 def send_password_reset(user):
-    SUBJECT = "Confirm your e-mail for Lost Time Orienteering"
+    SUBJECT = "Password Reset Requested on Lost Time Orienteering"
     SEND_FROM = 'Lost Time Orienteering <bot@losttimeorienteering.com>'
     try:
         token = tts.dumps(user.email, salt='reset-pw')
         reset_url = url_for('auth.reset_password', token=token, _external=True)
         HTML = render_template(
             'auth/reset_pw_message.html',
-            url=rest_url
+            url=reset_url
         )
     except:
         msg = 'Something went wrong creating the message.'

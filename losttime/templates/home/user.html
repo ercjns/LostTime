@@ -41,16 +41,29 @@
 <div class="row">
   <div class="col-sm-10 col-sm-offset-1">
     <h3 class="section-title">Account Information</h3>
-      <p>Email: {{ user.email }} 
-      {% if user.isVerified %}
-      <span class="text-success">
-        <i class="fa fa-check-circle-o" aria-hidden="true"></i> Verified
-      </span>
-      {% else %}
-      <a href="{{url_for('auth.reconfirm_email')}}">Verify your email address</a>
-      {% endif %}
-      </p>
-      <!-- <p>Change my password</p> -->
+      <form class="form-horizontal">
+        <div class="form-group">
+          <label class="col-sm-2 control-label">Email</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">
+              {{ user.email }}
+              {% if user.isVerified %}
+              <span class="text-success">
+                <i class="fa fa-check-circle-o" aria-hidden="true"></i> Verified
+              </span>
+              {% else %}
+              <a href="{{url_for('auth.reconfirm_email')}}">Verify your email address</a>
+              {% endif %}
+            </p>
+          </div>
+          <label class="col-sm-2 control-label">Password</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">
+              <a href="{{url_for('auth.change_password')}}">Change Password</a>
+            </p>
+          </div>
+        </div>
+      </form>
   </div>
 </div>
 

@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 
-{% block title %}LostTime - Join{% endblock %}
+{% block title %}LostTime - New Password{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-sm-10 col-sm-offset-1">
-    <h3 class="page-title">Password Reset</h3>
+    <h3 class="page-title">New Password</h3>
     <div class="pinkline"></div>
     </div>
 </div>
@@ -32,7 +32,7 @@
 
 <div class="row">
   <div class="col-sm-10 col-sm-offset-1">
-  <form action="{{url_for('auth.reset_password')}}" method="POST" class="form-horizontal">
+  <form action="{{url_for('auth.reset_password', token=token)}}" method="POST" class="form-horizontal">
   <div class="row form-group">
     <label class="col-sm-3 control-label" for="email">E-mail Address</label>
     <div class="col-sm-7 col-md-6">
