@@ -26,7 +26,7 @@
 </div>
 
 <div class="row">
-    <div class="col-sm-5 col-sm-offset-1 col-md-3 col-md-offset-2">
+    <div class="col-sm-5 col-sm-offset-1 col-md-4 col-md-offset-2">
         <h3 class="home-section text-center">Entries</h3>
         <p class="text-center">
             <a class="btn btn-primary" href="{{ url_for('entryManager.upload_entries') }}">
@@ -34,7 +34,7 @@
         </p>
         <p class="text-center">Format online pre-registration data so that it's ready for import into Sport Software. Create check-in sheets for the registration table.</p>
     </div>
-    <div class="col-sm-5 col-md-3 col-md-offset-2">
+    <div class="col-sm-5 col-md-4">
         <h3 class="home-section text-center">Results</h3>
         <p class="text-center">
             <a class="btn btn-primary" href="{{ url_for('eventResult.upload_event') }}">
@@ -43,6 +43,17 @@
                 <i class="fa fa-database" aria-hidden="true"></i> Series Results</a>
         </p>
         <p class="text-center">Transform results files to look great on your website. Assign points using custom scoring methods. Compile series standings from results of multiple events.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
+        <h3 class="page-title">Examples</h3>
+        <div class="pinkline"></div>
+        <h4 class="home-section">On-Site Check In Lists</h4>
+        <img class="img-responsive center-block demo-gif" src="{{ url_for('static', filename='LTDemoRegTableEntry.gif') }}">
+        <h4 class="home-section">Event Results</h4>
+        <img class="img-responsive center-block demo-gif" src="{{ url_for('static', filename='LTDemoResults.gif') }}">
     </div>
 </div>
 

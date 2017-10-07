@@ -117,3 +117,10 @@ td.toggle-event {
 .badge.caution {
 	background-color: orangered;
 }
+
+.demo-gif {
+	border: 2px solid black;
+	border-radius: 2px;
+	width: 95%;
+	max-width: 700px;
+}
