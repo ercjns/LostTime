@@ -2,21 +2,9 @@
 
 {% block title %}LostTime{% endblock %}
 
-{% block content %}
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <div class="row">
-        <div class="col-sm-10 col-sm-offset-1">
-            {% for message in messages %}
-                <div class="alert alert-warning alert-dismissable fade in">
-                <i class="fa fa-exclamation-circle" aria-hidden="true"></i> {{ message }} <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-    {% endwith %}
+{% block pagetitle %}{% endblock %}
 
+{% block content %}
 <div class="row">
     <div class="col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
         <h1 class="page-title">Lost Time Orienteering</h1>

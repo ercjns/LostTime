@@ -13,7 +13,7 @@ users = Blueprint("users", __name__, static_url_path='/')
 def user_home():
     ltuser = flask_login.current_user
     if not ltuser.isVerified:
-        flash("Please Verify Your E-Mail Address")
+        flash("Please Verify Your E-Mail Address", 'warning')
     my_events = Event.query.filter_by(ltuserid=ltuser.id,replacedbyid=None,isProcessed=True).all()
     my_old_events = Event.query.filter_by(ltuserid=ltuser.id,isProcessed=True).filter(Event.replacedbyid != None).all()
     my_series = Series.query.filter_by(ltuserid=ltuser.id,isProcessed=True).filter(Series.replacedbyid == None).all()

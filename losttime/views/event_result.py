@@ -25,6 +25,8 @@ def upload_event():
     """
     if request.method == 'GET':
         replace = request.args.get('replace')
+        if not flask_login.current_user.is_authenticated:
+            flash('Not logged in. Your result will not be associated with an account.', 'warning')
         return render_template('eventresult/upload.html', replaceid=replace)
 
     elif request.method == 'POST':
