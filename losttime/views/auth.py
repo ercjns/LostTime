@@ -36,7 +36,7 @@ def join():
                 flash(sent[1], 'info')
         else:
             flash(sent[1], 'warning')
-        return redirect(url_for('home_page'))
+        return redirect(url_for('users.user_home'))
 
 @auth.route("/login", methods=['GET', 'POST'])
 def login():

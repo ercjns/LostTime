@@ -11,6 +11,25 @@
 <div class="col-sm-10 col-sm-offset-1">
 <h3 class="page-title">Post Process Event Results Step 1: File Upload</h3>
 <div class="pinkline"></div>
+</div>
+</div>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+        {% for message in messages %}
+            <div class="alert alert-warning alert-dismissable fade in">
+            <i class="fa fa-exclamation-circle" aria-hidden="true"></i> {{ message }} <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
 <h4 class="form-section-title">Event File</h4>
 <p>Use your event software to save results in the IOF <strong>XML v3</strong> format for point to point courses. For events that didn't use e-punch, or for other types of events, you can upload event results as a simple <strong>csv</strong> file.</p>
 
