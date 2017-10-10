@@ -7,7 +7,7 @@ The current goal of LostTime is not to replace event management software, but to
 
 ## Entries
 **Input**: any number of .csv files representing entries  
-**Output**: single .csv file ready for import into SportSoftware  
+**Output**: single .csv file ready for import into SportSoftware, or a PDF check-in list ready to print for the registration table.
 For the input .csv files, if the header line contains any of the following strings, its data will be included in the output: `bib`, `first`, `last`, `club` or `school`, `class`, `sex` or `gen`, `punch` or `card`, `rent`, and `nc`. Checking is loose: a column titled `First Name` will match `first`. *(Special case, the word `emergency` does not match `gen` or `nc`.)*
 
 ## Event Results
@@ -25,8 +25,8 @@ Series can be configured to count the best N scores out of M races. Individuals 
 ## Entries
 - make the default output an IOF xml `<EntryList>` file, for greater inter-operability
 ## Series
-- ability to preload series events / add events to existing series
 - ability to add blank events to fill out remainder of a series
+- better detect input file types (for example, Sport Software ScoreO .csv)
 
 
 # Technical Notes
@@ -61,6 +61,9 @@ You'll need python 2.x and `virtualenvwrapper` installed on a linux machine (or 
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + join(_cwd, 'dev.db') # puts the db in the instance folder
     SQLALCHEMY_ECHO = False
     SECRET_KEY = 'generate-a-secret-key-with-os.urandom(24)-and-paste-here'
+
+    SEND_EMAILS = False # app will call unix sendmail program.
+    FLASH_EMAILS = True # app will display emails in the UI as a flashed message.
    ```
 
 4. run the development server
@@ -87,7 +90,9 @@ python -m flask db upgrade
 
 ## Deployment
 
-It's easy! Open an ssh client and `git pull` and then restart the daemon via `TERM` in the NFS GUI. If there are also db schema changes, also run `python -m flask db upgrade` to pick up the new schema. 
+It's easy! Open an ssh client and `git pull` and then restart the daemon via `TERM` in the NFS GUI. 
+If there are new libraries, make sure `requirements.txt` is updated and `pip install -r requirements.txt` before restarting.
+You can upgrade to a new db schema with `python -m flask db upgrade`, though that line is also in the startup script so it's not necessary.
 
 
 ### Initial
