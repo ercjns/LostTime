@@ -6,7 +6,8 @@ def send_email(sender, recipient, subject, body, verbose=False):
     if verbose:
         print('Sending {} to {}'.format(subject, recipient))
 
-    header = "From: {0}\nTo: {1}\nSubject: {2}\n\n".format(sender, recipient, subject)
+    header = "From: {0}\nTo: {1}\nSubject: {2}\n".format(sender, recipient, subject)
+    header += "MIME-Version: 1.0\nContent-Type: text/html\n\n"
     message = header + body
 
     if app.config["SEND_EMAILS"]:
