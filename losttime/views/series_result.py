@@ -1,6 +1,7 @@
 #losttime/views/series_result.py
 
 from flask import Blueprint, url_for, redirect, request, render_template, jsonify, flash
+import flask_login
 from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, Series, SeriesClass, ClubCode
 from _output_templates import SeriesHtmlWriter
 from os.path import join
@@ -17,16 +18,21 @@ def home():
 @seriesResult.route('/events', methods=['GET', 'POST'])
 def select_events():
     if request.method == 'GET':
-        # current_events = [3, 36, 26, 34, 35, 30]
-        # events = Event.query.filter((Event.id.in_(current_events)) | (Event.id > 36)).all()
-        events = Event.query.all()
-        return render_template('seriesresult/events.html', events=events)
+        replace = request.args.get('replace')
+        ltuser = flask_login.current_user.get_id()
+        events = Event.query. \
+                     filter_by(isProcessed=True). \
+                     filter((Event.ltuserid == ltuser) |
+                            (Event.ltuserid == None)). \
+                     all()
+        return render_template('seriesresult/events.html', 
+                               events = events,
+                               ltuserid = ltuser,
+                               replaceid = replace)
 
     elif request.method == 'POST':
-        # if CODE in series Results table, grab that series result
-        # request.form.get('code')
-
-        series = Series([int(x) for x in request.form.getlist('events[]')])
+        ltuser = flask_login.current_user.get_id()
+        series = Series([int(x) for x in request.form.getlist('events[]')], ltuser)
         db.session.add(series)
         db.session.commit()
 
@@ -37,12 +43,12 @@ def get_series_events():
     serieskey = request.args.get('serieskey')
     my_series = Series.query.get(serieskey)
     events = my_series.eventids.split(',')
-    print(events)
     return jsonify(events), 200
 
 @seriesResult.route('/info/<seriesid>', methods=['GET', 'POST'])
 def series_info(seriesid):
     if request.method == 'GET':
+        replace = request.args.get('replace')
         series = Series.query.get(seriesid)
         eventids = [int(x) for x in series.eventids.split(',')] # TODO handle empty case?
         events = Event.query.filter(Event.id.in_(eventids)).all()
@@ -70,7 +76,8 @@ def series_info(seriesid):
                                series=series,
                                events=events,
                                seriesclasses=seriesclasses,
-                               seriesteamclasses=seriesteamclasses)
+                               seriesteamclasses=seriesteamclasses,
+                               replaceid=replace)
 
     elif request.method == 'POST':
         formdata = request.get_json(force=True)
@@ -110,6 +117,28 @@ def series_info(seriesid):
         filename = join(seriesResult.static_folder, 'SeriesResult-{0:03d}.html'.format(int(seriesid)))
         with open(filename, 'w') as f:
             f.write(doc.render().encode('utf-8'))
+
+        replace = request.args.get('replace')
+        prev = Series.query.get(replace) # actually None
+        if prev != None:
+            ltuser = flask_login.current_user.get_id()
+            if ((ltuser != None) and (int(ltuser) == prev.ltuserid)) or \
+               ((ltuser == None) and (prev.ltuserid == None)):
+                prev.replacedbyid = seriesid
+                db.session.add(prev)
+                old_seriess = Series.query.filter_by(replacedbyid=replace).all()
+                for old_series in old_seriess:
+                    old_series.replacedbyid = seriesid
+                    db.session.add(old_series)
+                db.session.commit()
+                flash('Updated series {} with this one.'.format(prev.name), 'info')
+            else:
+                flash("Didn't update series {}, that is not your series!".format(prev.name), 'warning')
+
+        series = Series.query.get(seriesid)
+        series.isProcessed = True
+        db.session.add(series)
+        db.session.commit()
 
         return jsonify(seriesid=seriesid), 201
 

@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Admin Series{% endblock %}
+
+{% block pagetitle %}
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+    <h3 class="page-title">Admin Series</h3>
+    <div class="pinkline"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <table class="table">
+        <tr>
+          <th>seriesid</th>
+          <th>userid</th>
+          <th>name</th>
+          <th>created</th>
+          <th>processed</th>
+          <th>replaced by</th>
+        </tr>
+      {% for s in series %}
+        <tr>
+          <td>{{ s.id }}</td>
+          <td>{{ s.ltuserid }}</td>
+          <td><a href="{{url_for('seriesResult.series_result', seriesid=s.id)}}">{{ s.name }}</a></td>
+          {% if s.updated != None %}
+          <td>{{ s.updated.strftime('%Y.%m.%d %H:%M') }}</td>
+          {% else %}
+          <td></td>
+          {% endif %}
+          <td>{{ s.isProcessed }}</td>
+          <td>{{ s.replacedbyid }}</td>
+        </tr>
+      {% endfor %}
+      </table>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block bottomscripts %}
+{% endblock %}

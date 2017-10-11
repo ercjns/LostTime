@@ -6,11 +6,18 @@
 <link href="{{ url_for('static', filename='dropzone.css') }}" rel="stylesheet">
 {% endblock %}
 
-{% block content %}
+{% block pagetitle %}
 <div class="row">
 <div class="col-sm-10 col-sm-offset-1">
 <h3 class="page-title">Post Process Event Results Step 1: File Upload</h3>
 <div class="pinkline"></div>
+</div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
 <h4 class="form-section-title">Event File</h4>
 <p>Use your event software to save results in the IOF <strong>XML v3</strong> format for point to point courses. For events that didn't use e-punch, or for other types of events, you can upload event results as a simple <strong>csv</strong> file.</p>
 
@@ -163,7 +170,9 @@ var dzOptions = {
 		});
 		this.on("success", function(file, response) {
 			// console.log('Successfully saved event to database with id: '.concat(String(response.eventid)));
-			window.location.href = "{{ url_for('eventResult.event_info', eventid='') }}".concat(String(response.eventid));
+			window.location.href = "{{ url_for('eventResult.event_info', eventid='') }}"
+				.concat(String(response.eventid))
+				.concat(String("?replace={{ replaceid }}"));
 		});
 	}
 }

@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Join{% endblock %}
+
+{% block pagetitle %}
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+    <h3 class="page-title">Log In</h3>
+    <div class="pinkline"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+  <form action="{{url_for('auth.login')}}" method="POST" class="form-horizontal">
+  <div class="row form-group">
+    <label class="col-sm-3 control-label" for="email">E-mail Address</label>
+    <div class="col-sm-7 col-md-6">
+      <input name="email" type="email" class="form-control" placeholder="name@domain.tld" id="email" required>
+    </div>
+  </div>
+  <div class="row form-group">
+    <label class="col-sm-3 control-label" for="pw1">Password</label>
+    <div class="col-sm-7 col-md-6">
+      <input name="pw" type="password" class="form-control" placeholder="password" id="pw" required>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-7 col-sm-offset-3">
+      <button type="submit" class="btn btn-md btn-primary" id="loginBtn">Log In</button>
+    </div>
+  </div>
+  </form>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <p></p>
+    <div class="row"><div class="col-sm-7 col-sm-offset-3">
+      <p>Forgot your password? <a href="{{url_for('auth.request_password_reset')}}">Click here</a></p>
+    </div></div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block bottomscripts %}
+
+{% endblock %}

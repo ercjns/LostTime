@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Admin Events{% endblock %}
+
+{% block pagetitle %}
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+    <h3 class="page-title">Admin Events</h3>
+    <div class="pinkline"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <table class="table">
+        <tr>
+          <th>eventid</th>
+          <th>userid</th>
+          <th>name</th>
+          <th>created</th>
+          <th>processed</th>
+          <th>replaced by</th>
+        </tr>
+      {% for event in events %}
+        <tr>
+          <td>{{ event.id }}</td>
+          <td>{{ event.ltuserid }}</td>
+          <td><a href="{{url_for('eventResult.event_results', eventid=event.id)}}">{{ event.name }}</a></td>
+          <td>{{ event.created.strftime('%Y.%m.%d %H:%M') }}</td>
+          <td>{{ event.isProcessed }}</td>
+          <td>{{ event.replacedbyid }}</td>
+        </tr>
+      {% endfor %}
+      </table>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block bottomscripts %}
+{% endblock %}

@@ -2,14 +2,16 @@
 
 {% block title %}LostTime - Series Result{% endblock %}
 
-{% block content %}
+{% block pagetitle %}
 <div class="row">
 <div class="col-sm-10 col-sm-offset-1">
 <h3 class="page-title">Series Results Step 2: Series Info</h3>
 <div class="pinkline"></div>
 </div>
 </div>
+{% endblock %}
 
+{% block content %}
 <div class="row">
 <div class="col-sm-6 col-sm-offset-1">
 <h4 class="form-section-title">Series Details</h4>
@@ -23,20 +25,6 @@
 </div>
 </div>
 </div>
-
-{% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <div class="row">
-        <div class="col-sm-10 col-sm-offset-1">
-            {% for message in messages %}
-                <div class="alert alert-warning alert-dismissable fade in">
-                <i class="fa fa-exclamation-circle" aria-hidden="true"></i> {{ message }} <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                </div>
-            {% endfor %}
-        </div>
-        </div>
-        {% endif %}
-    {% endwith %}
 
 
 <div class="row">
@@ -163,7 +151,9 @@ function submitSeriesInfo() {
     console.log(series);
     $('#nextbutton').after('<span id="spinner"><i class="fa fa-cog fa-spin fa-2x fa-fw" style="vertical-align:middle;"></i><span class="sr-only">Loading...</span></span>');
 
-    posturl = "{{ url_for('seriesResult.series_info', seriesid='') }}".concat(String(series.id))
+    posturl = "{{ url_for('seriesResult.series_info', seriesid='') }}"
+        .concat(String(series.id))
+        .concat(String("?replace={{ replaceid }}"));
 
     jqxhr = $.post(posturl, JSON.stringify(series))
       .done(function(data) {

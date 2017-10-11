@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Admin Users{% endblock %}
+
+{% block pagetitle %}
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <h3 class="page-title">Admin LostTime Users</h3>
+    <div class="pinkline"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <table class="table">
+      <tr>
+        <th>id</th>
+        <th>Email</th>
+        <th>Last Login</th>
+        <th>isVerified</th>
+        <th>isMod</th>
+      </tr>
+    {% for user in users %}
+      <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.email }}</td>
+        <td>(date here)</td>
+        <td>{{ user.isVerified }} 
+          <!-- {% if not user.isVerified %}
+          <a href="#" class="btn btn-default btn-sm">Re-send Verification</a>
+          {% endif %}
+          {% if user.isVerified %}
+          <a href="#"class="btn btn-default btn-sm">Send PW reset</a>
+          {% endif %} -->
+        </td>
+        <td>{{ user.isMod }} 
+          <!-- <a href="#"class="btn btn-default btn-sm" {% if user == currentUser %}disabled {%endif%}>Toggle Mod</a> -->
+        </td>
+      </tr>
+    {% endfor %}
+    </table>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block bottomscripts %}
+{% endblock %}

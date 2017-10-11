@@ -334,7 +334,7 @@ class SeriesHtmlWriter(object):
                             if sc.classtype == 'indv':
                                 # td("{0} ({1})".format(r['name'], r['club']))
                                 td(r['name'])
-                                td(r['club'])
+                                td(r['club']) if r['club'] != None else td()
                             elif sc.classtype == 'team':
                                 td("{0} ({1})".format(self.clubcodes[r['name']][0].name, r['name']))
 

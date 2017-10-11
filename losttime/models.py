@@ -2,23 +2,65 @@
 
 from . import db
 from datetime import datetime
+from os import urandom
+from binascii import b2a_base64
+from flask_login import UserMixin
+from sqlalchemy.ext.hybrid import hybrid_property
+from . import bcrypt
+
+
+class User(db.Model, UserMixin):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(120), unique=True)
+    _password = db.Column(db.String(128))
+    salt = db.Column(db.String(32))
+    isMod = db.Column(db.Boolean)
+    isVerified = db.Column(db.Boolean)
+
+    def __init__(self, email, password, isMod=False, isVerified=False):
+        self.email = email.lower()
+        self.password = password
+        self.isMod = isMod
+        self.isVerified = isVerified
+
+    def __repr__(self):
+        return '<User {}: {}>'.format(self.id, self.email)
+
+    @hybrid_property
+    def password(self):
+        return self._password
+
+    @password.setter
+    def _set_password(self, plaintext):
+        self.salt = b2a_base64(urandom(32))
+        self._password = bcrypt.generate_password_hash(self.salt+plaintext)
+
+    def is_correct_password(self, plaintext):
+        return bcrypt.check_password_hash(self._password, self.salt+plaintext)
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    ltuserid = db.Column(db.Integer) # foreign key User.id
     name = db.Column(db.String)
     date = db.Column(db.DateTime)
     venue = db.Column(db.String)
     host = db.Column(db.String)
     type = db.Column(db.String)
     created = db.Column(db.DateTime)
+    replacedbyid = db.Column(db.Integer) # None or latest rev event ID.
+    isProcessed = db.Column(db.Boolean)
 
-    def __init__(self, name, date, venue, host, type='standard'):
+    def __init__(self, name, date, venue, host, type='standard', ltuser=None):
         self.name = name
         self.date = date
         self.venue = venue
         self.host = host
         self.type = type
         self.created = datetime.now()
+        self.ltuserid = ltuser
+        self.replacedbyid = None
+        self.isProcessed = False
         return
 
 class EventClass(db.Model):
@@ -125,8 +167,16 @@ class ClubCode(db.Model):
         self.name = name
         return
 
+    def serialize(self):
+        return {
+            'namespace': self.namespace,
+            'code': self.code,
+            'name': self.name
+        }
+
 class Series(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    ltuserid = db.Column(db.Integer)
     name = db.Column(db.String)
     host = db.Column(db.String)
     updated = db.Column(db.DateTime)
@@ -135,9 +185,14 @@ class Series(db.Model):
     scoreeventscount = db.Column(db.Integer)
     scoreeventsneeded = db.Column(db.Integer)
     scoretiebreak = db.Column(db.String)
+    replacedbyid = db.Column(db.Integer) # None or latest rev event ID.
+    isProcessed = db.Column(db.Boolean)
 
-    def __init__(self, events):
+    def __init__(self, events, ltuser=None):
+        self.ltuserid = ltuser
         self.eventids = str(events).strip('[]').replace(' ', '')
+        self.replacedbyid = None
+        self.isProcessed = False
         return
 
 class SeriesClass(db.Model):

@@ -2,21 +2,22 @@
 
 {% block title %}LostTime - Series Result{% endblock %}
 
-{% block content %}
+{% block pagetitle %}
 <div class="row">
 <div class="col-sm-10 col-sm-offset-1">
 <h3 class="page-title">Series Results Step 1: Select Events</h3>
 <div class="pinkline"></div>
 </div>
 </div>
+{% endblock %}
 
- 
+{% block content %}
 <div class="row">
 <div class="col-sm-10 col-sm-offset-1">
 <h4 class="form-section-title">Add Events</h4>
 <p>Use the <a href="{{url_for('eventResult.home')}}">individual event results</a> tool to score events, then add events to a series below.</p>
-<p>Adding an event to an existing seires? Enter the series code 
-<input type="text" id="seriescode"> <button class="btn btn-default" onclick="fetchExistingSeriesEvents()">Load Series Events</button></p>
+<!-- <p>Adding an event to an existing seires? Enter the series code 
+<input type="text" id="seriescode"> <button class="btn btn-default" onclick="fetchExistingSeriesEvents()">Load Series Events</button></p> -->
 </div>
 </div>
 
@@ -24,8 +25,8 @@
 <div class="col-sm-10 col-md-5 col-sm-offset-1">
 <h4 class="form-section-title">Available Events</h4>
 <p>Click on an event to add it to the series.</p>
-<p>
-Show results from the past <select name="event-age" id="event-age-select">
+<!-- <p>
+Showing results from the past <select name="event-age" id="event-age-select">
     <option value="3">3 months</option>
     <option value="6" selected>6 months</option>
     <option value="9">9 months</option>
@@ -33,7 +34,13 @@ Show results from the past <select name="event-age" id="event-age-select">
     <option value="18">18 months</option>
     <option value="99">show all</option>
 </select>
-</p>
+</p> -->
+{% if ltuserid != None %}
+<p><i class="fa fa-warning" aria-hidden="true"></i> <a onClick="toggleOldResults()">old versions</a> <span id="oldVersionsBadge" class="badge">Hidden</span></p>
+<p><i class="fa fa-unlock" aria-hidden="true"></i> <a onClick="togglePublicResults()">public results</a> <span id="publicResultsBadge" class="badge">Hidden</span></p>
+{% else %}
+<p>Not logged in, showing <i class="fa fa-unlock" aria-hidden="true"></i> public results only.</p>
+{% endif %}
 
 <table class="table table-hover" id="eventstable">
     <thead>
@@ -45,8 +52,15 @@ Show results from the past <select name="event-age" id="event-age-select">
     </thead>
     <tbody>
 {% for e in events %}
-    <tr data-id="{{e.id}}" onclick="toggleEvent(this)">
-        <td>{{e.name}}</td>
+{% if (ltuserid != None and e.ltuserid == None) or (e.replacedbyid != None) %}
+    <tr data-id="{{e.id}}" data-user="{{e.ltuserid}}" data-replacedby="{{e.replacedbyid}}" onclick="toggleEvent(this)" style="display:none;">
+{% else %}
+    <tr data-id="{{e.id}}" data-user="{{e.ltuserid}}" data-replacedby="{{e.replacedbyid}}" onclick="toggleEvent(this)" style="">
+{% endif %}
+        <td>{% if e.replacedbyid != None %} <i class="fa fa-warning" aria-hidden="true"></i>{% endif %}
+            {% if e.ltuserid == None %} <i class="fa fa-unlock" aria-hidden="true"></i>{% endif %}
+            {{e.name}}
+        </td>
         {% if e.date %}
         <td>{{e.date|datetimeformat("%Y-%m-%d")}}</td>
         {% else %}
@@ -100,13 +114,53 @@ function toggleEvent(tr){
     }
 }
 
-function fetchExistingSeriesEvents() {
-    //fetch the id from the seriescode
-    var serieskey = $("#seriescode").val();
-    //clear all the events from the right side
-    var toRemove = $('#seriestable tbody tr').toArray();
-    console.log(toRemove);
-    toRemove.forEach(toggleEvent);
+var showPublic = false;
+var showOld = false;
+
+function togglePublicResults(){
+    if (showPublic) {
+        var trs = $('#eventstable tbody tr[data-user=None]');
+        trs.hide();
+        showPublic = false;
+        $('#publicResultsBadge').text('Hidden').toggleClass('caution');
+    } else if (showOld && !showPublic) {
+        var trs = $('#eventstable tbody tr[data-user=None]');
+        trs.show();
+        showPublic = true;
+        $('#publicResultsBadge').text('Shown').toggleClass('caution');
+    } else {
+        var trs = $('#eventstable tbody tr[data-user=None][data-replacedby=None]');
+        trs.show();
+        showPublic = true;
+        $('#publicResultsBadge').text('Shown').toggleClass('caution');
+    }
+}
+
+function toggleOldResults(){
+    if (showOld) {
+        var trs = $('#eventstable tbody tr[data-replacedby!=None]');
+        trs.hide();
+        showOld = false;
+        $('#oldVersionsBadge').text('Hidden').toggleClass('caution');
+    } else if (!showOld && showPublic) {
+        var trs = $('#eventstable tbody tr[data-replacedby!=None]');
+        trs.show();
+        showOld = true;
+        $('#oldVersionsBadge').text('Shown').toggleClass('caution');
+    } else {
+        var trs = $('#eventstable tbody tr[data-user!=None][data-replacedby!=None]');
+        trs.show();
+        showOld = true;
+        $('#oldVersionsBadge').text('Shown').toggleClass('caution');
+    }
+}
+
+
+
+function fetchExistingSeriesEvents(serieskey) {
+    //toggle on all events so I can move old results left to right
+    toggleOldResults();
+    togglePublicResults();
     
     //query for event ids
     jqxhr = $.get("{{ url_for('seriesResult.get_series_events', serieskey='') }}".concat(String(serieskey)))
@@ -121,36 +175,44 @@ function fetchExistingSeriesEvents() {
       .fail(function(data) {
         console.log("fail handler");
         console.log(data);
-        //show a message failed to get series events
+      })
+      .always(function(){
+        // toggle old+public events off.
+        toggleOldResults();
+        togglePublicResults();
       });
 }
 
-$('#event-age-select').change(
-    function filterEventsDate(age){
-        var age = parseInt($(this).val());
-        var limit = (1000*60*60*24*30) * age
-        var now = Date.now();
-        var trs = $('#eventstable').find('tbody tr');
-        for (i = 0; i < trs.length; i++) {
-            date = $(trs[i]).find('td')[2]
-            if(age == 99) {
-                $(trs[i]).show();
-            } else {
-                if (date) {
-                    var res_date = new Date(date.textContent);
-                    var elapsed = now - res_date;
-                    if (elapsed < limit) {
-                        $(trs[i]).show();
-                    } else {
-                        $(trs[i]).hide();
-                    }
-                } else {
-                    $(trs[i]).hide();
-                }
-            }
-        }
-    }
-).change()
+{% if replaceid != None %}
+fetchExistingSeriesEvents({{ replaceid }})
+{% endif %}
+
+// $('#event-age-select').change(
+//     function filterEventsDate(age){
+//         var age = parseInt($(this).val());
+//         var limit = (1000*60*60*24*30) * age
+//         var now = Date.now();
+//         var trs = $('#eventstable').find('tbody tr');
+//         for (i = 0; i < trs.length; i++) {
+//             date = $(trs[i]).find('td')[2]
+//             if(age == 99) {
+//                 $(trs[i]).show();
+//             } else {
+//                 if (date) {
+//                     var res_date = new Date(date.textContent);
+//                     var elapsed = now - res_date;
+//                     if (elapsed < limit) {
+//                         $(trs[i]).show();
+//                     } else {
+//                         $(trs[i]).hide();
+//                     }
+//                 } else {
+//                     $(trs[i]).hide();
+//                 }
+//             }
+//         }
+//     }
+// ).change()
 
 
 function createSeries() {
@@ -166,7 +228,9 @@ function createSeries() {
       .done(function(data) {
         console.log("done handler");
         console.log(data);
-        window.location.href = "{{ url_for('seriesResult.series_info', seriesid='') }}".concat(String(data.seriesid));
+        window.location.href = "{{ url_for('seriesResult.series_info', seriesid='') }}"
+            .concat(String(data.seriesid))
+            .concat(String("?replace={{ replaceid }}"));
       })
       .fail(function(data) {
         console.log("fail handler");
