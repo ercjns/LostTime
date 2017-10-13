@@ -13,7 +13,7 @@
 
 import csv, unicodedata
 from bs4 import BeautifulSoup as BS
-
+from datetime import datetime
 
 class Event(object):
     def __init__(self, name, date, venue):
@@ -214,7 +214,11 @@ class OrienteerResultReader(object):
     def __XMLgetEventDate(self):
         if self.xmlv == 3:
             try: date = self.xmlsoup.ResultList.Event.StartTime.string
-            except: date = None
+            except: 
+                try: date = self.xmlsoup.ResultList.ClassResult.PersonResult.Result.StartTime.string
+                except: date = None
+        if date != None:
+            date = datetime.strptime(date.split('T')[0], '%Y-%m-%d')
         return date
     def __XMLgetEventVenue(self):
         return None
