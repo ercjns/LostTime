@@ -20,7 +20,7 @@
 <div class="col-md-7">
 	<div class="form-group">
 		<label for="event-name" class="control-label">Event Name</label>
-		<input type="text" class="form-control" name="event-name" value="{{ event.name }}">
+		<input type="text" class="form-control" name="event-name" value="{{ replace.name if replace.name else event.name }}">
 	</div>
 	<div class="form-group">
     <!-- add a date picker. Also why is this required? -->
@@ -35,12 +35,12 @@
 		<label for="event-venue" class="control-label">Event Venue</label>
 		<div class="input-group">
 		<div class="input-group-addon"><i class="fa fa-map-marker" aria-hidden="true"></i></div>
-		<input type="text" class="form-control" name="event-venue" value="{{ event.venue if event.venue }}">
+		<input type="text" class="form-control" name="event-venue" value="{{ replace.venue if replace.venue }}">
 		</div>
 	</div>
 	<div class="form-group">
 		<label for="event-host" class="control-label">Event Host</label>
-		<input type="text" class="form-control" name="event-host" value="{{ event.host if event.host }}">
+		<input type="text" class="form-control" name="event-host" value="{{ replace.host if replace.host }}">
 	</div>
 </div>
 </div>
@@ -109,7 +109,7 @@
 	<button type="submit" class="btn btn-default btn-primary">Continue <i class="fa fa-arrow-circle-right" aria-hidden="true"></i></button>
 	</div>
 </div>
-<input name='replace' value={{replaceid}} hidden>
+<input name='replace' value="{{ replace.id if replace.id else 'None' }}" hidden>
 </form>
 
 <div class="row">

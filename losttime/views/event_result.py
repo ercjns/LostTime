@@ -92,13 +92,13 @@ def event_info(eventid):
     Select scoring methods for event classes, edit name, date, venue
     """
     if request.method == 'GET':
-        replace = request.args.get('replace')
+        replace = Event.query.get(request.args.get('replace'))
         event_data = Event.query.get(eventid)
         classes = EventClass.query.filter_by(eventid=eventid).all()
         return render_template('eventresult/info.html', 
                                event=event_data, 
                                classes=classes,
-                               replaceid=replace)
+                               replace=replace)
 
     elif request.method == 'POST':
         event = Event.query.get(eventid)
@@ -109,7 +109,6 @@ def event_info(eventid):
             event.data = None
         event.venue = request.form['event-venue']
         event.host = request.form['event-host']
-        # event.teamscoremethod = request.form['event-team-score-method']
         db.session.add(event)
 
         classes = EventClass.query.filter_by(eventid=eventid).all()
@@ -150,7 +149,7 @@ def event_info(eventid):
         db.session.add(event)
         db.session.commit()
 
-        return redirect(url_for('eventResult.event_results', eventid=eventid))
+        return redirect(url_for('eventResult.event_results', eventid=eventid, replace=replace))
 
 @eventResult.route('/results/<eventid>', methods=['GET'])
 def event_results(eventid):
@@ -172,7 +171,14 @@ def event_results(eventid):
     except:
         teamfn = None
         teamhtmldoc = None
-    return render_template('eventresult/result.html', eventid=eventid, indvhtml=indvhtmldoc, indvfn=indvfn, teamhtml=teamhtmldoc, teamfn=teamfn)
+    replaceid = request.args.get('replace')
+    return render_template('eventresult/result.html', 
+                           eventid=eventid, 
+                           indvhtml=indvhtmldoc, 
+                           indvfn=indvfn, 
+                           teamhtml=teamhtmldoc, 
+                           teamfn=teamfn,
+                           replaceid=replaceid)
 
 def _assignPositions(eventid):
     """Assign position to PersonResult.position
