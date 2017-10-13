@@ -17,11 +17,11 @@
 <h4 class="form-section-title">Series Details</h4>
 <div class="form-group">
     <label for="series-name" class="control-label">Series Name</label>
-    <input type="text" class="form-control" name="series-name" value="{{series.name}}">
+    <input type="text" class="form-control" name="series-name" value="{{replace.name}}">
 </div>
 <div class="form-group">
     <label for="series-host" class="control-label">Series Host</label>
-    <input type="text" class="form-control" name="series-host" value="{{series.host}}">
+    <input type="text" class="form-control" name="series-host" value="{{replace.host}}">
 </div>
 </div>
 </div>
@@ -46,7 +46,7 @@
         <td><em>{{scevents['name']}} ({{sc}})</em> <a onclick=toggleClassSelection(this)>select all</a></td>
         {% for e in events %}
             {% if scevents[e.id] != False %}
-            <td class="text-center eventclass-option" data-event-class={{scevents[e.id].id}}><input type="checkbox"></td>
+            <td class="text-center eventclass-option" data-event-class={{scevents[e.id].id}}><input type="checkbox" {% if scevents[e.id].id in oldIndvECs %} checked {% endif %}></td>
             {% else %}
             <td class="text-center">n/a</td>
             {% endif %}
@@ -58,7 +58,7 @@
         <td><em>{{stcevents['name']}} ({{stc}})</em> <a onclick=toggleClassSelection(this)>select all</a></td>
         {% for e in events %}
             {% if stcevents[e.id] != False %}
-            <td class="text-center eventclass-option" data-event-class={{stcevents[e.id].id}}><input type="checkbox"></td>
+            <td class="text-center eventclass-option" data-event-class={{stcevents[e.id].id}}><input type="checkbox" {% if stcevents[e.id].id in oldTeamECs %} checked {% endif %}></td>
             {% else %}
             <td class="text-center">n/a</td>
             {% endif %}
@@ -78,9 +78,21 @@
 		<option value="sum">sum</option>
 		<option value="average">average</option>
 </select>
-of the best <input name="series-num-scored-events" type="number" min=1 max={{events|length}} value={{events|length}}> event scores.
+of the best <input name="series-num-scored-events" type="number" min=1 max={{events|length}} 
+    {% if replace != None and replace.scoreeventscount <= events|length %}
+    value={{replace.scoreeventscount}}
+    {% else %}
+    value={{events|length}}
+    {% endif %}> 
+event scores.
 </p>
-<p>An entry must have at least <input name="series-num-needed-events" type="number" min=1 max={{events|length}} value=1> valid event score(s) for a valid series score.</p>
+<p>An entry must have at least <input name="series-num-needed-events" type="number" min=1 max={{events|length}} 
+    {% if replace != None and replace.scoreeventsneeded <= events|length %}
+    value={{replace.scoreeventsneeded}}
+    {% else %}
+    value=1
+    {% endif %}>
+valid event score(s) for a valid series score.</p>
 <p>Tie series scores are awarded 
 <select name="series-tiebreak-method">
         <option value="all">by comparing all {{events|length}} event scores.</option>
@@ -153,7 +165,7 @@ function submitSeriesInfo() {
 
     posturl = "{{ url_for('seriesResult.series_info', seriesid='') }}"
         .concat(String(series.id))
-        .concat(String("?replace={{ replaceid }}"));
+        .concat(String("?replace={{ replace.id }}"));
 
     jqxhr = $.post(posturl, JSON.stringify(series))
       .done(function(data) {

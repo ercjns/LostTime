@@ -239,8 +239,10 @@ function createSeries() {
             .concat(String("?replace={{ replaceid }}"));
       })
       .fail(function(data) {
-        console.log("fail handler");
+        console.log("createSeries failed");
         console.log(data);
+        window.location.href = "{{ url_for('seriesResult.select_events') }}"
+            .concat(String("?replace={{ replaceid }}"));
       });
 }
 </script>

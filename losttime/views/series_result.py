@@ -32,7 +32,11 @@ def select_events():
 
     elif request.method == 'POST':
         ltuser = flask_login.current_user.get_id()
-        series = Series([int(x) for x in request.form.getlist('events[]')], ltuser)
+        events = [int(x) for x in request.form.getlist('events[]')]
+        if len(events) == 0:
+            flash('Add events before creating a series', 'warning')
+            return 'Failed to create series: no events', 400
+        series = Series(events, ltuser)
         db.session.add(series)
         db.session.commit()
 
@@ -48,7 +52,7 @@ def get_series_events():
 @seriesResult.route('/info/<seriesid>', methods=['GET', 'POST'])
 def series_info(seriesid):
     if request.method == 'GET':
-        replace = request.args.get('replace')
+        replace = Series.query.get(request.args.get('replace'))
         series = Series.query.get(seriesid)
         eventids = [int(x) for x in series.eventids.split(',')] # TODO handle empty case?
         events = Event.query.filter(Event.id.in_(eventids)).all()
@@ -70,6 +74,17 @@ def series_info(seriesid):
             seriesteamclasstable.setdefault(etc.shortname, starterdict)[etc.eventid] = etc
         seriesteamclasses = sorted(seriesteamclasstable.items(), key=lambda x: x[0])
 
+        oldIndvECs = []
+        oldTeamECs= []
+        if replace != None:
+            oldSeriesClasses = SeriesClass.query.filter(SeriesClass.seriesid == replace.id).all()
+            for oSC in oldSeriesClasses:
+                oldecids = [int(x) for x in oSC.eventclassids.split(',')]
+                if oSC.classtype == 'indv':
+                    oldIndvECs.extend(oldecids)
+                elif oSC.classtype == 'team':
+                    oldTeamECs.extend(oldecids)
+
         verifyScoringMethods(seriesclasses + seriesteamclasses)
 
         return render_template('seriesresult/info.html',
@@ -77,7 +92,9 @@ def series_info(seriesid):
                                events=events,
                                seriesclasses=seriesclasses,
                                seriesteamclasses=seriesteamclasses,
-                               replaceid=replace)
+                               replace=replace,
+                               oldIndvECs=oldIndvECs,
+                               oldTeamECs=oldTeamECs)
 
     elif request.method == 'POST':
         formdata = request.get_json(force=True)
