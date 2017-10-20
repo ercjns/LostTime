@@ -398,12 +398,12 @@ class EntryWriter(object):
                 known_nc = True if 'nc' in datacols.keys() else False
 
                 for line in regreader:
-                    first = line[datacols['first']].strip('\"\'\/\\ ')
-                    last = line[datacols['last']].strip('\"\'\/\\ ')
-                    club = line[datacols['club']].strip('\"\'\/\\ ')
-                    cat = line[datacols['cat']].strip('\"\'\/\\ ')
-                    sex = line[datacols['sex']].strip('\"\'\/\\ ')
-                    punch = line[datacols['punch']].strip('\"\'\/\\ ')
+                    first = line[datacols['first']].strip('\"\'\/\\ ') if 'first' in datacols.keys() else ''
+                    last = line[datacols['last']].strip('\"\'\/\\ ') if 'last' in datacols.keys() else ''
+                    club = line[datacols['club']].strip('\"\'\/\\ ') if 'club' in datacols.keys() else ''
+                    cat = line[datacols['cat']].strip('\"\'\/\\ ') if 'cat' in datacols.keys() else ''
+                    sex = line[datacols['sex']].strip('\"\'\/\\ ') if 'sex' in datacols.keys() else ''
+                    punch = line[datacols['punch']].strip('\"\'\/\\ ') if 'punch' in datacols.keys() else ''
                     if (first == '') and (last == '') and (club == '') and (cat == ''):
                         continue
                     if known_renting:
@@ -459,17 +459,17 @@ class EntryWriter(object):
                 datacols = self.__identify_columns(next(regreader))
                 
                 for line in regreader:
-                    first = line[datacols['first']].strip('\"\'\/\\ ').replace('_', ' ')
-                    last = line[datacols['last']].strip('\"\'\/\\ ').replace('_', ' ')
-                    club = line[datacols['club']].strip('\"\'\/\\ ')
-                    cat = line[datacols['cat']].strip('\"\'\/\\ ')
-                    sex = line[datacols['sex']].strip('\"\'\/\\ ')
-                    punch = line[datacols['punch']].strip('\"\'\/\\ ') if self.epunch else ''
-                    paid = line[datacols['paid']].strip('\"\'\/\\ ')
-                    owed = line[datacols['owed']].strip('\"\'\/\\ ')
-                    phone = line[datacols['phone1']].strip('\"\'\/\\ ').replace('\\', ' ').replace('/', ' ').replace('-', '.')
-                    phone2 = line[datacols['phone2']].strip('\"\'\/\\ ').replace('\\', ' ').replace('/', ' ').replace('-', '.')
-                    license = line[datacols['license']].strip('\"\'\/\\ ')
+                    first = line[datacols['first']].strip('\"\'\/\\ ').replace('_', ' ') if 'first' in datacols.keys() else ''
+                    last = line[datacols['last']].strip('\"\'\/\\ ').replace('_', ' ') if 'last' in datacols.keys() else ''
+                    club = line[datacols['club']].strip('\"\'\/\\ ') if 'club' in datacols.keys() else ''
+                    cat = line[datacols['cat']].strip('\"\'\/\\ ') if 'cat' in datacols.keys() else ''
+                    sex = line[datacols['sex']].strip('\"\'\/\\ ') if 'sex' in datacols.keys() else ''
+                    punch = line[datacols['punch']].strip('\"\'\/\\ ') if ('punch' in datacols.keys() and self.epunch) else ''
+                    paid = line[datacols['paid']].strip('\"\'\/\\ ') if 'paid' in datacols.keys() else '?'
+                    owed = line[datacols['owed']].strip('\"\'\/\\ ') if 'owed' in datacols.keys() else ''
+                    phone = line[datacols['phone1']].strip('\"\'\/\\ ').replace('\\', ' ').replace('/', ' ').replace('-', '.') if 'phone1' in datacols.keys() else ''
+                    phone2 = line[datacols['phone2']].strip('\"\'\/\\ ').replace('\\', ' ').replace('/', ' ').replace('-', '.') if 'phone2' in datacols.keys() else ''
+                    license = line[datacols['license']].strip('\"\'\/\\ ') if 'license' in datacols.keys() else ''
 
                     rental = True if len(punch) == 0 else False
                     paid = True if len(owed) == 0 else False
