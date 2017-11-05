@@ -146,14 +146,17 @@ class EventHtmlWriter(object):
                             classresults = _sortByPosition(classresults)
                             th('Pos.')
                         th('Name')
-                        th('Club')
+                        if ec in WIOL:
+                            th('School')
+                        else:
+                            th('Club')
                         if ec.scoremethod in ['score', 'score1000']:
                             th('Points')
                             th('Penalty')
                             th('Total')
-                        th('Time')
+                        th('Time', cls="text-right")
                         if ec.scoremethod in ['1000pts', 'worldcup', 'score1000']:
-                            th('Score')
+                            th('Score', cls="text-right")
                     for pr in classresults:
                         with t.add(tr()):
                             if ec.scoremethod in ['time', 'worldcup', '1000pts', 'score', 'score1000']:
@@ -165,15 +168,15 @@ class EventHtmlWriter(object):
                                 td(pr.ScoreO_penalty)
                                 td(pr.ScoreO_net)
                             if pr.coursestatus in ['ok']:
-                                td(pr.timetommmss())
+                                td(pr.timetommmss(), cls="text-right")
                             elif pr.resultstatus in ['ok']:
-                                td('{0} {1}'.format(pr.coursestatus, pr.timetommmss()))
+                                td('{0} {1}'.format(pr.coursestatus, pr.timetommmss()), cls="text-right")
                             elif pr.resultstatus in ['dns']:
-                                td('{0}'.format(pr.resultstatus))
+                                td('{0}'.format(pr.resultstatus), cls="text-right")
                             else:
-                                td('{0} {1}*'.format(pr.resultstatus, pr.timetommmss()))
+                                td('{0} {1}*'.format(pr.resultstatus, pr.timetommmss()), cls="text-right")
                             if (ec.scoremethod in ['worldcup', '1000pts', 'score1000']):
-                                td('{0:d}'.format(int(pr.score))) if pr.score is not None else td()
+                                td('{0:d}'.format(int(pr.score)), cls="text-right") if pr.score is not None else td()
                 p(a("Menu", href="#lt-top"), cls="lg-mrg-bottom text-center")
             if len(self.teamclasses) > 0:
                 for tc in self.teamclasses:
