@@ -71,14 +71,42 @@
       <tr>
         <td>{{ event.id }}</td>
         <td><a href="{{url_for('eventResult.event_results', eventid=event.id)}}">{{ event.name }}</a></td>
-        <td>{{ event.created }}</td>
+        <td>{{ event.created|datetimeformat('%H:%M, %d %b %Y') }}</td>
         <td>
-          <a href="{{url_for('eventResult.upload_event', replace=event.id)}}">update this event</a>
+          <a class="btn btn-info btn-xs" href="{{url_for('eventResult.upload_event', replace=event.id)}}">update with new</a>
+          <button type="button" class="btn btn-default btn-xs" onClick="openReplaceModal({{event.id}}, '{{event.name}}')">replace with existing</button>
         </td>
       </tr>
       {% endfor %}
     </table>
     <p><a href="#" onclick="toggleOldEvents()" id="oldEventToggle">Show Old Versions</a></p>
+  </div>
+</div>
+
+<div class="modal fade" id="eventReplaceModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="eventReplaceModalTitle">Replace with an existing Event Result</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form">
+          <input type="hidden" id="eventReplaceModalOldEvent" name="old_event" value="None">
+          <div class="form-group">
+            <label for="new_event" id="eventReplaceModalPrompt">Which event replaced this one?</label>
+              <select class="form-control" id="eventReplaceModalSelect">
+                <option value="None"></option>
+                {% for event in events %}
+                <option value={{event.id}}>{{event.name}} (id: {{event.id}})</option>
+                {% endfor %}
+              </select>
+          </div>
+          <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">Close</button>
+          <button type="button" class="btn btn-primary" id="eventReplaceModalSubmit" onclick="replaceEvent()">Mark as Replaced</button>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -96,7 +124,7 @@
       <tr>
         <td>{{ event.id }}</td>
         <td><a href="{{url_for('eventResult.event_results', eventid=event.id)}}">{{ event.name }}</a></td>
-        <td>{{ event.created }}</td>
+        <td>{{ event.created|datetimeformat('%H:%M, %d %b %Y') }}</td>
         <td>{{ event.replacedbyid }}</td>
       </tr>
       {% endfor %}
@@ -160,24 +188,56 @@
 {% block bottomscripts %}
 <script>
 function toggleOldEvents() {
-	if ($("#oldEvents").css('display') == 'none') {
-		$("#oldEvents").show();
-		$("#oldEventToggle").text("Hide Old Versions");
-	}
-	else {
-		$("#oldEvents").hide();
-		$("#oldEventToggle").text("Show Old Versions");
-	}
+  if ($("#oldEvents").css('display') == 'none') {
+    $("#oldEvents").show();
+    $("#oldEventToggle").text("Hide Old Versions");
+  }
+  else {
+    $("#oldEvents").hide();
+    $("#oldEventToggle").text("Show Old Versions");
+  }
 }
 function toggleOldSeries() {
-	if ($("#oldSeries").css('display') == 'none') {
-		$("#oldSeries").show();
-		$("#oldSeriesToggle").text("Hide Old Versions");
-	}
-	else {
-		$("#oldSeries").hide();
-		$("#oldSeriesToggle").text("Show Old Versions");
-	}
+  if ($("#oldSeries").css('display') == 'none') {
+    $("#oldSeries").show();
+    $("#oldSeriesToggle").text("Hide Old Versions");
+  }
+  else {
+    $("#oldSeries").hide();
+    $("#oldSeriesToggle").text("Show Old Versions");
+  }
+}
+function openReplaceModal(eventid, eventname) {
+  // set the content of the modal
+  $('#eventReplaceModalPrompt').html('Which result replaces '.concat(eventname).concat(' (id: ').concat(eventid).concat(')?'));
+  $('#eventReplaceModalOldEvent').prop('value', eventid);
+  $('#eventReplaceModalSelect option:disabled').prop('disabled', false);
+  $('#eventReplaceModalSelect option:selected').prop('selected', false);
+  var myselector = '#eventReplaceModalSelect option[value='.concat(eventid).concat(']');
+  $(myselector).prop('disabled', true);
+
+  // open the modal
+  $('#eventReplaceModal').modal();
+}
+
+function replaceEvent() {
+  var old_event = $('#eventReplaceModalOldEvent').prop('value');
+  var new_event = $('#eventReplaceModalSelect option:selected').prop('value');
+  console.log('Replacing', old_event, 'with', new_event);
+
+  var xhr = new XMLHttpRequest();
+  var url = '{{ url_for("eventResult.mark_as_replaced") }}';
+  var data = new FormData();
+  data.append('old_event', old_event)
+  data.append('new_event', new_event)
+
+  xhr.open("POST", url, true);
+  xhr.onreadystatechange = function() {
+    if(xhr.readyState == 4 && xhr.status == 200) {
+      window.location = '{{ url_for("users.user_home") }}';
+    }
+  }
+  xhr.send(data);
 }
 </script>
 {% endblock %}

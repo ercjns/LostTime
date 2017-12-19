@@ -128,21 +128,28 @@ def event_info(eventid):
             with open(filename, 'w') as f:
                 f.write(doc.render().encode('utf-8'))
 
-        replace = request.form['replace'] # string None
-        prev = Event.query.get(replace) # actually None
-        if prev != None:
-            ltuser = flask_login.current_user.get_id()
-            if (ltuser != None) and (int(ltuser) == prev.ltuserid):
-                prev.replacedbyid = eventid
-                db.session.add(prev)
-                old_events = Event.query.filter_by(replacedbyid=replace).all()
-                for old_event in old_events:
-                    old_event.replacedbyid = eventid
-                    db.session.add(old_event)
-                db.session.commit()
-                flash('Updated event {} with this event result.'.format(prev.name), 'info')
+        replace = request.form['replace'] # string id or 'None'
+        if replace != 'None':
+            replaced = mark_event_as_replaced(replace, event.id)
+            if replaced:
+                flash('Updated event {} with this event result.'.format(replace), 'info')
             else:
-                flash("Didn't update event {}, that is not your event!".format(prev.name), 'warning')
+                flash("Didn't update event {}, something went wrong!".format(replace), 'warning')
+
+        # prev = Event.query.get(replace) # Event object or Nonetype
+        # if prev != None:
+        #     ltuser = flask_login.current_user.get_id()
+        #     if (ltuser != None) and (int(ltuser) == prev.ltuserid):
+        #         prev.replacedbyid = eventid
+        #         db.session.add(prev)
+        #         old_events = Event.query.filter_by(replacedbyid=replace).all()
+        #         for old_event in old_events:
+        #             old_event.replacedbyid = eventid
+        #             db.session.add(old_event)
+        #         db.session.commit()
+        #         flash('Updated event {} with this event result.'.format(prev.name), 'info')
+        #     else:
+        #         flash("Didn't update event {}, that is not your event!".format(prev.name), 'warning')
 
         event = Event.query.get(eventid)
         event.isProcessed = True
@@ -150,6 +157,39 @@ def event_info(eventid):
         db.session.commit()
 
         return redirect(url_for('eventResult.event_results', eventid=eventid, replace=replace))
+
+
+def mark_event_as_replaced(old_event_id, new_event_id):
+    if old_event_id == 'None' or new_event_id == 'None':
+        return False
+
+    old_event = Event.query.get(old_event_id)
+    new_event = Event.query.get(new_event_id)
+
+    ltuser = flask_login.current_user.get_id()
+    if (ltuser != None) and (int(ltuser)) == old_event.ltuserid and (int(ltuser)) == new_event.ltuserid:
+        old_event.replacedbyid = new_event.id
+        db.session.add(old_event)
+        older_events = Event.query.filter_by(replacedbyid=old_event_id).all()
+        for older_event in older_events:
+            older_event.replacedbyid = new_event.id
+            db.session.add(older_event)
+        db.session.commit()
+        return True
+    return False
+
+
+@eventResult.route('/replace', methods=['POST'])
+def mark_as_replaced():
+    old_event = request.form['old_event']
+    new_event = request.form['new_event']
+    replaced = mark_event_as_replaced(old_event, new_event)
+    if replaced:
+        flash('Marked {} as replaced by {}'.format(old_event, new_event), 'info')
+    else:
+        flash('Something went wrong, no changes made.', 'warning')
+    return redirect(url_for('users.user_home')), 200
+
 
 @eventResult.route('/results/<eventid>', methods=['GET'])
 def event_results(eventid):
