@@ -79,7 +79,10 @@ configure_uploads(app, (eventfiles, entryfiles))
 
 @app.template_filter()
 def datetimeformat(value, format='%Y-%m-%dT%H:%M:%S'):
-    return value.strftime(format)
+    try:
+        return value.strftime(format)
+    except:
+        return ''
 
 ### Load the Blueprints / Paths
 

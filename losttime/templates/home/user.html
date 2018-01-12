@@ -78,7 +78,7 @@
         </td>
         <td>{{ event.created|datetimeformat('%H:%M, %d %b %Y') }}</td>
         <td>
-          <button type="button" class="btn btn-danger btn-xs" onClick="openReplaceModal({{event.id}}, '{{event.name}}')">Replace</button>
+          <button type="button" class="btn btn-danger btn-xs" onClick="openEventReplaceModal({{event.id}}, '{{event.name}}')">Replace</button>
         </td>
       </tr>
       {% endfor %}
@@ -141,7 +141,10 @@
   <div class="col-sm-10 col-sm-offset-1">
     <h3 class="section-title">My Series</h3>
     <p><a class="btn btn-primary" href="{{ url_for('seriesResult.select_events') }}">
-        <i class="fa fa-database" aria-hidden="true"></i> Create New Series Result</a></p>
+        <i class="fa fa-database" aria-hidden="true"></i> New Series Result</a></p>
+    <p>
+        Click <span class="btn-info btn-xs">Update</span> to select new results to use in this series. Use <span class="btn-danger btn-xs">Replace</span> if a series is mistakenly in this list multiple times.
+      </p>
     <table class="table table-condensed table-striped">
       <tr>
         <th>id</th>
@@ -152,17 +155,47 @@
       {% for s in series %}
       <tr>
         <td>{{ s.id }}</td>
-        <td><a href="{{url_for('seriesResult.series_result', seriesid=s.id)}}">{{ s.name }}</a></td>
-        <td>{{ s.updated }}</td>
-        <td>
-          <a href="{{url_for('seriesResult.select_events', replace=s.id)}}">update this series</a>
+        <td><a href="{{url_for('seriesResult.series_result', seriesid=s.id)}}">{{ s.name }}</a>
+          <a class="btn btn-info btn-xs" href="{{url_for('seriesResult.select_events', replace=s.id)}}">Update</a>
         </td>
+        <td>{{ s.updated|datetimeformat('%H:%M, %d %b %Y') }}</td>
+        <td>
+            <button type="button" class="btn btn-danger btn-xs" onClick="openSeriesReplaceModal({{s.id}}, '{{s.name}}')">Replace</button>
+          </td>
       </tr>
       {% endfor %}
     </table>
     <p><a href="#" onclick="toggleOldSeries()" id="oldSeriesToggle">Show Old Versions</a></p>
   </div>
 </div>
+
+<div class="modal fade" id="seriesReplaceModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="seriesReplaceModalTitle">Replace with an existing Series</h4>
+        </div>
+        <div class="modal-body">
+          <p><b>Old Version:</b> <span id="seriesReplaceModalOldSeriesName"></span></p>
+          <form class="form">
+            <input type="hidden" id="seriesReplaceModalOldSeries" name="old_series" value="None">
+            <div class="form-group">
+              <label for="new_series" id="seriesReplaceModalPrompt">New Version:</label>
+                <select class="form-control" id="seriesReplaceModalSelect">
+                  <option value="None"></option>
+                  {% for s in series %}
+                  <option value={{s.id}}>{{s.name}} (id: {{s.id}})</option>
+                  {% endfor %}
+                </select>
+            </div>
+            <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">Close</button>
+            <button type="button" class="btn btn-primary" id="seriesReplaceModalSubmit" onclick="replaceSeries()">Replace</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <div class="row" id="oldSeries" style="display:none;">
     <div class="col-sm-10 col-sm-offset-1">
@@ -178,7 +211,7 @@
         <tr>
           <td>{{ s.id }}</td>
           <td><a href="{{url_for('seriesResult.series_result', seriesid=s.id)}}">{{ s.name }}</a></td>
-          <td>{{ s.udpated }}</td>
+          <td>{{ s.updated|datetimeformat('%H:%M, %d %b %Y') }}</td>
           <td>{{ s.replacedbyid }}</td>
         </tr>
         {% endfor %}
@@ -212,9 +245,8 @@ function toggleOldSeries() {
     $("#oldSeriesToggle").text("Show Old Versions");
   }
 }
-function openReplaceModal(eventid, eventname) {
+function openEventReplaceModal(eventid, eventname) {
   // set the content of the modal
-  // $('#eventReplaceModalPrompt').html('Which result replaces '.concat(eventname).concat(' (id: ').concat(eventid).concat(')?'));
   $('#eventReplaceModalOldEventName').html(eventname.concat(' (id: ').concat(eventid).concat(')'));
   $('#eventReplaceModalOldEvent').prop('value', eventid);
   $('#eventReplaceModalSelect option:disabled').prop('disabled', false);
@@ -245,5 +277,39 @@ function replaceEvent() {
   }
   xhr.send(data);
 }
+
+function openSeriesReplaceModal(seriesid, seriesname) {
+  // set the content of the modal
+  $('#seriesReplaceModalOldSeriesName').html(seriesname.concat(' (id: ').concat(seriesid).concat(')'));
+  $('#seriesReplaceModalOldSeries').prop('value', seriesid);
+  $('#seriesReplaceModalSelect option:disabled').prop('disabled', false);
+  $('#seriesReplaceModalSelect option:selected').prop('selected', false);
+  var myselector = '#seriesReplaceModalSelect option[value='.concat(seriesid).concat(']');
+  $(myselector).prop('disabled', true);
+
+  // open the modal
+  $('#seriesReplaceModal').modal();
+}
+
+function replaceSeries() {
+  var old_series = $('#seriesReplaceModalOldSeries').prop('value');
+  var new_series = $('#seriesReplaceModalSelect option:selected').prop('value');
+  console.log('Replacing series', old_series, 'with', new_series);
+
+  var xhr = new XMLHttpRequest();
+  var url = '{{ url_for("seriesResult.replace_series") }}';
+  var data = new FormData();
+  data.append('old_series', old_series)
+  data.append('new_series', new_series)
+
+  xhr.open("POST", url, true);
+  xhr.onreadystatechange = function() {
+    if(xhr.readyState == 4 && xhr.status == 200) {
+      window.location = '{{ url_for("users.user_home") }}';
+    }
+  }
+  xhr.send(data);
+}
+
 </script>
 {% endblock %}

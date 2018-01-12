@@ -7,6 +7,7 @@ from _output_templates import SeriesHtmlWriter
 from os.path import join
 from fuzzywuzzy import fuzz
 import itertools, unicodedata
+from datetime import datetime
 
 
 seriesResult = Blueprint("seriesResult", __name__, static_url_path='/download', static_folder='../static/userfiles')
@@ -135,29 +136,75 @@ def series_info(seriesid):
         with open(filename, 'w') as f:
             f.write(doc.render().encode('utf-8'))
 
-        replace = request.args.get('replace')
-        prev = Series.query.get(replace) # actually None
-        if prev != None:
-            ltuser = flask_login.current_user.get_id()
-            if ((ltuser != None) and (int(ltuser) == prev.ltuserid)) or \
-               ((ltuser == None) and (prev.ltuserid == None)):
-                prev.replacedbyid = seriesid
-                db.session.add(prev)
-                old_seriess = Series.query.filter_by(replacedbyid=replace).all()
-                for old_series in old_seriess:
-                    old_series.replacedbyid = seriesid
-                    db.session.add(old_series)
-                db.session.commit()
-                flash('Updated series {} with this one.'.format(prev.name), 'info')
+        replace = request.args.get('replace') # empty string or a string id
+        print type(replace), replace
+
+        if replace != '':
+            replaced = mark_series_as_replaced(replace, seriesid)
+            if replaced:
+                flash('Updated series {} with this one.'.format(replace), 'info')
             else:
-                flash("Didn't update series {}, that is not your series!".format(prev.name), 'warning')
+                flash("Didn't update series {}, something went wrong.".format(replace), 'warning')
+
+        # prev = Series.query.get(replace) # actually None
+        # if prev != None:
+        #     ltuser = flask_login.current_user.get_id()
+        #     if ((ltuser != None) and (int(ltuser) == prev.ltuserid)) or \
+        #        ((ltuser == None) and (prev.ltuserid == None)):
+        #         prev.replacedbyid = seriesid
+        #         db.session.add(prev)
+        #         old_seriess = Series.query.filter_by(replacedbyid=replace).all()
+        #         for old_series in old_seriess:
+        #             old_series.replacedbyid = seriesid
+        #             db.session.add(old_series)
+        #         db.session.commit()
+        #         flash('Updated series {} with this one.'.format(prev.name), 'info')
+        #     else:
+        #         flash("Didn't update series {}, that is not your series!".format(prev.name), 'warning')
 
         series = Series.query.get(seriesid)
         series.isProcessed = True
+        series.updated = datetime.now()
         db.session.add(series)
         db.session.commit()
 
         return jsonify(seriesid=seriesid), 201
+
+
+def mark_series_as_replaced(old_id, new_id):
+    if old_id == "None" or new_id == "None":
+        return False
+
+    old_series = Series.query.get(old_id)
+    new_series = Series.query.get(new_id)
+
+    if old_series == None:
+        print('Shouldnt have called replace.')
+        return False
+
+    ltuser = flask_login.current_user.get_id()
+    if ((ltuser != None) and (int(ltuser) == old_series.ltuserid)) or \
+        ((ltuser == None) and (old_series.ltuserid == None)):
+        old_series.replacedbyid = new_id
+        db.session.add(old_series)
+        old_serieses = Series.query.filter_by(replacedbyid=new_id).all()
+        for prev_series in old_serieses:
+            prev_series.replacedbyid = new_id
+            db.session.add(prev_series)
+        db.session.commit()
+        return True
+    return False
+
+@seriesResult.route('/replace', methods=['POST'])
+def replace_series():
+    old_series = request.form['old_series']
+    new_series = request.form['new_series']
+    replaced = mark_series_as_replaced(old_series, new_series)
+    if replaced:
+        flash('Marked {} as replaced by {}'.format(old_series, new_series), 'info')
+    else:
+        flash('Something went wrong, no changes made.', 'warning')
+    return redirect(url_for('users.user_home')), 200
 
 @seriesResult.route('/results/<seriesid>', methods=['GET'])
 def series_result(seriesid):
