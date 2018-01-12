@@ -167,7 +167,7 @@ def mark_event_as_replaced(old_event_id, new_event_id):
     new_event = Event.query.get(new_event_id)
 
     ltuser = flask_login.current_user.get_id()
-    if (ltuser != None) and (int(ltuser)) == old_event.ltuserid and (int(ltuser)) == new_event.ltuserid:
+    if (ltuser != None) and (int(ltuser) == old_event.ltuserid) and (int(ltuser) == new_event.ltuserid):
         old_event.replacedbyid = new_event.id
         db.session.add(old_event)
         older_events = Event.query.filter_by(replacedbyid=old_event_id).all()

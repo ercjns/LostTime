@@ -59,7 +59,10 @@
   <div class="col-sm-10 col-sm-offset-1">
     <h3 class="section-title">My Event Results</h3>
     <p><a class="btn btn-primary" href="{{ url_for('eventResult.upload_event') }}">
-        <i class="fa fa-flag-checkered" aria-hidden="true"></i> Create New Event Result</a></p>
+        <i class="fa fa-flag-checkered" aria-hidden="true"></i> New Event Result</a></p>
+    <p>
+      Click <span class="btn-info btn-xs">Update</span> to upload a new results file (xml/csv) for that event. Use <span class="btn-danger btn-xs">Replace</span> if an event is mistakenly in this list multiple times.
+    </p>
     <table class="table table-condensed table-striped">
       <tr>
         <th>id</th>
@@ -70,11 +73,12 @@
       {% for event in events %}
       <tr>
         <td>{{ event.id }}</td>
-        <td><a href="{{url_for('eventResult.event_results', eventid=event.id)}}">{{ event.name }}</a></td>
+        <td><a href="{{url_for('eventResult.event_results', eventid=event.id)}}">{{ event.name }}</a> 
+          <a class="btn btn-info btn-xs" href="{{url_for('eventResult.upload_event', replace=event.id)}}">Update</a>
+        </td>
         <td>{{ event.created|datetimeformat('%H:%M, %d %b %Y') }}</td>
         <td>
-          <a class="btn btn-info btn-xs" href="{{url_for('eventResult.upload_event', replace=event.id)}}">update with new</a>
-          <button type="button" class="btn btn-default btn-xs" onClick="openReplaceModal({{event.id}}, '{{event.name}}')">replace with existing</button>
+          <button type="button" class="btn btn-danger btn-xs" onClick="openReplaceModal({{event.id}}, '{{event.name}}')">Replace</button>
         </td>
       </tr>
       {% endfor %}
@@ -91,10 +95,11 @@
         <h4 class="modal-title" id="eventReplaceModalTitle">Replace with an existing Event Result</h4>
       </div>
       <div class="modal-body">
+        <p><b>Old Version:</b> <span id="eventReplaceModalOldEventName"></span></p>
         <form class="form">
           <input type="hidden" id="eventReplaceModalOldEvent" name="old_event" value="None">
           <div class="form-group">
-            <label for="new_event" id="eventReplaceModalPrompt">Which event replaced this one?</label>
+            <label for="new_event" id="eventReplaceModalPrompt">New Version:</label>
               <select class="form-control" id="eventReplaceModalSelect">
                 <option value="None"></option>
                 {% for event in events %}
@@ -103,7 +108,7 @@
               </select>
           </div>
           <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">Close</button>
-          <button type="button" class="btn btn-primary" id="eventReplaceModalSubmit" onclick="replaceEvent()">Mark as Replaced</button>
+          <button type="button" class="btn btn-primary" id="eventReplaceModalSubmit" onclick="replaceEvent()">Replace</button>
         </form>
       </div>
     </div>
@@ -209,7 +214,8 @@ function toggleOldSeries() {
 }
 function openReplaceModal(eventid, eventname) {
   // set the content of the modal
-  $('#eventReplaceModalPrompt').html('Which result replaces '.concat(eventname).concat(' (id: ').concat(eventid).concat(')?'));
+  // $('#eventReplaceModalPrompt').html('Which result replaces '.concat(eventname).concat(' (id: ').concat(eventid).concat(')?'));
+  $('#eventReplaceModalOldEventName').html(eventname.concat(' (id: ').concat(eventid).concat(')'));
   $('#eventReplaceModalOldEvent').prop('value', eventid);
   $('#eventReplaceModalSelect option:disabled').prop('disabled', false);
   $('#eventReplaceModalSelect option:selected').prop('selected', false);
