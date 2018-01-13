@@ -14,10 +14,10 @@ def user_home():
     ltuser = flask_login.current_user
     if not ltuser.isVerified:
         flash("Please Verify Your E-Mail Address", 'warning')
-    my_events = Event.query.filter_by(ltuserid=ltuser.id,replacedbyid=None,isProcessed=True).all()
-    my_old_events = Event.query.filter_by(ltuserid=ltuser.id,isProcessed=True).filter(Event.replacedbyid != None).all()
-    my_series = Series.query.filter_by(ltuserid=ltuser.id,isProcessed=True).filter(Series.replacedbyid == None).all()
-    my_old_series = Series.query.filter_by(ltuserid=ltuser.id,isProcessed=True).filter(Series.replacedbyid != None).all()
+    my_events = Event.query.filter_by(ltuserid=ltuser.id,replacedbyid=None,isProcessed=True).order_by(Event.id.desc()).all()
+    my_old_events = Event.query.filter_by(ltuserid=ltuser.id,isProcessed=True).filter(Event.replacedbyid != None).order_by(Event.id.desc()).all()
+    my_series = Series.query.filter_by(ltuserid=ltuser.id,isProcessed=True).filter(Series.replacedbyid == None).order_by(Series.id.desc()).all()
+    my_old_series = Series.query.filter_by(ltuserid=ltuser.id,isProcessed=True).filter(Series.replacedbyid != None).order_by(Series.id.desc()).all()
     return render_template('home/user.html', 
                            user=ltuser,
                            events=my_events,

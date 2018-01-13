@@ -5,8 +5,14 @@
 {% block pagetitle %}
 <div class="row">
     <div class="col-sm-10 col-sm-offset-1">
-    <h3 class="page-title">Hello, {{ user.email }}</h3>
+    <h3 class="page-title">{{ user.email }}</h3>
     <div class="pinkline"></div>
+    <p>
+      Create and manage event results and series standings.
+    </p>
+    <p>
+      Click <span class="btn-info btn-xs">Update</span> to load a new results file (xml/csv) for that event or choose different events for that series. Use <span class="btn-danger btn-xs">Replace</span> if an event is mistakenly in the list multiple times.
+    </p>
     </div>
 </div>
 {% endblock %}
@@ -28,38 +34,9 @@
 
 <div class="row">
   <div class="col-sm-10 col-sm-offset-1">
-    <h3 class="section-title">Account Information</h3>
-      <form class="form-horizontal">
-        <div class="form-group">
-          <label class="col-sm-2 control-label">Email</label>
-          <div class="col-sm-10">
-            <p class="form-control-static">
-              {{ user.email }}
-              {% if user.isVerified %}
-              <span class="text-success">
-                <i class="fa fa-check-circle-o" aria-hidden="true"></i> Verified
-              </span>
-              {% else %}
-              <a href="{{url_for('auth.reconfirm_email')}}">Verify your email address</a>
-              {% endif %}
-            </p>
-          </div>
-          <label class="col-sm-2 control-label">Password</label>
-          <div class="col-sm-10">
-            <p class="form-control-static">
-              <a href="{{url_for('auth.change_password')}}">Change Password</a>
-            </p>
-          </div>
-        </div>
-      </form>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-sm-10 col-sm-offset-1">
     <h3 class="section-title">My Event Results</h3>
     <p><a class="btn btn-primary" href="{{ url_for('eventResult.upload_event') }}">
-        <i class="fa fa-flag-checkered" aria-hidden="true"></i> Create New Event Result</a></p>
+        <i class="fa fa-flag-checkered" aria-hidden="true"></i> New Event Result</a></p>
     <table class="table table-condensed table-striped">
       <tr>
         <th>id</th>
@@ -70,15 +47,45 @@
       {% for event in events %}
       <tr>
         <td>{{ event.id }}</td>
-        <td><a href="{{url_for('eventResult.event_results', eventid=event.id)}}">{{ event.name }}</a></td>
-        <td>{{ event.created }}</td>
+        <td><a href="{{url_for('eventResult.event_results', eventid=event.id)}}">{{ event.name }}</a> 
+          <a class="btn btn-info btn-xs" href="{{url_for('eventResult.upload_event', replace=event.id)}}">Update</a>
+        </td>
+        <td>{{ event.created|datetimeformat('%H:%M, %d %b %Y') }}</td>
         <td>
-          <a href="{{url_for('eventResult.upload_event', replace=event.id)}}">update this event</a>
+          <button type="button" class="btn btn-danger btn-xs" onClick="openEventReplaceModal({{event.id}}, '{{event.name|e|htmlEscapeQuotes}}')">Replace</button>
         </td>
       </tr>
       {% endfor %}
     </table>
     <p><a href="#" onclick="toggleOldEvents()" id="oldEventToggle">Show Old Versions</a></p>
+  </div>
+</div>
+
+<div class="modal fade" id="eventReplaceModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="eventReplaceModalTitle">Replace with an existing Event Result</h4>
+      </div>
+      <div class="modal-body">
+        <p><b>Old Version:</b> <span id="eventReplaceModalOldEventName"></span></p>
+        <form class="form">
+          <input type="hidden" id="eventReplaceModalOldEvent" name="old_event" value="None">
+          <div class="form-group">
+            <label for="new_event" id="eventReplaceModalPrompt">New Version:</label>
+              <select class="form-control" id="eventReplaceModalSelect">
+                <option value="None"></option>
+                {% for event in events %}
+                <option value={{event.id}}>{{event.name}} (id: {{event.id}})</option>
+                {% endfor %}
+              </select>
+          </div>
+          <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">Close</button>
+          <button type="button" class="btn btn-primary" id="eventReplaceModalSubmit" onclick="replaceEvent()">Replace</button>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -96,7 +103,7 @@
       <tr>
         <td>{{ event.id }}</td>
         <td><a href="{{url_for('eventResult.event_results', eventid=event.id)}}">{{ event.name }}</a></td>
-        <td>{{ event.created }}</td>
+        <td>{{ event.created|datetimeformat('%H:%M, %d %b %Y') }}</td>
         <td>{{ event.replacedbyid }}</td>
       </tr>
       {% endfor %}
@@ -108,7 +115,7 @@
   <div class="col-sm-10 col-sm-offset-1">
     <h3 class="section-title">My Series</h3>
     <p><a class="btn btn-primary" href="{{ url_for('seriesResult.select_events') }}">
-        <i class="fa fa-database" aria-hidden="true"></i> Create New Series Result</a></p>
+        <i class="fa fa-database" aria-hidden="true"></i> New Series Result</a></p>
     <table class="table table-condensed table-striped">
       <tr>
         <th>id</th>
@@ -119,17 +126,47 @@
       {% for s in series %}
       <tr>
         <td>{{ s.id }}</td>
-        <td><a href="{{url_for('seriesResult.series_result', seriesid=s.id)}}">{{ s.name }}</a></td>
-        <td>{{ s.updated }}</td>
-        <td>
-          <a href="{{url_for('seriesResult.select_events', replace=s.id)}}">update this series</a>
+        <td><a href="{{url_for('seriesResult.series_result', seriesid=s.id)}}">{{ s.name }}</a>
+          <a class="btn btn-info btn-xs" href="{{url_for('seriesResult.select_events', replace=s.id)}}">Update</a>
         </td>
+        <td>{{ s.updated|datetimeformat('%H:%M, %d %b %Y') }}</td>
+        <td>
+            <button type="button" class="btn btn-danger btn-xs" onClick="openSeriesReplaceModal({{s.id}}, '{{s.name|e|htmlEscapeQuotes}}')">Replace</button>
+          </td>
       </tr>
       {% endfor %}
     </table>
     <p><a href="#" onclick="toggleOldSeries()" id="oldSeriesToggle">Show Old Versions</a></p>
   </div>
 </div>
+
+<div class="modal fade" id="seriesReplaceModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="seriesReplaceModalTitle">Replace with an existing Series</h4>
+        </div>
+        <div class="modal-body">
+          <p><b>Old Version:</b> <span id="seriesReplaceModalOldSeriesName"></span></p>
+          <form class="form">
+            <input type="hidden" id="seriesReplaceModalOldSeries" name="old_series" value="None">
+            <div class="form-group">
+              <label for="new_series" id="seriesReplaceModalPrompt">New Version:</label>
+                <select class="form-control" id="seriesReplaceModalSelect">
+                  <option value="None"></option>
+                  {% for s in series %}
+                  <option value={{s.id}}>{{s.name}} (id: {{s.id}})</option>
+                  {% endfor %}
+                </select>
+            </div>
+            <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">Close</button>
+            <button type="button" class="btn btn-primary" id="seriesReplaceModalSubmit" onclick="replaceSeries()">Replace</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <div class="row" id="oldSeries" style="display:none;">
     <div class="col-sm-10 col-sm-offset-1">
@@ -145,11 +182,40 @@
         <tr>
           <td>{{ s.id }}</td>
           <td><a href="{{url_for('seriesResult.series_result', seriesid=s.id)}}">{{ s.name }}</a></td>
-          <td>{{ s.udpated }}</td>
+          <td>{{ s.updated|datetimeformat('%H:%M, %d %b %Y') }}</td>
           <td>{{ s.replacedbyid }}</td>
         </tr>
         {% endfor %}
       </table>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+      <h3 class="section-title">Account Information</h3>
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-2 control-label">Email</label>
+            <div class="col-sm-10">
+              <p class="form-control-static">
+                {{ user.email }}
+                {% if user.isVerified %}
+                <span class="text-success">
+                  <i class="fa fa-check-circle-o" aria-hidden="true"></i> Verified
+                </span>
+                {% else %}
+                <a href="{{url_for('auth.reconfirm_email')}}">Verify your email address</a>
+                {% endif %}
+              </p>
+            </div>
+            <label class="col-sm-2 control-label">Password</label>
+            <div class="col-sm-10">
+              <p class="form-control-static">
+                <a href="{{url_for('auth.change_password')}}">Change Password</a>
+              </p>
+            </div>
+          </div>
+        </form>
     </div>
   </div>
 
@@ -160,24 +226,90 @@
 {% block bottomscripts %}
 <script>
 function toggleOldEvents() {
-	if ($("#oldEvents").css('display') == 'none') {
-		$("#oldEvents").show();
-		$("#oldEventToggle").text("Hide Old Versions");
-	}
-	else {
-		$("#oldEvents").hide();
-		$("#oldEventToggle").text("Show Old Versions");
-	}
+  if ($("#oldEvents").css('display') == 'none') {
+    $("#oldEvents").show();
+    $("#oldEventToggle").text("Hide Old Versions");
+  }
+  else {
+    $("#oldEvents").hide();
+    $("#oldEventToggle").text("Show Old Versions");
+  }
 }
 function toggleOldSeries() {
-	if ($("#oldSeries").css('display') == 'none') {
-		$("#oldSeries").show();
-		$("#oldSeriesToggle").text("Hide Old Versions");
-	}
-	else {
-		$("#oldSeries").hide();
-		$("#oldSeriesToggle").text("Show Old Versions");
-	}
+  if ($("#oldSeries").css('display') == 'none') {
+    $("#oldSeries").show();
+    $("#oldSeriesToggle").text("Hide Old Versions");
+  }
+  else {
+    $("#oldSeries").hide();
+    $("#oldSeriesToggle").text("Show Old Versions");
+  }
 }
+function openEventReplaceModal(eventid, eventname) {
+  // set the content of the modal
+  $('#eventReplaceModalOldEventName').html(eventname.concat(' (id: ').concat(eventid).concat(')'));
+  $('#eventReplaceModalOldEvent').prop('value', eventid);
+  $('#eventReplaceModalSelect option:disabled').prop('disabled', false);
+  $('#eventReplaceModalSelect option:selected').prop('selected', false);
+  var myselector = '#eventReplaceModalSelect option[value='.concat(eventid).concat(']');
+  $(myselector).prop('disabled', true);
+
+  // open the modal
+  $('#eventReplaceModal').modal();
+}
+
+function replaceEvent() {
+  var old_event = $('#eventReplaceModalOldEvent').prop('value');
+  var new_event = $('#eventReplaceModalSelect option:selected').prop('value');
+  console.log('Replacing', old_event, 'with', new_event);
+
+  var xhr = new XMLHttpRequest();
+  var url = '{{ url_for("eventResult.mark_as_replaced") }}';
+  var data = new FormData();
+  data.append('old_event', old_event)
+  data.append('new_event', new_event)
+
+  xhr.open("POST", url, true);
+  xhr.onreadystatechange = function() {
+    if(xhr.readyState == 4 && xhr.status == 200) {
+      window.location = '{{ url_for("users.user_home") }}';
+    }
+  }
+  xhr.send(data);
+}
+
+function openSeriesReplaceModal(seriesid, seriesname) {
+  // set the content of the modal
+  $('#seriesReplaceModalOldSeriesName').html(seriesname.concat(' (id: ').concat(seriesid).concat(')'));
+  $('#seriesReplaceModalOldSeries').prop('value', seriesid);
+  $('#seriesReplaceModalSelect option:disabled').prop('disabled', false);
+  $('#seriesReplaceModalSelect option:selected').prop('selected', false);
+  var myselector = '#seriesReplaceModalSelect option[value='.concat(seriesid).concat(']');
+  $(myselector).prop('disabled', true);
+
+  // open the modal
+  $('#seriesReplaceModal').modal();
+}
+
+function replaceSeries() {
+  var old_series = $('#seriesReplaceModalOldSeries').prop('value');
+  var new_series = $('#seriesReplaceModalSelect option:selected').prop('value');
+  console.log('Replacing series', old_series, 'with', new_series);
+
+  var xhr = new XMLHttpRequest();
+  var url = '{{ url_for("seriesResult.replace_series") }}';
+  var data = new FormData();
+  data.append('old_series', old_series)
+  data.append('new_series', new_series)
+
+  xhr.open("POST", url, true);
+  xhr.onreadystatechange = function() {
+    if(xhr.readyState == 4 && xhr.status == 200) {
+      window.location = '{{ url_for("users.user_home") }}';
+    }
+  }
+  xhr.send(data);
+}
+
 </script>
 {% endblock %}
