@@ -75,7 +75,7 @@ entryfilepath = join('losttime', 'static', 'userfiles')
 entryfiles = UploadSet('entryfiles', ('csv',), lambda app:entryfilepath)
 configure_uploads(app, (eventfiles, entryfiles))
 
-### TODO:What is this?
+### Custom Jinja Filters
 
 @app.template_filter()
 def datetimeformat(value, format='%Y-%m-%dT%H:%M:%S'):
@@ -83,6 +83,12 @@ def datetimeformat(value, format='%Y-%m-%dT%H:%M:%S'):
         return value.strftime(format)
     except:
         return ''
+
+@app.template_filter()
+def htmlEscapeQuotes(value):
+    value = value.replace("'", "&#39;")
+    value = value.replace('"', "&#34;")
+    return value
 
 ### Load the Blueprints / Paths
 

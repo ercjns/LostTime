@@ -78,7 +78,7 @@
         </td>
         <td>{{ event.created|datetimeformat('%H:%M, %d %b %Y') }}</td>
         <td>
-          <button type="button" class="btn btn-danger btn-xs" onClick="openEventReplaceModal({{event.id}}, '{{event.name}}')">Replace</button>
+          <button type="button" class="btn btn-danger btn-xs" onClick="openEventReplaceModal({{event.id}}, '{{event.name|e|htmlEscapeQuotes}}')">Replace</button>
         </td>
       </tr>
       {% endfor %}
@@ -160,7 +160,7 @@
         </td>
         <td>{{ s.updated|datetimeformat('%H:%M, %d %b %Y') }}</td>
         <td>
-            <button type="button" class="btn btn-danger btn-xs" onClick="openSeriesReplaceModal({{s.id}}, '{{s.name}}')">Replace</button>
+            <button type="button" class="btn btn-danger btn-xs" onClick="openSeriesReplaceModal({{s.id}}, '{{s.name|e|htmlEscapeQuotes}}')">Replace</button>
           </td>
       </tr>
       {% endfor %}
