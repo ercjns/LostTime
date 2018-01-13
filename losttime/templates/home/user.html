@@ -5,8 +5,14 @@
 {% block pagetitle %}
 <div class="row">
     <div class="col-sm-10 col-sm-offset-1">
-    <h3 class="page-title">Hello, {{ user.email }}</h3>
+    <h3 class="page-title">{{ user.email }}</h3>
     <div class="pinkline"></div>
+    <p>
+      Create and manage event results and series standings.
+    </p>
+    <p>
+      Click <span class="btn-info btn-xs">Update</span> to load a new results file (xml/csv) for that event or choose different events for that series. Use <span class="btn-danger btn-xs">Replace</span> if an event is mistakenly in the list multiple times.
+    </p>
     </div>
 </div>
 {% endblock %}
@@ -28,41 +34,9 @@
 
 <div class="row">
   <div class="col-sm-10 col-sm-offset-1">
-    <h3 class="section-title">Account Information</h3>
-      <form class="form-horizontal">
-        <div class="form-group">
-          <label class="col-sm-2 control-label">Email</label>
-          <div class="col-sm-10">
-            <p class="form-control-static">
-              {{ user.email }}
-              {% if user.isVerified %}
-              <span class="text-success">
-                <i class="fa fa-check-circle-o" aria-hidden="true"></i> Verified
-              </span>
-              {% else %}
-              <a href="{{url_for('auth.reconfirm_email')}}">Verify your email address</a>
-              {% endif %}
-            </p>
-          </div>
-          <label class="col-sm-2 control-label">Password</label>
-          <div class="col-sm-10">
-            <p class="form-control-static">
-              <a href="{{url_for('auth.change_password')}}">Change Password</a>
-            </p>
-          </div>
-        </div>
-      </form>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-sm-10 col-sm-offset-1">
     <h3 class="section-title">My Event Results</h3>
     <p><a class="btn btn-primary" href="{{ url_for('eventResult.upload_event') }}">
         <i class="fa fa-flag-checkered" aria-hidden="true"></i> New Event Result</a></p>
-    <p>
-      Click <span class="btn-info btn-xs">Update</span> to upload a new results file (xml/csv) for that event. Use <span class="btn-danger btn-xs">Replace</span> if an event is mistakenly in this list multiple times.
-    </p>
     <table class="table table-condensed table-striped">
       <tr>
         <th>id</th>
@@ -142,9 +116,6 @@
     <h3 class="section-title">My Series</h3>
     <p><a class="btn btn-primary" href="{{ url_for('seriesResult.select_events') }}">
         <i class="fa fa-database" aria-hidden="true"></i> New Series Result</a></p>
-    <p>
-        Click <span class="btn-info btn-xs">Update</span> to select new results to use in this series. Use <span class="btn-danger btn-xs">Replace</span> if a series is mistakenly in this list multiple times.
-      </p>
     <table class="table table-condensed table-striped">
       <tr>
         <th>id</th>
@@ -216,6 +187,35 @@
         </tr>
         {% endfor %}
       </table>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+      <h3 class="section-title">Account Information</h3>
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-2 control-label">Email</label>
+            <div class="col-sm-10">
+              <p class="form-control-static">
+                {{ user.email }}
+                {% if user.isVerified %}
+                <span class="text-success">
+                  <i class="fa fa-check-circle-o" aria-hidden="true"></i> Verified
+                </span>
+                {% else %}
+                <a href="{{url_for('auth.reconfirm_email')}}">Verify your email address</a>
+                {% endif %}
+              </p>
+            </div>
+            <label class="col-sm-2 control-label">Password</label>
+            <div class="col-sm-10">
+              <p class="form-control-static">
+                <a href="{{url_for('auth.change_password')}}">Change Password</a>
+              </p>
+            </div>
+          </div>
+        </form>
     </div>
   </div>
 
