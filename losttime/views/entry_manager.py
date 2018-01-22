@@ -48,7 +48,7 @@ def upload_entries():
             outfilename = join(entryManager.static_folder, 'EntryForOE-{0}.csv'.format(request.form['stamp']))
             with open(outfilename, 'w') as out:
                 out.write(doc)
-        elif request.form['entry-format'] == 'CheckIn':
+        elif request.form['entry-format'] in ['CheckIn', 'CheckInNationalMeet']:
             outfilename = join(entryManager.static_folder, 'EntryForCheckIn-{0}.pdf'.format(request.form['stamp']))
             from weasyprint import HTML
             HTML(string=doc).write_pdf(outfilename, stylesheets=[join(entryManager.static_folder,'CheckInEntries.css')])

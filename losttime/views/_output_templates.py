@@ -368,6 +368,10 @@ class EntryWriter(object):
     def __init__(self, infiles, format, eventtype='standard', punchtype='epunch', bibstart=1001):
         self.files = infiles
         self.format = format
+        if self.format == 'CheckInNationalMeet':
+            self.national_meet = True
+        else:
+            self.national_meet = False
         self.eventtype = eventtype
         self.epunch = True if punchtype == 'epunch' else False
         self.bibnum = _nextbib(bibstart)
@@ -375,7 +379,7 @@ class EntryWriter(object):
     def writeEntries(self):
         if self.format == 'OE':
             return self.__writeOEentries()
-        elif self.format == 'CheckIn':
+        elif self.format == 'CheckIn' or self.format == 'CheckInNationalMeet':
             return self.__writeCheckInEntries()
         else:
             raise KeyError("Unrecognized output format for entries: {}".format(self.format))
@@ -445,12 +449,20 @@ class EntryWriter(object):
             ownersDoc = '<h2>Pre-Registered List: OWNED e-punches</h2>\n'
             ownersDoc += '<h4>REGISTRATION VOLUNTEERS</h4><p>Check off ALL participants in the first column as they arrive. Collect money from those who owe it and mark it out when paid.</p>\n<hr />\n'
 
-            tablehead = '<table>\n<thead><tr><th class="check">&#x2714;</th><th>First</th><th>Last</th><th>Owes</th><th>Course</th><th>E-Punch</th><th>Club</th><th>Phone</th><th>Emergency Phone</th><th>Car</th></tr></thead>\n'
+            if self.national_meet:
+                tablehead = '<table>\n<thead><tr><th class="check">&#x2714;</th><th>First</th><th>Last</th><th>Owes</th><th>Course</th><th>E-Punch</th><th>Club</th><th>YB</th><th>Gen.</th><th>Phone</th><th>Emergency Phone</th><th>Car</th></tr></thead>\n'
+            else:
+                tablehead = '<table>\n<thead><tr><th class="check">&#x2714;</th><th>First</th><th>Last</th><th>Owes</th><th>Course</th><th>E-Punch</th><th>Club</th><th>Phone</th><th>Emergency Phone</th><th>Car</th></tr></thead>\n'
 
             rentalDoc += tablehead
             ownersDoc += tablehead
-            OWN_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td>{}</td><td class="punch">{}</td><td>{}</td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
-            RENT_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td>{}</td><td class="rentpunch"></td><td>{}</td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
+
+            if self.national_meet:
+                OWN_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td class="verify">{}</td><td class="punch">{}</td><td class="verify">{}</td><td class="YB verify"></td><td class="gender verify"></td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
+                RENT_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td class="verify">{}</td><td class="rentpunch"></td><td class="verify">{}</td><td class="YB verify"></td><td class="gender verify"></td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
+            else:
+                OWN_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td>{}</td><td class="punch">{}</td><td>{}</td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
+                RENT_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td>{}</td><td class="rentpunch"></td><td>{}</td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
 
         else:
             manualDoc = '<h2>Pre-Registered List: MANUAL PUNCH event</h2>\n'

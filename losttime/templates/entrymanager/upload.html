@@ -98,6 +98,7 @@
 			<option value="OE" selected>Sport Software csv</option>
 			<option value="xml" disabled>IOF XML v3 EntryList</option>
 			<option value="CheckIn">Check-In Table PDF</option>
+			<option value="CheckInNationalMeet">Check-In Table PDF - National Meet</option>
 		</select>
 		</div>
 	</div>
@@ -233,8 +234,11 @@ function outputoptions() {
 	} else if ($("#entry-format-select").val() == 'CheckIn'){
 		$("#event-type-row").hide();
 		$("#punch-system-row").show();
+	} else if ($("#entry-format-select").val() == 'CheckInNationalMeet'){
+		$("#event-type-row").hide();
+		$("#punch-system-row").show();
 	}
-}
+}	
 outputoptions();
 </script>
 {% endblock %}
