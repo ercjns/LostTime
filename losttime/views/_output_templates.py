@@ -5,6 +5,7 @@ import pytz
 import csv, fileinput, sys
 import dominate
 from dominate.tags import *
+from flask import flash
 
 class EventHtmlWriter(object):
     def __init__(self, event, format='generic', classes=None, results=None, teamclasses=None, teamresults=None, clubcodes=None):
@@ -385,6 +386,8 @@ class EntryWriter(object):
         prefix = 'OESco0001;' if self.eventtype == 'score' else 'OE0001;'
         header = prefix + 'Stno;XStno;Chipno;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Credit -;Penalty +;Comment;Club no.;Cl.name;City;Nat;Location;Region;Cl. no.;Short;Long;Entry cl. No;Entry class (short);Entry class (long);Rank;Ranking points;Num1;Num2;Num3;Text1;Text2;Text3;Addr. surname;Addr. first name;Street;Line2;Zip;Addr. city;Phone;Mobile;Fax;EMail;Rented;Start fee;Paid;Team;Course no.;Course;km;m;Course controls\n'
         doc += header
+        bibs = []
+        bibs_dupes_exist = False
         for f in self.files:
 
             for line in fileinput.input(files=(f), inplace=True):
@@ -423,8 +426,13 @@ class EntryWriter(object):
                         nc = line[datacols['nc']].strip('\"\'\/\\ ')
                     else:
                         nc = '0'
+                    if stno in bibs:
+                        bibs_dupes_exist = True
+                    bibs.append(stno)
                     regline = template.format(stno, punch, last, first, sex, nc, club, cat, rented)
                     doc += regline
+        if bibs_dupes_exist:
+            flash("Detected entries with non-unique start/bib numbers.", 'danger')
         return doc
 
     def __writeCheckInEntries(self):
