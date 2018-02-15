@@ -385,7 +385,7 @@ class EntryWriter(object):
             raise KeyError("Unrecognized output format for entries: {}".format(self.format))
 
     def __writeOEentries(self):
-        template = ';{0};;{1};;{2};{3};;{4};;{5};;;;0;;;;;;{6};;;;;{7};;;;;;;;;;;;;;;;;;;;;;;{8};0;X;;;;;;\n'
+        template = ';{0};;{1};;{2};{3};{4};{5};;{6};;;;0;;;;;;{7};;;;;{8};;;;;;;;;;;;;;;;;;;;;;;{9};0;X;;;;;;\n'
         doc = ''
         prefix = 'OESco0001;' if self.eventtype == 'score' else 'OE0001;'
         header = prefix + 'Stno;XStno;Chipno;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Credit -;Penalty +;Comment;Club no.;Cl.name;City;Nat;Location;Region;Cl. no.;Short;Long;Entry cl. No;Entry class (short);Entry class (long);Rank;Ranking points;Num1;Num2;Num3;Text1;Text2;Text3;Addr. surname;Addr. first name;Street;Line2;Zip;Addr. city;Phone;Mobile;Fax;EMail;Rented;Start fee;Paid;Team;Course no.;Course;km;m;Course controls\n'
@@ -410,6 +410,7 @@ class EntryWriter(object):
                 for line in regreader:
                     first = line[datacols['first']].strip('\"\'\/\\ ') if 'first' in datacols.keys() else ''
                     last = line[datacols['last']].strip('\"\'\/\\ ') if 'last' in datacols.keys() else ''
+                    yb = line[datacols['yb']].strip('\"\'\/\\ ') if 'yb' in datacols.keys() else ''
                     club = line[datacols['club']].strip('\"\'\/\\ ') if 'club' in datacols.keys() else ''
                     cat = line[datacols['cat']].strip('\"\'\/\\ ') if 'cat' in datacols.keys() else ''
                     sex = line[datacols['sex']].strip('\"\'\/\\ ') if 'sex' in datacols.keys() else ''
@@ -433,7 +434,7 @@ class EntryWriter(object):
                     if stno in bibs:
                         bibs_dupes_exist = True
                     bibs.append(stno)
-                    regline = template.format(stno, punch, last, first, sex, nc, club, cat, rented)
+                    regline = template.format(stno, punch, last, first, yb, sex, nc, club, cat, rented)
                     doc += regline
         if bibs_dupes_exist:
             flash("Detected entries with non-unique start/bib numbers.", 'danger')
@@ -585,6 +586,9 @@ class EntryWriter(object):
                 continue
             elif 'license' in val:
                 datacols['license'] = idx
+                continue
+            elif 'yb' in val:
+                datacols['yb'] = idx
                 continue
             else:
                 continue
