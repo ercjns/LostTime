@@ -7,6 +7,8 @@ from losttime import eventfiles
 from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, ClubCode
 from _orienteer_data import OrienteerResultReader
 from _output_templates import EventHtmlWriter
+from _output_template_coc import EventHtmlWriter_COC
+from _output_template_generic import EventHtmlWriter_Generic
 from os import remove
 from os.path import join
 
@@ -510,10 +512,20 @@ def _buildResultPages(eventid, style):
     for club in ClubCode.query.all():
         clubcodes.setdefault(club.code, []).append(club)
 
-    writer = EventHtmlWriter(event, style, classes, results, teamclasses, teamresults, clubcodes)
+    writer = EventHtmlWriterHandler(event, style, classes, results, teamclasses, teamresults, clubcodes)
     docdict = {}
     docdict['indv'] = writer.eventResultIndv()
     teamdoc = writer.eventResultTeam()
     if teamdoc: # false if no team results page
         docdict['team'] = teamdoc
     return docdict
+
+
+def EventHtmlWriterHandler(event, style='generic', classes=None, results=None, teamclasses=None, teamresults=None,
+                           clubcodes=None):
+    if style == 'coc':
+        return EventHtmlWriter_COC(event, style, classes, results, teamclasses, teamresults, clubcodes)
+    else:
+        return EventHtmlWriter_Generic(event, style, classes, results, teamclasses, teamresults, clubcodes)
+
+
