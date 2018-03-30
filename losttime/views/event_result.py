@@ -520,7 +520,8 @@ def _buildResultPages(eventid, style):
         docdict['team'] = teamdoc
     return docdict
 
-handlers = {
+
+htmlWriterHandlers = {
     'coc': EventHtmlWriter_COC,
     'generic': EventHtmlWriter_Generic,
 }
@@ -528,7 +529,7 @@ handlers = {
 
 def EventHtmlWriterHandler(event, style='generic', classes=None, results=None, teamclasses=None, teamresults=None,
                            clubcodes=None):
-    return handlers[style](event, classes, results, teamclasses, teamresults, clubcodes)
+    return htmlWriterHandlers[style](event, classes, results, teamclasses, teamresults, clubcodes)
     # if style == 'coc':
     #     return EventHtmlWriter_COC(event, classes, results, teamclasses, teamresults, clubcodes)
     # else:
