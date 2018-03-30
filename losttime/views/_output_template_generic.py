@@ -78,3 +78,48 @@ class EventHtmlWriter_Generic(EventHtmlWriter):
                             if (ec.scoremethod in ['worldcup', '1000pts', 'score1000']):
                                 td('{0:d}'.format(int(pr.score))) if pr.score is not None else td()
         return doc # __writeEventResultIndv
+
+    def eventResultTeam(self):
+        doc = dominate.document(title='Event Results')
+        with doc.head:
+            link(rel='stylesheet',
+                 href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css',
+                 integrity='sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7',
+                 crossorigin='anonymous')
+            link(rel='stylsheet',
+                 href='https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css')
+            meta(name='viewport', content='width=device-width, initial-scale=1.0')
+        with doc:
+            page = div(cls='container-fluid')
+        with page:
+            with div(cls='row').add(div(cls='col-xs-12')):
+                h1('Team Results for {0}'.format(self.event.name))
+                try:
+                    eventdate = datetime.date(*[int(x) for x in self.event.date.split('-')])
+                    p('An orienteering event held at {0} on {1:%d %B %Y}'.format(self.event.venue, eventdate))
+                except:
+                    pass
+                p('Team Competition Classes:')
+            with div(cls='row'):
+                for tc in self.teamclasses:
+                    self.teamclasses.sort(key=lambda x: x.shortname)
+                    div((a(tc.name, href='#{0}'.format(tc.shortname))), cls='col-md-3')
+            for tc in self.teamclasses:
+                with div(cls='row').add(div(cls='col-md-8')):
+                    classresults = [r for r in self.teamresults if r.teamclassid == tc.id]
+                    h3(tc.name, id=tc.shortname)
+                    t = table(cls='table table-striped table-condensed',
+                              id='TeamResultsTable-{0}'.format(tc.shortname))
+                    with t.add(tr(id='column-titles')):
+                        classresults = _sortByPosition(classresults)
+                        th('Pos.')
+                        th('Name')
+                        th('Score')
+                    for r in classresults:
+                        with t.add(tr()):
+                            td(r.position) if r.position > 0 else td()
+                            td(r.teamname_short)
+                            td('{0:d}'.format(int(r.score))) if r.score is not None else td()
+        return doc  # __writeEventResultTeam
+
+

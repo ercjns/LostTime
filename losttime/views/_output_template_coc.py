@@ -143,3 +143,6 @@ class EventHtmlWriter_COC(EventHtmlWriter):
                 dt("<time>*")
                 dd("the star indicates course completion status was not reported and may be valid, msp, or dnf")
         return doc # __writeEventResultIndv_coc
+
+    def eventResultTeam(self):
+        return False
