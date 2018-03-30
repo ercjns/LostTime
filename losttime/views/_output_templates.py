@@ -4,11 +4,14 @@ import datetime
 import pytz
 import csv, fileinput, sys
 import dominate
+import abc
 from dominate.tags import *
 from flask import flash
 
 
 class EventHtmlWriter(object):
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self, event, format='generic', classes=None, results=None, teamclasses=None, teamresults=None, clubcodes=None):
         self.event = event
         self.format = format
@@ -18,16 +21,22 @@ class EventHtmlWriter(object):
         self.teamresults = teamresults
         self.clubcodes = clubcodes
 
+    @abc.abstractmethod
     def eventResultIndv(self):
         """
-        create an html file with individual, or individual+team results for this event.
+
+        :return:
         """
-        if self.format == 'generic':
-            return self.__writeEventResultIndv()
-        elif self.format == 'coc':
-            return self.__writeEventResultIndv_coc()
-        else:
-            raise KeyError("Unrecognized output format {0}".format(self.format))
+        pass
+    #     """
+    #     create an html file with individual, or individual+team results for this event.
+    #     """
+    #     if self.format == 'generic':
+    #         return self.__writeEventResultIndv()
+    #     elif self.format == 'coc':
+    #         return self.__writeEventResultIndv_coc()
+    #     else:
+    #         raise KeyError("Unrecognized output format {0}".format(self.format))
 
     def eventResultTeam(self):
         """
