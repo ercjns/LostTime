@@ -12,7 +12,7 @@ from flask import flash
 
 class EventHtmlWriter_COC(EventHtmlWriter):
     def __init__(self, event, classes=None, results=None, teamclasses=None, teamresults=None, clubcodes=None):
-        super(EventHtmlWriter_COC, self).__init__(event, 'coc', classes, results, teamclasses, teamresults, clubcodes)
+        super(EventHtmlWriter_COC, self).__init__(event, classes, results, teamclasses, teamresults, clubcodes)
 
     def eventResultIndv(self):
         doc = div(cls="LostTimeContent", id="lt-top")

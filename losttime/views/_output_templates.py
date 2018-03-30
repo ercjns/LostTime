@@ -12,9 +12,8 @@ from flask import flash
 class EventHtmlWriter(object):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, event, format='generic', classes=None, results=None, teamclasses=None, teamresults=None, clubcodes=None):
+    def __init__(self, event, classes=None, results=None, teamclasses=None, teamresults=None, clubcodes=None):
         self.event = event
-        self.format = format
         self.eventclasses = classes
         self.personresults = results
         self.teamclasses = teamclasses

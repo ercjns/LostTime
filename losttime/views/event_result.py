@@ -524,8 +524,8 @@ def _buildResultPages(eventid, style):
 def EventHtmlWriterHandler(event, style='generic', classes=None, results=None, teamclasses=None, teamresults=None,
                            clubcodes=None):
     if style == 'coc':
-        return EventHtmlWriter_COC(event, style, classes, results, teamclasses, teamresults, clubcodes)
+        return EventHtmlWriter_COC(event, classes, results, teamclasses, teamresults, clubcodes)
     else:
-        return EventHtmlWriter_Generic(event, style, classes, results, teamclasses, teamresults, clubcodes)
+        return EventHtmlWriter_Generic(event, classes, results, teamclasses, teamresults, clubcodes)
 
 

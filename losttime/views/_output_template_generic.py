@@ -12,7 +12,7 @@ from flask import flash
 
 class EventHtmlWriter_Generic(EventHtmlWriter):
     def __init__(self, event, classes=None, results=None, teamclasses=None, teamresults=None, clubcodes=None):
-        super(EventHtmlWriter_Generic, self).__init__(event, 'generic', classes, results, teamclasses, teamresults, clubcodes)
+        super(EventHtmlWriter_Generic, self).__init__(event, classes, results, teamclasses, teamresults, clubcodes)
 
     def eventResultIndv(self):
         doc = dominate.document(title='Event Results')
