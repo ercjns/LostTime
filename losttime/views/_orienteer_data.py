@@ -187,8 +187,6 @@ class OrienteerResultReader(object):
         return eventClasses
     def _getEventClassPersonResultsXML(self, Oecr):
         results = []
-        
-        # Fix for class and course with the same name
         for node in self.xmlsoup.find_all(string=Oecr.name):
             try:
                 personresults = node.find_parent("Class").find_next_siblings("PersonResult")
@@ -196,10 +194,6 @@ class OrienteerResultReader(object):
                 continue
         if personresults == None:
             raise ValueError('No results found for class {}'.format(Oecr.name))
-
-        # print type(self.xmlsoup.find(string=Oecr.name).find_parent("Class")), Oecr.name
-        # #GIVEN an EVENT, I need to re-qurey the self.xmlsoup, there is no soup passed in as before. this is a change!
-        # personresults = self.xmlsoup.find(string=Oecr.name).find_parent("Class").find_next_siblings("PersonResult")
 
         for prsoup in personresults:
             pr = EventPersonResult(
