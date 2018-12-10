@@ -86,13 +86,55 @@ class OrienteerResultReader(object):
     def _validateCSV(self):
         with open(self.file, 'r') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
-            self.csvcols = self._getCSVcols(next(reader))
-            if set(['name', 'class', 'time']) <= set(self.csvcols.keys()):
+            firstline = next(reader)
+            if firstline[0] == 'OESco0012':
+                self.csvcols = self.__getOEScoCSVcols(firstline)
+            else:
+                self.csvcols = self._getCSVcols(firstline)
+            if (set(['name', 'class', 'time']) <= set(self.csvcols.keys()) or
+                set(['first', 'last', 'class', 'time']) <= set(self.csvcols.keys())):
                 if not self.ScoreO:
                     return True
-                elif 'points' in self.csvcols.keys():
+                elif 'points' in self.csvcols.keys() and 'penalty' in self.csvcols.keys():
                     return True
         return False
+
+    def __getOEScoCSVcols(self, headerline):
+        '''
+        Important columns from an OEScore csv, based on how COC has OE configured
+        '''
+        print('parsing OEscore columns')
+        print(headerline)
+        datacols = {}
+        for idx, val in enumerate(headerline):
+            val = val.lower()
+            if val == 'first name':
+                datacols['first'] = idx
+                continue
+            elif val == 'surname':
+                datacols['last'] = idx
+                continue
+            elif val == 'short':
+                datacols['class'] = idx
+                continue
+            elif val == 'long':
+                datacols['classlong'] = idx
+                continue
+            elif val == 'time':
+                datacols['time'] = idx
+                continue
+            elif val == 'city':
+                datacols['club'] = idx
+                continue
+            elif val == 'points':
+                datacols['points'] = idx
+                continue
+            elif val == 'score penalty':
+                datacols['penalty'] = idx
+                continue
+            else:
+                continue
+        return datacols
 
     def _getCSVcols(self, headerline):
         datacols = {}
@@ -435,8 +477,17 @@ class OrienteerResultReader(object):
         except:
             return self.__CSVgetEventClassShortName(line)
     def __CSVgetPersonResultName(self, line):
-        name = unicode(line[self.csvcols['name']].strip('\"\'\/\\ '), 'utf-8')
-        return unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
+        if 'name' in self.csvcols.keys():
+            name = unicode(line[self.csvcols['name']].strip('\"\'\/\\ '), 'utf-8')
+            return unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
+        elif 'first' in self.csvcols.keys() and 'last' in self.csvcols.keys():
+            first = unicode(line[self.csvcols['first']].strip('\"\'\/\\ '), 'utf-8')
+            last = unicode(line[self.csvcols['last']].strip('\"\'\/\\ '), 'utf-8')
+            return unicodedata.normalize('NFKD', first + ' ' + last).encode('ascii', 'ignore')
+        else:
+            return ''
+        return 
+
     def __CSVgetPersonResultClubShort(self, line):
         try:
             return line[self.csvcols['club']].strip('\"\'\/\\ ')
