@@ -21,7 +21,7 @@
             <ul class="nav navbar-nav navbar-right">
                 {% if not current_user.is_authenticated %}
                 <li><a href="{{ url_for('auth.join') }}"><i class="fa fa-user-plus" aria-hidden="true"></i> register</a></li>
-                <li><a href="{{ url_for('auth.login') }}"><i class="fa fa-sign-in" aria-hidden="true"></i> log in</a></li>
+                <li><a href="{{ url_for('auth.login') }}"><i class="fa fa-sign-in-alt" aria-hidden="true"></i> log in</a></li>
                 {% else %}
                 <li><a href="{{url_for('users.user_home')}}"><i class="fa fa-user-circle-o" aria-hidden="true"></i> my account</a></li>
                 <li><a href="{{url_for('auth.logout')}}"><i class="fa fa-sign-in" aria-hidden="true"></i> log out</a></li>
@@ -65,10 +65,10 @@
     <footer style="margin-top: 5vh; margin-bottom: 5vh">
         <p class="text-center">
         Questions, comments, suggestions, or just want to say thanks?<br />
-        <i class="fa fa-twitter" aria-hidden="true"></i> @ercjns <span style="margin-left:1em"><i class="fa fa-envelope" aria-hidden="true"></i> eric-at-ercjns-dot-com</span> 
+        <i class="fab fa-twitter" aria-hidden="true"></i> @ercjns <span style="margin-left:1em"><i class="fa fa-envelope" aria-hidden="true"></i> eric-at-ercjns-dot-com</span> 
         </p>
         <p class="text-center">
-        Lost Time Orienteering <i class="fa fa-copyright" aria-hidden="true"></i> <a href="http://www.ercjns.com">Eric Jones</a>
+        Lost Time Orienteering <i class="far fa-copyright" aria-hidden="true"></i> <a href="http://www.ercjns.com">Eric Jones</a>
 
         </p>
     </footer>
