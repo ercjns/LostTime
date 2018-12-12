@@ -30,7 +30,8 @@ gunicorn==19.6.0
 html5lib==0.999999999
 idna==2.7
 itsdangerous==0.24
-lxml==3.6.4
+#lxml==3.6.4
+lxml==4.2.1
 pycparser==2.18
 python-Levenshtein==0.12.0
 python-editor==1.0.1
