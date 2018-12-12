@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block title %}LostTime - Start Times{% endblock %}
+
+{% block addhead %}
+{% endblock %}
+
+{% block pagetitle %}
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
+<h3 class="page-title">Start Times Step 2: Download</h3>
+<div class="pinkline"></div>
+</div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
+<h4 class="form-section-title">Formatted Entry File</h4>
+{% if stats %}
+<p>Found <strong>{{stats['count']}}</strong> entries across the following classes: </p>
+<ul class="row" style="list-style-type:none;">
+    {% for c, v in stats['categories'] %}
+    <li class="col-xs-4"><strong>{{c}}</strong>: {{v}} entries</li>
+    {% endfor %}
+</ul>
+{% endif %}
+<p><a href="{{ url_for('startTimes.static', filename=startsfn) }}" class="btn btn-success"><i class="fa fa-download" aria-hidden="true"></i> Download</a></p>
+<div style="margin-top:30px;"></div>
+<p><a href="{{ url_for('home_page') }}" class="btn btn-default"><i class="fa fa-home"></i> Home</a></p>
+</div>
+</div>
+{% endblock %}
+
+{% block bottomscripts %}
+{% endblock %}

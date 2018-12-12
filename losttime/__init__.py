@@ -73,7 +73,9 @@ eventfilepath = join('losttime', 'static', 'userfiles')
 eventfiles = UploadSet('eventfiles', ('xml', 'csv'), lambda app:eventfilepath)
 entryfilepath = join('losttime', 'static', 'userfiles')
 entryfiles = UploadSet('entryfiles', ('csv',), lambda app:entryfilepath)
-configure_uploads(app, (eventfiles, entryfiles))
+startsfilepath = join('losttime', 'static', 'userfiles')
+startsfiles = UploadSet('startsfiles', ('csv',), lambda app:startsfilepath)
+configure_uploads(app, (eventfiles, entryfiles, startsfiles))
 
 ### Custom Jinja Filters
 
@@ -97,6 +99,9 @@ app.register_blueprint(eventResultBP, url_prefix='/event-result')
 
 from .views.entry_manager import entryManager as entryManagerBP
 app.register_blueprint(entryManagerBP, url_prefix='/entry-manager')
+
+from .views.start_times import startTimes as startTimesBP
+app.register_blueprint(startTimesBP, url_prefix='/start-times')
 
 from .views.series_result import seriesResult as seriesResultBP
 app.register_blueprint(seriesResultBP, url_prefix='/series-result')
