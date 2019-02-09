@@ -3,7 +3,7 @@
 from flask import Blueprint, url_for, redirect, request, render_template, jsonify, flash
 import flask_login
 from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, Series, SeriesClass, ClubCode
-from _output_templates import SeriesHtmlWriter
+from ._output_templates import SeriesHtmlWriter
 from os.path import join
 from fuzzywuzzy import fuzz
 import itertools, unicodedata
@@ -137,7 +137,6 @@ def series_info(seriesid):
             f.write(doc.render().encode('utf-8'))
 
         replace = request.args.get('replace') # empty string or a string id
-        print type(replace), replace
 
         if replace != '':
             replaced = mark_series_as_replaced(replace, seriesid)

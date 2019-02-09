@@ -5,5 +5,6 @@ instance/
 *.db
 *~
 venv/
+venv-lt/
 losttime/static/userfiles/
 losttime/static/adminfiles

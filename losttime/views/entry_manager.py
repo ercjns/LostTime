@@ -3,7 +3,7 @@
 from flask import Blueprint, request, render_template, redirect, url_for, jsonify
 from datetime import datetime
 from losttime import entryfiles
-from _output_templates import EntryWriter
+from ._output_templates import EntryWriter
 import re
 import csv
 from os import remove

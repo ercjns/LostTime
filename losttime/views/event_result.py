@@ -5,8 +5,8 @@ import flask_login
 from datetime import datetime
 from losttime import eventfiles
 from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, ClubCode
-from _orienteer_data import OrienteerResultReader
-from _output_templates import EventHtmlWriter
+from ._orienteer_data import OrienteerResultReader
+from ._output_templates import EventHtmlWriter
 from os import remove
 from os.path import join
 

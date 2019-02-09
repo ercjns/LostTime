@@ -12,7 +12,8 @@
 # 2016
 
 import csv, unicodedata
-from bs4 import BeautifulSoup as BS
+# from bs4 import BeautifulSoup as BS
+from defusedxml.ElementTree import parse
 from datetime import datetime
 
 class Event(object):
@@ -75,7 +76,9 @@ class OrienteerResultReader(object):
     def _validateXML(self):
         with open(self.file, 'r') as xmlfile:
             xmlfile.readline().replace('windows-1252', 'utf-8')
-            self.xmlsoup = BS(xmlfile, 'xml')
+            #TODO replace with defusedXML
+            #self.xmlsoup = BS(xmlfile, 'xml')
+            self.xmlsoup = parse(xmlfile)
             if not self.xmlsoup.ResultList:
                 return False
         self.xmlv = int(self.xmlsoup.ResultList['iofVersion'][0])
