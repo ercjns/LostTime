@@ -4,7 +4,7 @@ instance/
 *.pid
 *.db
 *~
-venv/
-venv-lt/
+venv*/
+.vscode/
 losttime/static/userfiles/
 losttime/static/adminfiles
