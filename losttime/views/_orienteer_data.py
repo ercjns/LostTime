@@ -77,7 +77,7 @@ class OrienteerResultReader(object):
     def _validateXML(self):
         self.xmlns = {'iof3': 'http://www.orienteering.org/datastandard/3.0', 
               'xsi': 'http://www.w3.org/2001/XMLSchema-instance'}
-        with open(self.file, 'r') as xmlfile:
+        with open(self.file, 'r', encoding="utf-8") as xmlfile:
             xmlfile.readline().replace('windows-1252', 'utf-8')
             self.xmltree = parse(xmlfile)
             self.xmlroot = self.xmltree.getroot()
@@ -110,8 +110,6 @@ class OrienteerResultReader(object):
         '''
         Important columns from an OEScore csv, based on how COC has OE configured
         '''
-        print('parsing OEscore columns')
-        print(headerline)
         datacols = {}
         for idx, val in enumerate(headerline):
             val = val.lower()
@@ -251,7 +249,6 @@ class OrienteerResultReader(object):
                 self.__XMLgetPersonResultTime(prElement),
             )
             results.append(pr)
-        print(len(results))
         return results
 
 
