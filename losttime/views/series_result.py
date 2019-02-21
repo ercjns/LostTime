@@ -134,7 +134,8 @@ def series_info(seriesid):
         doc = writer.seriesResult()
         filename = join(seriesResult.static_folder, 'SeriesResult-{0:03d}.html'.format(int(seriesid)))
         with open(filename, 'w') as f:
-            f.write(doc.render().encode('utf-8'))
+            # f.write(doc.render().encode('utf-8'))
+            f.write(doc.render())
 
         replace = request.args.get('replace') # empty string or a string id
 
@@ -210,8 +211,9 @@ def series_result(seriesid):
     try:
         fn = 'SeriesResult-{0:03d}.html'.format(int(seriesid))
         filepath = join(seriesResult.static_folder, fn)
-        with open(filepath) as f:
-            htmldoc = f.read().decode('utf-8')
+        with open(filepath, encoding='utf-8') as f:
+            # htmldoc = f.read().decode('utf-8')
+            htmldoc = f.read()
     except IOError:
         return "couldn't find that file...", 404
     return render_template('seriesresult/result.html', seriesid=seriesid, thehtml=htmldoc, fn=fn)
@@ -243,7 +245,7 @@ def _calculateSeries(seriesid):
             raise "Didn't find any results"
 
         # Check to see if any entires in scresultdict might need to be combined
-        possible_dupes = [(k,v) for k, v in scresultdict.iteritems() if False in scresultdict[k]['results'].values()]
+        possible_dupes = [(k,v) for k, v in scresultdict.items() if False in scresultdict[k]['results'].values()]
 
         name_matches = []
         for r1, r2 in itertools.combinations(possible_dupes, 2):
@@ -294,8 +296,28 @@ def _calculateSeriesScore(series, results):
         tiebreakscores = []
     return score, tiebreakscores
 
+def cmp_to_key(mycmp):
+    'Convert a cmp= function into a key= function'
+    class K:
+        def __init__(self, obj, *args):
+            self.obj = obj
+        def __lt__(self, other):
+            return mycmp(self.obj, other.obj) < 0
+        def __gt__(self, other):
+            return mycmp(self.obj, other.obj) > 0
+        def __eq__(self, other):
+            return mycmp(self.obj, other.obj) == 0
+        def __le__(self, other):
+            return mycmp(self.obj, other.obj) <= 0
+        def __ge__(self, other):
+            return mycmp(self.obj, other.obj) >= 0
+        def __ne__(self, other):
+            return mycmp(self.obj, other.obj) != 0
+    return K
+
 def _assignSeriesClassPositions(series, seriesclassresults):
-    seriesclassresults.sort(cmp=sortSeriesResults)
+    # seriesclassresults.sort(cmp=sortSeriesResults)
+    seriesclassresults = sorted(seriesclassresults, key=cmp_to_key(sortSeriesResults))
     seriesclassresults.reverse()
     nextpos = 1
     tied = 0
@@ -348,7 +370,7 @@ def verifyScoringMethods(seriesclasslist):
     """
     for scid, scinfo in seriesclasslist:
         methods = []
-        for eid, ec in scinfo.iteritems():
+        for eid, ec in scinfo.items():
             if eid == 'name' or not ec:
                 continue
             methods.append(ec.scoremethod)
