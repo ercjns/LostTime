@@ -226,7 +226,7 @@ def _assignPositions(eventid):
     Given an eventid, queries for associated PersonResults, computes and assigns position.
     Ties are awarded the same place, with the following finisher bumped an extra place down.
     For example the first 5 places, including a tie for 2nd, are: 1, 2, 2, 4, 5.
-    Positions only assigned for 'time', 'worldcup', and '1000pts' scoremethods, others skipped.
+    Positions only assigned for 'time', 'worldcup', '1000pts', and 'awt' scoremethods, others skipped.
     Invalid results are assigned a place of -1.
     """
     classes = EventClass.query.filter_by(eventid=eventid).all()
@@ -237,7 +237,7 @@ def _assignPositions(eventid):
                 # TODO log event class with no results.
                 continue
 
-            if ec.scoremethod in ['time', 'worldcup', '1000pts']:
+            if ec.scoremethod in ['time', 'worldcup', '1000pts', 'awt']:
                 ec_results.sort(key=lambda x: x.time)
                 prev_result = (0, 1, -1) # (position, results in current position, time)
                 for i in range(len(ec_results)):
@@ -287,6 +287,7 @@ def _assignScores(eventid):
         'worldcup': 100, 95, 92, 90, 89, 88, 87, ...
         '1000pts': round ( (winning time / competitor time) * 1000 )
         'time': duplicates the time to the score column (integer seconds)
+        'awt': Points based on average winning time. OUSA spec for Jr. Nationals Scoring (A.36.5.1)
         'hide', 'alpha' or '' will skip
         anything else will log a warning and skip
     """
@@ -351,6 +352,26 @@ def _assignScores(eventid):
                     r.score = round((r.ScoreO_net / float(win_score)) * slowestSweepScore)
                 else:
                     r.score = 0
+
+        elif ec.scoremethod == 'awt':
+            # get the results for this class
+            results = PersonResult.query.filter_by(eventid=eventid).filter_by(classid=ec.id).all()
+            #TODO: "for Championships use only times from Team Championship eligible competitors"
+            # determine if there are three valid times
+            if len([r for r in results if (r.coursestatus == 'ok' and r.resultstatus == 'ok') ]) < 3:
+                continue
+            # calculate the awt for this class
+            awt = sum([r.time for r in results if (r.position in [1,2,3]) ]) / 3.0
+            # calculate scores for each individual
+            for r in results:
+                if r.position > 0:
+                    r.score = 60 * r.time / awt
+                else:
+                    #TODO: msp score is worse (higher) of this using the AWT from either of comparable male and female classes
+                    timelimit = 3 * 60 * 60
+                    r.score = 10 + (60 * timelimit / awt)
+            db.session.add_all(results)
+
 
         elif ec.scoremethod in ['', 'hide', 'alpha']:
             continue

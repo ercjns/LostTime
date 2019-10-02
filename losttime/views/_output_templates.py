@@ -73,7 +73,7 @@ class EventHtmlWriter(object):
                     h3(ec.name, id=ec.shortname)
                     t = table(cls='table table-striped table-condensed', id='ResultsTable-{0}'.format(ec.shortname))
                     with t.add(tr(id='column-titles')):
-                        if ec.scoremethod in ['time', 'worldcup', '1000pts', 'score', 'score1000']:
+                        if ec.scoremethod in ['time', 'worldcup', '1000pts', 'score', 'score1000', 'awt']:
                             classresults = _sortByPosition(classresults)
                             th('Pos.')
                         th('Name')
@@ -85,11 +85,11 @@ class EventHtmlWriter(object):
                             th('Penalty')
                             th('Total')
                         th('Time')
-                        if ec.scoremethod in ['1000pts', 'worldcup', 'score1000']:
+                        if ec.scoremethod in ['1000pts', 'worldcup', 'score1000', 'awt']:
                             th('Score')
                     for pr in classresults:
                         with t.add(tr()):
-                            if ec.scoremethod in ['time', 'worldcup', '1000pts', 'score', 'score1000']:
+                            if ec.scoremethod in ['time', 'worldcup', '1000pts', 'score', 'score1000', 'awt']:
                                 td(pr.position) if pr.position > 0 else td()
                             td(pr.name)
                             td(pr.club_shortname) if pr.club_shortname else td()
@@ -105,6 +105,8 @@ class EventHtmlWriter(object):
                                 td('{1} {2} {0}'.format(pr.timetommmss(), pr.coursestatus, pr.resultstatus))
                             if (ec.scoremethod in ['worldcup', '1000pts', 'score1000']):
                                 td('{0:d}'.format(int(pr.score))) if pr.score is not None else td()
+                            elif (ec.scoremethod in ['awt']):
+                                td('{0:.2f}'.format(pr.score)) if pr.score is not None else td()
         return doc # __writeEventResultIndv
 
     def __writeEventResultIndv_coc(self):
@@ -143,7 +145,7 @@ class EventHtmlWriter(object):
                     h3(ec.name, id=ec.shortname)
                     t = table(cls="table table-striped", id='ResultsTable-{0}'.format(ec.shortname)).add(tbody())
                     with t.add(tr(id="column-titles")):
-                        if ec.scoremethod in ['time', 'worldcup', '1000pts', 'score', 'score1000']:
+                        if ec.scoremethod in ['time', 'worldcup', '1000pts', 'score', 'score1000', 'awt']:
                             classresults = _sortByPosition(classresults)
                             th('Pos.')
                         th('Name')
@@ -156,11 +158,11 @@ class EventHtmlWriter(object):
                             th('Penalty')
                             th('Total')
                         th('Time', cls="text-right")
-                        if ec.scoremethod in ['1000pts', 'worldcup', 'score1000']:
+                        if ec.scoremethod in ['1000pts', 'worldcup', 'score1000', 'awt']:
                             th('Score', cls="text-right")
                     for pr in classresults:
                         with t.add(tr()):
-                            if ec.scoremethod in ['time', 'worldcup', '1000pts', 'score', 'score1000']:
+                            if ec.scoremethod in ['time', 'worldcup', '1000pts', 'score', 'score1000', 'awt']:
                                 td(pr.position) if pr.position > 0 else td()
                             td(pr.name)
                             td(pr.club_shortname) if pr.club_shortname else td()
@@ -178,6 +180,8 @@ class EventHtmlWriter(object):
                                 td('{0} {1}*'.format(pr.resultstatus, pr.timetommmss()), cls="text-right")
                             if (ec.scoremethod in ['worldcup', '1000pts', 'score1000']):
                                 td('{0:d}'.format(int(pr.score)), cls="text-right") if pr.score is not None else td()
+                            elif (ec.scoremethod in ['awt']):
+                                td('{0:.2f}'.format(pr.score)) if pr.score is not None else td()
                 p(a("Menu", href="#lt-top"), cls="lg-mrg-bottom text-center")
             if len(self.teamclasses) > 0:
                 for tc in self.teamclasses:
