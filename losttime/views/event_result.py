@@ -386,12 +386,21 @@ def _assignTeamScores(eventid, scoremethod):
                     teamclasses['WT2'][1].append(ec.id)
                 else:
                     teamclasses['WT2'] = ('Middle School Teams', [ec.id])
-            elif ec.shortname == 'W3F':
-                teamclasses['WT3F'] = ('JV Girls Teams', [ec.id])
-            elif ec.shortname == 'W4M':
-                teamclasses['WT4M'] = ('JV Boys North Teams', [ec.id])
+            # elif ec.shortname == 'W3F':
+            #     teamclasses['WT3F'] = ('JV Girls Teams', [ec.id])
+            # elif ec.shortname == 'W4M':
+            #     teamclasses['WT4M'] = ('JV Boys North Teams', [ec.id])
+            # elif ec.shortname == 'W5M':
+            #     teamclasses['WT5M'] = ('JV Boys South Teams', [ec.id])
+            elif (ec.shortname == 'W3F') or (ec.shortname == 'W3M'):
+                if teamclasses.has_key('WT3'):
+                    teamclasses['WT3'][1].append(ec.id)
+                else:
+                    teamclasses['WT3'] = ('HS Rookie Teams', [ec.id])
+            elif ec.shortname == 'W4F':
+                teamclasses['WT4F'] = ('JV Girls Teams', [ec.id])
             elif ec.shortname == 'W5M':
-                teamclasses['WT5M'] = ('JV Boys South Teams', [ec.id])
+                teamclasses['WT5M'] = ('JV Boys Teams', [ec.id])
             elif ec.shortname == 'W6F':
                 teamclasses['WT6F'] = ('Varsity Girls Teams', [ec.id])
             elif ec.shortname == 'W6M':
