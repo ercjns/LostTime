@@ -396,7 +396,7 @@ def _assignTeamScores(eventid, scoremethod):
                 if teamclasses.has_key('WT3'):
                     teamclasses['WT3'][1].append(ec.id)
                 else:
-                    teamclasses['WT3'] = ('HS Rookie Teams', [ec.id])
+                    teamclasses['WT3'] = ('JV Rookie Teams', [ec.id])
             elif ec.shortname == 'W4F':
                 teamclasses['WT4F'] = ('JV Girls Teams', [ec.id])
             elif ec.shortname == 'W5M':
