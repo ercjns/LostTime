@@ -451,9 +451,9 @@ class EntryWriter(object):
             ownersDoc += '<h4>REGISTRATION VOLUNTEERS</h4><p>Check off ALL participants in the first column as they arrive. Collect money from those who owe it and mark it out when paid.</p>\n<hr />\n'
 
             if self.national_meet:
-                tablehead = '<table>\n<thead><tr><th class="check">&#x2714;</th><th>First</th><th>Last</th><th>Owes</th><th>Course</th><th>E-Punch</th><th>Club</th><th>YB</th><th>Gen.</th><th>Phone</th><th>Emergency Phone</th><th>Car</th></tr></thead>\n'
+                tablehead = '<table>\n<thead><tr><th class="check">&#x2714;</th><th>First</th><th>Last</th><th>Owes</th><th>Course</th><th>E-Punch</th><th>Compass</th><th>Club</th><th>YB</th><th>Gen.</th><th>Phone</th><th>Emergency Phone</th><th>Car</th></tr></thead>\n'
             else:
-                tablehead = '<table>\n<thead><tr><th class="check">&#x2714;</th><th>First</th><th>Last</th><th>Owes</th><th>Course</th><th>E-Punch</th><th>Club</th><th>Phone</th><th>Emergency Phone</th><th>Car</th></tr></thead>\n'
+                tablehead = '<table>\n<thead><tr><th class="check">&#x2714;</th><th>First</th><th>Last</th><th>Owes</th><th>Course</th><th>E-Punch</th><th>Compass</th><th>Club</th><th>Phone</th><th>Emergency Phone</th><th>Car</th></tr></thead>\n'
 
             rentalDoc += tablehead
             ownersDoc += tablehead
@@ -462,8 +462,8 @@ class EntryWriter(object):
                 OWN_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td class="verify">{}</td><td class="punch">{}</td><td class="verify">{}</td><td class="YB verify"></td><td class="gender verify"></td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
                 RENT_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td class="verify">{}</td><td class="rentpunch"></td><td class="verify">{}</td><td class="YB verify"></td><td class="gender verify"></td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
             else:
-                OWN_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td>{}</td><td class="punch">{}</td><td>{}</td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
-                RENT_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td>{}</td><td class="rentpunch"></td><td>{}</td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
+                OWN_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td>{}</td><td class="punch">{}</td><td class="check"></td><td>{}</td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
+                RENT_TEMPLATE = '<tr><td class="check">{}</td><td>{}</td><td>{}</td><td class="owes">{}</td><td>{}</td><td class="rentpunch"></td><td class="check"></td><td>{}</td><td class="phone">{}</td><td class="phone">{}</td><td class="license">{}</td></tr>\n'
 
         else:
             manualDoc = '<h2>Pre-Registered List: MANUAL PUNCH event</h2>\n'
