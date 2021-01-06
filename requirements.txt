@@ -1,4 +1,4 @@
-CairoSVG==1.0.22
+CairoSVG==2.5.1
 Flask==0.11.1
 Flask-Bcrypt==0.7.1
 Flask-Login==0.4.0
