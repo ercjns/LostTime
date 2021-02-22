@@ -19,7 +19,7 @@ except IOError:
 ### Force SSL
 
 from flask_sslify import SSLify
-sslify = SSLify(app)
+ sslify = SSLify(app)
 
 ### Setup the logger
 
@@ -41,7 +41,7 @@ from flask_login import LoginManager, current_user
 from flask_bcrypt import Bcrypt
 bcrypt = Bcrypt(app)
 
-from models import User
+from .models import User
 
 login_manager = LoginManager()
 login_manager.init_app(app)

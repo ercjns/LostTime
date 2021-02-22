@@ -12,7 +12,8 @@
 # 2016
 
 import csv, unicodedata
-from bs4 import BeautifulSoup as BS
+from math import floor
+from defusedxml.ElementTree import parse
 from datetime import datetime
 
 class Event(object):
@@ -73,13 +74,18 @@ class OrienteerResultReader(object):
         return
 
     def _validateXML(self):
-        with open(self.file, 'r') as xmlfile:
+        self.xmlns = {'iof3': 'http://www.orienteering.org/datastandard/3.0', 
+              'xsi': 'http://www.w3.org/2001/XMLSchema-instance'}
+        with open(self.file, 'r', encoding="utf-8") as xmlfile:
             xmlfile.readline().replace('windows-1252', 'utf-8')
-            self.xmlsoup = BS(xmlfile, 'xml')
-            if not self.xmlsoup.ResultList:
+            self.xmltree = parse(xmlfile)
+            self.xmlroot = self.xmltree.getroot()
+            EXPECTED_ROOT = '{' + self.xmlns['iof3'] + '}'+ 'ResultList'
+            if self.xmlroot.tag != EXPECTED_ROOT:
                 return False
-        self.xmlv = int(self.xmlsoup.ResultList['iofVersion'][0])
-        if self.xmlv not in [2, 3]:
+
+        self.xmlv = floor(float(self.xmlroot.attrib['iofVersion']))
+        if self.xmlv not in [3]:
             return False
         return True
 
@@ -103,8 +109,6 @@ class OrienteerResultReader(object):
         '''
         Important columns from an OEScore csv, based on how COC has OE configured
         '''
-        print('parsing OEscore columns')
-        print(headerline)
         datacols = {}
         for idx, val in enumerate(headerline):
             val = val.lower()
@@ -197,12 +201,12 @@ class OrienteerResultReader(object):
             return self._getEventClassesCSV()
         return None
 
-    def getEventClassPersonResults(self, Oec):
+    def getEventClassPersonResults(self, eventClass):
         #return list of EPR objects
         if self.filetype == 'xml':
-            return self._getEventClassPersonResultsXML(Oec)
+            return self._getEventClassPersonResultsXML(eventClass)
         elif self.filetype == 'csv':
-            return self._getEventClassPersonResultsCSV(Oec)
+            return self._getEventClassPersonResultsCSV(eventClass)
         return None
 
 
@@ -218,7 +222,7 @@ class OrienteerResultReader(object):
     def _getEventClassesXML(self):
         eventClasses = []
         if self.xmlv == 3:
-            classes = self.xmlsoup.find_all("ClassResult")
+            classes = self.xmltree.findall('iof3:ClassResult', self.xmlns)
             for eclass in classes:
                 eventclass = EventClass(
                     self.__XMLgetEventName(), 
@@ -227,25 +231,21 @@ class OrienteerResultReader(object):
                     )
                 eventClasses.append(eventclass)
         return eventClasses
-    def _getEventClassPersonResultsXML(self, Oecr):
+    def _getEventClassPersonResultsXML(self, eventClass):
         results = []
-        for node in self.xmlsoup.find_all(string=Oecr.name):
-            try:
-                personresults = node.find_parent("Class").find_next_siblings("PersonResult")
-            except:
-                continue
-        if personresults == None:
-            raise ValueError('No results found for class {}'.format(Oecr.name))
-
-        for prsoup in personresults:
+        xpath = "iof3:ClassResult/"
+        xpath += "iof3:Class[iof3:Name='{}']/".format(eventClass.name)
+        xpath += "../iof3:PersonResult"
+        personresults = self.xmltree.findall(xpath, self.xmlns)
+        for prElement in personresults:
             pr = EventPersonResult(
-                self.__XMLgetPersonResultName(prsoup),
-                self.__XMLgetPersonResultBib(prsoup),
-                self.__XMLgetPersonResultSicard(prsoup),
-                self.__XMLgetPersonResultClubShort(prsoup),
-                self.__XMLgetPersonResultCourseStatus(prsoup),
-                self.__XMLgetPersonResultResultStatus(prsoup),
-                self.__XMLgetPersonResultTime(prsoup),
+                self.__XMLgetPersonResultName(prElement),
+                self.__XMLgetPersonResultBib(prElement),
+                self.__XMLgetPersonResultSicard(prElement),
+                self.__XMLgetPersonResultClubShort(prElement),
+                self.__XMLgetPersonResultCourseStatus(prElement),
+                self.__XMLgetPersonResultResultStatus(prElement),
+                self.__XMLgetPersonResultTime(prElement),
             )
             results.append(pr)
         return results
@@ -256,52 +256,50 @@ class OrienteerResultReader(object):
 ##########
     def __XMLgetEventName(self):
         if self.xmlv == 3:
-            try: name = self.xmlsoup.ResultList.Event.Name.string
+            try: 
+                els = self.xmltree.findall('iof3:Event/iof3:Name', self.xmlns)
+                if len(els) == 1:
+                    name = els[0].text
+                else:
+                    name = None
             except: name = None
         return name
     def __XMLgetEventDate(self):
         if self.xmlv == 3:
-            try: date = self.xmlsoup.ResultList.Event.StartTime.string
-            except: 
-                try: date = self.xmlsoup.ResultList.ClassResult.PersonResult.Result.StartTime.string
-                except: date = None
+            try: 
+                els = self.xmltree.findall('iof3:Event/iof3:StartTime', self.xmlns)
+                if len(els) == 1:
+                    date = els[0].text
+                else:
+                    els = self.xmltree.findall('iof3:ClassResult/iof3:PersonResult/iof3:Result/iof3:StartTime', self.xmlns)
+                    date = els[0].text #just grab the first one.
+            except: date = None
         if date != None:
             date = datetime.strptime(date.split('T')[0], '%Y-%m-%d')
         return date
     def __XMLgetEventVenue(self):
         return None
-    def __XMLgetEventClassName(self, ecrsoup):
-        try: name = ecrsoup.Class.Name.string
+    def __XMLgetEventClassName(self, ecrtree):
+        try: name = ecrtree.find('iof3:Class/iof3:Name', self.xmlns).text
         except: name = None
         return name
-    def __XMLgetEventClassShortName(self, ecrsoup):
-        try: shortname = ecrsoup.Class.ShortName.string
+    def __XMLgetEventClassShortName(self, ecrtree):
+        try: shortname = ecrtree.find('iof3:Class/iof3:ShortName', self.xmlns).text
         except: shortname = None
         return shortname
 
-    def __XMLgetPersonResultName(self, prsoup):
-        if prsoup.name == 'PersonResult' or prsoup.name == 'PersonEntry':
-            if self.xmlv == 2:
-                try:
-                    gn = prsoup.Person.PersonName.Given.string
-                except:
-                    gn = None
-                try:
-                    fn = prsoup.Person.PersonName.Family.string
-                except:
-                    fn = None
-            elif self.xmlv == 3:
-                try:
-                    gn = prsoup.Person.Name.Given.string
-                except:
-                    gn = None
-                try:
-                    fn = prsoup.Person.Name.Family.string
-                except:
-                    fn = None
-            else:
-                raise ValueError
-        else: raise ValueError
+    def __XMLgetPersonResultName(self, prtree):
+        if self.xmlv == 3:
+            try: 
+                gn = prtree.find('iof3:Person/iof3:Name/iof3:Given', self.xmlns).text
+            except:
+                gn = None
+            try:
+                fn = prtree.find('iof3:Person/iof3:Name/iof3:Family', self.xmlns).text
+            except:
+                fn = None
+        else:
+            raise ValueError
         if (gn != None) and (fn != None):
             name = gn + ' ' + fn
         elif (gn != None):
@@ -312,94 +310,70 @@ class OrienteerResultReader(object):
             name = None
         return name
 
-    def __XMLgetPersonResultBib(self, prsoup):
-        if prsoup.name == 'PersonResult':
-            if self.xmlv == 2:
+    def __XMLgetPersonResultBib(self, prtree):
+        if self.xmlv == 3:
+            try:
+                bib = prtree.find('iof3:Result/iof3:BibNumber', self.xmlns).text
+            except:
                 bib = None
-            elif self.xmlv == 3:
-                try:
-                    bib = prsoup.Result.BibNumber.string
-                except:
-                    bib = None
-            else:
-                raise ValueError
         else: raise ValueError
         return bib
 
-    def __XMLgetPersonResultSicard(self, prsoup):
-        if prsoup.name == 'PersonEntry':
-            if self.xmlv == 3:
-                try:
-                    sicard = prsoup.ControlCard.string
-                except:
-                    sicard = None
-            else:
-                raise ValueError
-        elif prsoup.name == 'PersonResult':
-            if self.xmlv == 2:
+    def __XMLgetPersonResultSicard(self, prtree):
+        # if prsoup.name == 'PersonEntry':
+        #     if self.xmlv == 3:
+        #         try:
+        #             sicard = prsoup.ControlCard.string
+        #         except:
+        #             sicard = None
+        #     else:
+        #         raise ValueError
+        if self.xmlv == 3:
+            try:
+                sicard = prtree.find('iof3:Result/iof3:ControlCard', self.xmlns).text
+            except:
                 sicard = None
-            elif self.xmlv == 3:
-                try:
-                    sicard = prsoup.Result.ControlCard.string
-                except:
-                    sicard = None
-            else:
-                raise ValueError
         else: raise ValueError
         return sicard
 
-    def __XMLgetPersonResultClubShort(self, prsoup):
-        if prsoup.name == 'PersonResult' or prsoup.name == 'PersonEntry':
-            if self.xmlv == 2:
-                try:
-                    club = prsoup.Person.CountryId.string
-                except:
-                    club = None
-            elif self.xmlv == 3:
-                try:
-                    club = prsoup.Organisation.ShortName.string
-                except:
-                    club = None
+    def __XMLgetPersonResultClubShort(self, prtree):
+        if self.xmlv == 3:
+            try:
+                club = prtree.find('iof3:Organisation/iof3:ShortName', self.xmlns).text
+            except:
+                club = None
         else: raise ValueError
         return club
 
-    def __XMLgetPersonResultCourseStatus(self, prsoup):
-        if prsoup.name == 'PersonResult':
-            if self.xmlv == 3:
-                try:
-                    status = prsoup.Result.Status.string
-                    if status in ['NotCompeting', 'Disqualified', 'OverTime']:
-                        status = 'Unknown'
-                except:
-                    raise NameError
-            else:
-                raise ValueError
+    def __XMLgetPersonResultCourseStatus(self, prtree):
+        if self.xmlv == 3:
+            try:
+                status = prtree.find('iof3:Result/iof3:Status', self.xmlns).text
+                if status in ['NotCompeting', 'Disqualified', 'OverTime']:
+                    status = 'Unknown'
+            except:
+                raise NameError
         else: raise ValueError
         return self._resultStatusToCode(status)
 
-    def __XMLgetPersonResultResultStatus(self, prsoup):
-        if prsoup.name == 'PersonResult':
-            if self.xmlv == 3:
-                try:
-                    status = prsoup.Result.Status.string
-                    if status in ['MissingPunch', 'DidNotFinish']:
-                        status = 'OK'
-                except:
-                    raise NameError
-            else:
-                raise ValueError
+    def __XMLgetPersonResultResultStatus(self, prtree):
+
+        if self.xmlv == 3:
+            try:
+                status = prtree.find('iof3:Result/iof3:Status', self.xmlns).text
+                if status in ['MissingPunch', 'DidNotFinish']:
+                    status = 'OK'
+            except:
+                raise NameError
         else: raise ValueError
         return self._resultStatusToCode(status)
 
-    def __XMLgetPersonResultTime(self, prsoup):
-        if prsoup.name == 'PersonResult':
-            if self.xmlv == 3:
-                try:
-                    time = int(prsoup.Result.Time.string)
-                except:
-                    time = None
-            else:
-                raise ValueError
+    def __XMLgetPersonResultTime(self, prtree):
+        if self.xmlv == 3:
+            try:
+                time = int(prtree.find('iof3:Result/iof3:Time', self.xmlns).text)
+            except:
+                time = None
         else: raise ValueError
         return time
 

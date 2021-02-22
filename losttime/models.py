@@ -32,9 +32,9 @@ class User(db.Model, UserMixin):
         return self._password
 
     @password.setter
-    def _set_password(self, plaintext):
-        self.salt = b2a_base64(urandom(32))
-        self._password = bcrypt.generate_password_hash(self.salt+plaintext)
+    def password(self, plaintext):
+        self.salt = b2a_base64(urandom(32)).decode('utf-8')
+        self._password = bcrypt.generate_password_hash(self.salt+plaintext).decode('utf-8')
 
     def is_correct_password(self, plaintext):
         return bcrypt.check_password_hash(self._password, self.salt+plaintext)
