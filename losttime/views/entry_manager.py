@@ -3,7 +3,7 @@
 from flask import Blueprint, request, render_template, redirect, url_for, jsonify
 from datetime import datetime
 from losttime import entryfiles
-from _output_templates import EntryWriter
+from ._output_templates import EntryWriter
 import re
 import csv
 from os import remove
@@ -84,8 +84,8 @@ def _entries_stats_OE(filename):
             numentries += 1
             categories.append(line[25])
 
-        cats = dict(Counter(categories)).items()
-        cats.sort(key=lambda x: x[0])
+        cats = sorted(Counter(categories).items(), key=lambda x: x[0])
+
         if cats[0][0] == '':
             cats[0] = ('NO CLASS', cats[0][1])
     return {'count':numentries, 'categories':cats}

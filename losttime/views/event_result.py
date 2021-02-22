@@ -5,8 +5,8 @@ import flask_login
 from datetime import datetime
 from losttime import eventfiles
 from losttime.models import db, Event, EventClass, PersonResult, EventTeamClass, TeamResult, ClubCode
-from _orienteer_data import OrienteerResultReader
-from _output_templates import EventHtmlWriter
+from ._orienteer_data import OrienteerResultReader
+from ._output_templates import EventHtmlWriter
 from os import remove
 from os.path import join
 
@@ -123,10 +123,10 @@ def event_info(eventid):
         _assignTeamScores(eventid, request.form['event-team-score-method'])
 
         docdict = _buildResultPages(eventid, request.form['output-style'])
-        for key,doc in docdict.iteritems():
+        for key,doc in docdict.items():
             filename = join(eventResult.static_folder, 'EventResult-{0:03d}-{1}.html'.format(int(eventid),key))
             with open(filename, 'w') as f:
-                f.write(doc.render().encode('utf-8'))
+                f.write(doc.render())
 
         replace = request.form['replace'] # string id or 'None'
         if replace != 'None':
@@ -200,7 +200,7 @@ def event_results(eventid):
         indvfn = 'EventResult-{0:03d}-indv.html'.format(int(eventid))
         filepath = join(eventResult.static_folder, indvfn)
         with open(filepath) as f:
-            indvhtmldoc = f.read().decode('utf-8')
+            indvhtmldoc = f.read()
     except IOError:
         return "It seems that there are no event results files for event {0}".format(eventid), 404
     try:
@@ -238,18 +238,24 @@ def _assignPositions(eventid):
                 continue
 
             if ec.scoremethod in ['time', 'worldcup', '1000pts']:
-                ec_results.sort(key=lambda x: x.time)
-                prev_result = (0, 1, -1) # (position, results in current position, time)
-                for i in range(len(ec_results)):
-                    if ec_results[i].coursestatus != 'ok' or ec_results[i].resultstatus != 'ok':
-                        ec_results[i].position = -1
-                        continue
-                    ec_results[i].position = prev_result[0] + prev_result[1]
-                    if ec_results[i].time == prev_result[2]:
-                        ec_results[i].position = prev_result[0]
-                        prev_result = (ec_results[i].position, prev_result[1]+1, ec_results[i].time)
+                done = []
+                to_assign = []
+                for ec_result in ec_results:
+                    if ec_result.coursestatus != 'ok' or ec_result.resultstatus != 'ok':
+                        ec_result.position = -1
+                        done.append(ec_result)
                     else:
-                        prev_result = (ec_results[i].position, 1, ec_results[i].time)
+                        to_assign.append(ec_result)
+
+                to_assign.sort(key=lambda x: x.time)
+                prev_result = (0, 1, -1) # (position, results in current position, time)
+                for i in range(len(to_assign)):
+                    to_assign[i].position = prev_result[0] + prev_result[1] # assign first place
+                    if to_assign[i].time == prev_result[2]:
+                        to_assign[i].position = prev_result[0]
+                        prev_result = (to_assign[i].position, prev_result[1]+1, to_assign[i].time)
+                    else:
+                        prev_result = (to_assign[i].position, 1, to_assign[i].time)
                 db.session.add_all(ec_results)
                 db.session.commit()
                 db.session.flush()
@@ -382,25 +388,16 @@ def _assignTeamScores(eventid, scoremethod):
         classes = EventClass.query.filter_by(eventid=eventid).all()
         for ec in classes:
             if (ec.shortname == 'W2F') or (ec.shortname == 'W2M'):
-                if teamclasses.has_key('WT2'):
+                if 'WT2' in teamclasses:
                     teamclasses['WT2'][1].append(ec.id)
                 else:
                     teamclasses['WT2'] = ('Middle School Teams', [ec.id])
-            # elif ec.shortname == 'W3F':
-            #     teamclasses['WT3F'] = ('JV Girls Teams', [ec.id])
-            # elif ec.shortname == 'W4M':
-            #     teamclasses['WT4M'] = ('JV Boys North Teams', [ec.id])
-            # elif ec.shortname == 'W5M':
-            #     teamclasses['WT5M'] = ('JV Boys South Teams', [ec.id])
-            elif (ec.shortname == 'W3F') or (ec.shortname == 'W3M'):
-                if teamclasses.has_key('WT3'):
-                    teamclasses['WT3'][1].append(ec.id)
-                else:
-                    teamclasses['WT3'] = ('JV Rookie Teams', [ec.id])
-            elif ec.shortname == 'W4F':
-                teamclasses['WT4F'] = ('JV Girls Teams', [ec.id])
+            elif ec.shortname == 'W3F':
+                teamclasses['WT3F'] = ('JV Girls Teams', [ec.id])
+            elif ec.shortname == 'W4M':
+                teamclasses['WT4M'] = ('JV Boys North Teams', [ec.id])
             elif ec.shortname == 'W5M':
-                teamclasses['WT5M'] = ('JV Boys Teams', [ec.id])
+                teamclasses['WT5M'] = ('JV Boys South Teams', [ec.id])
             elif ec.shortname == 'W6F':
                 teamclasses['WT6F'] = ('Varsity Girls Teams', [ec.id])
             elif ec.shortname == 'W6M':
@@ -409,7 +406,7 @@ def _assignTeamScores(eventid, scoremethod):
                 pass
         if len(teamclasses.keys()) == 0:
             return
-        for k, v in teamclasses.iteritems():
+        for k, v in teamclasses.items():
             new_tc = EventTeamClass(eventid, k, v[0], v[1], 'wiol')
             db.session.add(new_tc)
         db.session.commit()

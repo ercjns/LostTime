@@ -32,8 +32,9 @@ Series can be configured to count the best N scores out of M races. Individuals 
 # Technical Notes
 ## Architecture
 This is a Flask application with a SQLite backend. There is currently no front-end framework; data is passed to the Jinja2 template engine that comes bundled with Flask.
+
 ## Development and Testing
-You'll need python 2.x and `virtualenvwrapper` installed on a linux machine (or windows subsystem for linux):
+You'll need python 3.8+ and `virtualenvwrapper` installed on a linux machine (or windows subsystem for linux). I'm using WSL2 with Ubuntu 20.04:
 
 1. Fork the project, then clone to a folder on your machine
    ```bash
@@ -43,12 +44,6 @@ You'll need python 2.x and `virtualenvwrapper` installed on a linux machine (or 
 2. Set up a python virtual environment with all dependencies. (The `-a` flag adds a virtual environment to an existing project directory; that's what we want to do.)
    ```bash
    $ mkvirtualenv losttime -a <ProjectFolder> -r requirements.txt
-   ```
-
-   It's likely that the `lxml` package will fail to install as it has some lower level C dependencies. Check out the lxml [http://lxml.de/installation.html](installation instructions) for help. I needed the following on my Ubuntu 14.04 in Windows Subsystem for Linux:
-   ```bash
-   (losttime)$ sudo apt-get install libxml2-dev libxslt-dev python-dev zlib1g-dev
-   (losttime)$ pip install lxml #success!
    ```
 
 3. add an instance folder and instanceconfig.py Mine looks like this:
