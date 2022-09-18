@@ -18,8 +18,24 @@ except IOError:
 
 ### Force SSL
 
-from flask_sslify import SSLify
-sslify = SSLify(app)
+# Comment out SSLify for running on localhost?
+
+# from flask_sslify import SSLify
+# sslify = SSLify(app)
+
+# from flask_talisman import Talisman
+# csp = {
+#     'default-src': [
+#         '\'self\'',
+#         '*.googleapis.com',
+#         'maxcdn.bootstrapcdn.com',
+#         'fonts.gstatic.com',
+#         'www.google-analytics.com',
+#         '\'unsafe-inline\'',
+
+#     ]
+# }
+# Talisman(app, content_security_policy=csp)
 
 ### Setup the logger
 

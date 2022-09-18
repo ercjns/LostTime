@@ -112,7 +112,7 @@ class EventHtmlWriter(object):
         with doc:
 
             self.eventclasses.sort(key=lambda x: x.shortname)
-            WIOL = [x for x in self.eventclasses if x.shortname.startswith('W')]
+            WIOL = [x for x in self.eventclasses if (x.shortname.startswith('W') and x.shortname != 'White')]
             if len(WIOL) > 0:
                 # Split Out Public and WIOL individual classes in menu
                 with div(cls="lg-mrg-bottom"):

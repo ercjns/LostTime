@@ -241,7 +241,7 @@ def _assignPositions(eventid):
                 done = []
                 to_assign = []
                 for ec_result in ec_results:
-                    if ec_result.coursestatus != 'ok' or ec_result.resultstatus != 'ok':
+                    if ec_result.coursestatus != 'ok' or ec_result.resultstatus != 'ok' or ec_result.time < 1:
                         ec_result.position = -1
                         done.append(ec_result)
                     else:
@@ -274,6 +274,9 @@ def _assignPositions(eventid):
                         prev_result = (ec_results[i].position, prev_result[1]+1, ec_results[i].time, ec_results[i].ScoreO_net)
                     else:
                         prev_result = (ec_results[i].position, 1, ec_results[i].time, ec_results[i].ScoreO_net)
+                db.session.add_all(ec_results)
+                db.session.commit()
+                db.session.flush()
 
             elif ec.scoremethod in ['alpha', 'hide']:
                 continue
@@ -345,11 +348,10 @@ def _assignScores(eventid):
         elif ec.scoremethod == 'score1000':
             results = PersonResult.query.filter_by(eventid=eventid).filter_by(classid=ec.id).all()
             win_time, win_score = next(((x.time, x.ScoreO_net) for x in results if x.position == 1), 0)
-            print(win_time, win_score)
             for r in results:
                 if r.ScoreO_net == win_score:
                     r.score = round((float(win_time) / r.time) * 1000)
-            slowestSweepScore = min([x.score for x in results if x.score > 0])
+            slowestSweepScore = min([x.score for x in results if (x.score != None and x.score > 0)])
             for r in results:
                 if r.score != None:
                     continue
@@ -392,12 +394,15 @@ def _assignTeamScores(eventid, scoremethod):
                     teamclasses['WT2'][1].append(ec.id)
                 else:
                     teamclasses['WT2'] = ('Middle School Teams', [ec.id])
-            elif ec.shortname == 'W3F':
-                teamclasses['WT3F'] = ('JV Girls Teams', [ec.id])
-            elif ec.shortname == 'W4M':
-                teamclasses['WT4M'] = ('JV Boys North Teams', [ec.id])
+            elif (ec.shortname == 'W3F') or (ec.shortname == 'W3M'):
+                if 'WT3' in teamclasses:
+                    teamclasses['WT3'][1].append(ec.id)
+                else:
+                    teamclasses['WT3'] = ('HS Rookie Teams', [ec.id])
+            elif ec.shortname == 'W4F':
+                teamclasses['WT4F'] = ('HS JV Girls Teams', [ec.id])
             elif ec.shortname == 'W5M':
-                teamclasses['WT5M'] = ('JV Boys South Teams', [ec.id])
+                teamclasses['WT5M'] = ('HS JV Boys Teams', [ec.id])
             elif ec.shortname == 'W6F':
                 teamclasses['WT6F'] = ('Varsity Girls Teams', [ec.id])
             elif ec.shortname == 'W6M':
