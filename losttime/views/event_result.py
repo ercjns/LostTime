@@ -433,7 +433,7 @@ def _assignTeamScores(eventid, scoremethod):
                     continue
                 members = [r for r in results if (r.club_shortname == team) and (r.resultstatus not in ['nc', 'dns'])]
                 numstarts = len(members)
-                if numstarts == 0:
+                if numstarts < 2:
                     print("not a team: {}".format(team))
                     continue
                 numfinishes = len([x for x in members if x.coursestatus == 'ok'])
