@@ -452,15 +452,17 @@ class OrienteerResultReader(object):
             return self.__CSVgetEventClassShortName(line)
     def __CSVgetPersonResultName(self, line):
         if 'name' in self.csvcols.keys():
-            name = unicode(line[self.csvcols['name']].strip('\"\'\/\\ '), 'utf-8')
-            return unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
+            name = line[self.csvcols['name']].strip('\"\'\/\\ ')
+            return name
+            # return unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
         elif 'first' in self.csvcols.keys() and 'last' in self.csvcols.keys():
-            first = unicode(line[self.csvcols['first']].strip('\"\'\/\\ '), 'utf-8')
-            last = unicode(line[self.csvcols['last']].strip('\"\'\/\\ '), 'utf-8')
-            return unicodedata.normalize('NFKD', first + ' ' + last).encode('ascii', 'ignore')
+            first = line[self.csvcols['first']].strip('\"\'\/\\ ')
+            last = line[self.csvcols['last']].strip('\"\'\/\\ ')
+            return first + ' ' + last
+            # return unicodedata.normalize('NFKD', first + ' ' + last).encode('ascii', 'ignore')
         else:
             return ''
-        return 
+        return
 
     def __CSVgetPersonResultClubShort(self, line):
         try:
