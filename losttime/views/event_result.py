@@ -389,7 +389,12 @@ def _assignTeamScores(eventid, scoremethod):
         teamclasses = {}
         classes = EventClass.query.filter_by(eventid=eventid).all()
         for ec in classes:
-            if (ec.shortname == 'W2F') or (ec.shortname == 'W2M'):
+            if (ec.shortname == 'W1F') or (ec.shortname == 'W1M'):
+                if 'WT1' in teamclasses:
+                    teamclasses['WT1'][1].append(ec.id)
+                else:
+                    teamclasses['WT1'] = ('Elementary School Teams', [ec.id])
+            elif (ec.shortname == 'W2F') or (ec.shortname == 'W2M'):
                 if 'WT2' in teamclasses:
                     teamclasses['WT2'][1].append(ec.id)
                 else:
