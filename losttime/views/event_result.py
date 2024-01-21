@@ -374,6 +374,7 @@ def _assignTeamScores(eventid, scoremethod):
     Individual scores must be assigned before calling this function.
     WIOL:
         sum scores for top 3 individuals in each teamclass, hard-coded below
+        must have at least two starts (one individual from a school is not a team)
         no minimum number of required finishers for a valid team.
         ties broken by individual scores 1 through 3.
         create EventTeamClass, create TeamResult with scores
@@ -405,14 +406,24 @@ def _assignTeamScores(eventid, scoremethod):
                 else:
                     teamclasses['WT3'] = ('HS Rookie Teams', [ec.id])
             elif ec.shortname == 'W4F':
-                teamclasses['WT4F'] = ('HS JV Girls Teams', [ec.id])
+                teamclasses['WT4F'] = ('HS JV Female Teams', [ec.id])
             elif ec.shortname == 'W5M':
-                teamclasses['WT5M'] = ('HS JV Boys Teams', [ec.id])
+                teamclasses['WT5M'] = ('HS JV Male Teams', [ec.id])
             elif (ec.shortname == 'W6F') or (ec.shortname == 'W6M'):
                 if 'WT6' in teamclasses:
                     teamclasses['WT6'][1].append(ec.id)
                 else:
                     teamclasses['WT6'] = ('HS Varsity Teams', [ec.id])
+            elif (ec.shortname == 'WICJVF') or (ec.shortname == 'WICJVM'):
+                if 'WTCJV' in teamclasses:
+                    teamclasses['WTCJV'][1].append(ec.id)
+                else:
+                    teamclasses['WTCJV'] = ('College JV Teams', [ec.id])
+            elif (ec.shortname == 'W8F') or (ec.shortname == 'W8M'):
+                if 'WT8' in teamclasses:
+                    teamclasses['WT8'][1].append(ec.id)
+                else:
+                    teamclasses['WT8'] = ('College Varsity Teams', [ec.id])
             else:
                 pass
         if len(teamclasses.keys()) == 0:
@@ -440,7 +451,7 @@ def _assignTeamScores(eventid, scoremethod):
                 numfinishes = len([x for x in members if x.coursestatus == 'ok'])
                 members.sort(key=lambda x: x.score, reverse=True)
                 members = members[:3]
-                memberids = [m.id for m in members if m.score > 0]
+                memberids = [m.id for m in members if m.score >= 0]
                 teamscore = sum([m.score for m in members])
                 new_team = TeamResult(eventid, tc.id, team, memberids, teamscore, numstarts, numfinishes)
                 db.session.add(new_team)
